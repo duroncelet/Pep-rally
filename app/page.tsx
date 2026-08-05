@@ -15,7 +15,7 @@ export default function Home() {
   const [destination, setDestination] = useState("Palm Springs");
   const [guests, setGuests] = useState(8);
   const [budget, setBudget] = useState(450);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSavedState] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [joined, setJoined] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
@@ -24,16 +24,47 @@ export default function Home() {
   const [gardenSpace, setGardenSpace] = useState("Balcony containers");
   const [sunlight, setSunlight] = useState("6+ hours");
   const [gardenGoal, setGardenGoal] = useState("Herbs & easy edibles");
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [libraryUser, setLibraryUser] = useState("");
+  const [library, setLibrary] = useState<Array<{id:string;title:string;summary:string;toolSlug:string;inputs:Record<string,unknown>}>>([]);
   const filtered = useMemo(() => tools.filter((tool) => `${tool.title} ${tool.tag} ${tool.blurb}`.toLowerCase().includes(query.toLowerCase())), [query]);
   const selected = tools[active];
+
+  async function openLibrary() {
+    setLibraryOpen(true); setLibraryLoading(true);
+    const response = await fetch("/api/rallies");
+    const data = await response.json();
+    if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
+    setLibrary(data.rallies ?? []); setLibraryUser(data.user?.name ?? ""); setLibraryLoading(false);
+  }
+
+  async function saveRally(toolSlug:string, title:string, inputs:Record<string,unknown>, summary:string) {
+    const response = await fetch("/api/rallies", { method:"POST", headers:{"content-type":"application/json"}, body:JSON.stringify({toolSlug,title,inputs,summary}) });
+    const data = await response.json();
+    if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
+    if (response.ok) { setSavedState(true); await openLibrary(); }
+  }
+
+  function setSaved(value:boolean) {
+    if (!value) { setSavedState(false); return; }
+    if (active === 1) void saveRally("garden-planner", `${gardenSpace} garden`, {gardenSpace,sunlight,gardenGoal}, `${sunlight} · ${gardenGoal}`);
+    else void saveRally("bachelorette-blueprint", `${tripDays} days in ${destination}`, {destination,guests,budget,tripDays,vibe}, `${guests} people · $${(budget*guests).toLocaleString()} · ${vibe}`);
+  }
+
+  async function removeRally(id:string) {
+    await fetch(`/api/rallies?id=${encodeURIComponent(id)}`, {method:"DELETE"});
+    setLibrary(items=>items.filter(item=>item.id!==id));
+  }
 
   return (
     <main>
       <nav>
         <a className="brand" href="#top"><span className="brand-mark">P</span>Pep Rally</a>
         <div className="nav-links"><a href="#marketplace">Explore</a><a href="#launchpad">Launch</a><a href="#how">How it works</a></div>
-        <button className="nav-button" onClick={() => document.querySelector("#launchpad")?.scrollIntoView({behavior:"smooth"})}>Launch a mini-app <span>→</span></button>
+        <div className="nav-actions"><button className="library-button" onClick={openLibrary}>My Rally</button><button className="nav-button" onClick={() => document.querySelector("#launchpad")?.scrollIntoView({behavior:"smooth"})}>Launch a mini-app <span>→</span></button></div>
       </nav>
+      {libraryOpen && <div className="library-shade" onClick={()=>setLibraryOpen(false)}><aside className="library-drawer" onClick={e=>e.stopPropagation()}><div className="library-head"><div><p className="kicker">MY RALLY</p><h2>{libraryUser ? `${libraryUser.split(" ")[0]}'s shortcuts` : "Your shortcuts"}</h2></div><button aria-label="Close library" onClick={()=>setLibraryOpen(false)}>×</button></div>{libraryLoading ? <p className="library-empty">Gathering your rallies…</p> : library.length ? <div className="library-list">{library.map(item=><article key={item.id}><span>{item.toolSlug === "garden-planner" ? "🪴" : "🎉"}</span><div><small>{item.toolSlug === "garden-planner" ? "FREE GARDEN PLANNER" : "BACHELORETTE BLUEPRINT"}</small><h3>{item.title}</h3><p>{item.summary}</p><button onClick={()=>removeRally(item.id)}>Remove</button></div></article>)}</div> : <div className="library-empty"><span>✦</span><h3>Your rally is ready for its first shortcut.</h3><p>Try a mini-app and save the result here.</p><button className="primary" onClick={()=>{setLibraryOpen(false);document.querySelector("#marketplace")?.scrollIntoView({behavior:"smooth"})}}>Explore mini-apps</button></div>}</aside></div>}
 
       <section className="hero" id="top">
         <div className="eyebrow"><span>✦</span> Useful AI mini-apps, tested in real life</div>
