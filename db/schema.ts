@@ -41,3 +41,10 @@ export const creatorApps = sqliteTable("creator_apps", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 }, (table) => [index("idx_creator_apps_owner_updated").on(table.creatorUserId, table.updatedAt)]);
+
+export const partyPlans = sqliteTable("party_plans", {
+  id: text("id").primaryKey(),
+  ownerUserId: text("owner_user_id").notNull().unique(),
+  data: text("data").notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+}, (table) => [index("idx_party_plans_owner").on(table.ownerUserId)]);
