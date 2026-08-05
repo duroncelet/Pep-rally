@@ -15,6 +15,13 @@
       "when": 1785967096679,
       "tag": "0001_sticky_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785968288955,
+      "tag": "0002_certain_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }

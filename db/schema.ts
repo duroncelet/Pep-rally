@@ -34,6 +34,10 @@ export const creatorApps = sqliteTable("creator_apps", {
   accessModel: text("access_model").notNull(),
   priceCents: integer("price_cents").notNull(),
   stage: text("stage").notNull(),
+  sourceType: text("source_type").notNull().default("guided"),
+  sourceUrl: text("source_url"),
+  sourceFileKey: text("source_file_key"),
+  builderSpec: text("builder_spec"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 }, (table) => [index("idx_creator_apps_owner_updated").on(table.creatorUserId, table.updatedAt)]);
