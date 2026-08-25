@@ -2,25 +2,25 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("ships the Pep Rally marketplace experience", async () => {
-  const [page, layout, css] = await Promise.all([
+test("ships a clear consumer storefront", async () => {
+  const [page, sell, layout, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/sell/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
   assert.match(layout, /Pep Rally/);
-  assert.match(page, /Executable full workspace/);
+  assert.match(page, /Plan the thing/);
+  assert.match(page, /WHAT YOU’RE BUYING/);
+  assert.match(page, /A workspace/);
+  assert.match(page, /Not another PDF/);
   assert.match(page, /bachelorette-pool\.jpg/);
   assert.match(page, /lush-garden\.jpg/);
-  assert.match(page, /saved run/);
-  assert.match(page, /verified review/);
-  assert.match(page, /BUILT ON THIS RALLY/);
-  assert.match(page, /70%/);
-  assert.match(page, /10%/);
-  assert.match(page, /20%/);
-  assert.match(css, /\.marketplace-trust/);
-  assert.match(css, /\.rally-lineage/);
+  assert.doesNotMatch(page, /moat|creator|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
+  assert.match(sell, /SELL A PLANNER/);
+  assert.match(css, /\.consumer-home/);
+  assert.match(css, /\.product-grid/);
 });
 
 test("includes durable review storage and deployable assets", async () => {
