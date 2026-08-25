@@ -1,4 +1,4 @@
-import { index, sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { index, sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const savedRallies = sqliteTable("saved_rallies", {
   id: text("id").primaryKey(),
@@ -48,3 +48,17 @@ export const partyPlans = sqliteTable("party_plans", {
   data: text("data").notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 }, (table) => [index("idx_party_plans_owner").on(table.ownerUserId)]);
+
+export const rallyReviews = sqliteTable("rally_reviews", {
+  id: text("id").primaryKey(),
+  toolSlug: text("tool_slug").notNull(),
+  reviewerUserId: text("reviewer_user_id").notNull(),
+  reviewerName: text("reviewer_name").notNull(),
+  rating: integer("rating").notNull(),
+  body: text("body").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+}, (table) => [
+  uniqueIndex("idx_rally_reviews_tool_reviewer").on(table.toolSlug, table.reviewerUserId),
+  index("idx_rally_reviews_tool_updated").on(table.toolSlug, table.updatedAt),
+]);

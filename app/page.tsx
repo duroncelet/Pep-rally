@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const tools = [
   {
-    icon: "🎉",
+    slug: "bachelorette-blueprint",
+    image: "/rallies/bachelorette-pool.jpg",
     tone: "coral",
     title: "The Bachelorette Blueprint",
     maker: "Pep Rally Studio",
@@ -13,11 +14,12 @@ const tools = [
     price: 18,
     blurb:
       "A joyful, no-chaos weekend workspace with guests, money, tasks, itinerary, packing, and communications.",
-    rating: "Executable",
-    uses: "Full workspace",
+    format: "Executable full workspace",
+    outputs: "App · calendar · printable itinerary",
   },
   {
-    icon: "🪴",
+    slug: "garden-planner",
+    image: "/rallies/lush-garden.jpg",
     tone: "green",
     title: "The Little Garden Planner",
     maker: "Kelly Duroncelet",
@@ -26,10 +28,24 @@ const tools = [
     price: 0,
     blurb:
       "Turn your space, sunlight, and gardening goals into a simple starter garden you can actually maintain.",
-    rating: "New",
-    uses: "Free rally",
+    format: "Executable starter workspace",
+    outputs: "App · printable garden plan",
   },
 ];
+
+type MarketplaceReview = {
+  id: string;
+  reviewerName: string;
+  rating: number;
+  body: string;
+};
+
+type MarketplaceStat = {
+  runs: number;
+  reviewCount: number;
+  averageRating: number | null;
+  reviews: MarketplaceReview[];
+};
 
 const rallyGoals = [
   {
@@ -125,6 +141,11 @@ export default function Home() {
     "Hi! Palm Springs is officially happening 🎉 Your share is $450. Please RSVP and send your deposit by Friday.",
   );
   const [hubSaved, setHubSaved] = useState(false);
+  const [marketStats, setMarketStats] = useState<Record<string, MarketplaceStat>>({});
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewBody, setReviewBody] = useState("");
+  const [reviewStatus, setReviewStatus] = useState("");
+  const [remixParent, setRemixParent] = useState("");
   const filtered = useMemo(
     () =>
       tools.filter((tool) =>
@@ -135,6 +156,40 @@ export default function Home() {
     [query],
   );
   const selected = tools[active];
+  const selectedStats = marketStats[selected.slug] ?? { runs: 0, reviewCount: 0, averageRating: null, reviews: [] };
+
+  async function refreshMarketplace() {
+    const response = await fetch("/api/marketplace");
+    if (!response.ok) return;
+    const data = await response.json();
+    setMarketStats(data.stats ?? {});
+  }
+
+  useEffect(() => {
+    void refreshMarketplace();
+  }, []);
+
+  async function submitReview(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setReviewStatus("Saving…");
+    const response = await fetch("/api/marketplace", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ toolSlug: selected.slug, rating: reviewRating, review: reviewBody }),
+    });
+    const data = await response.json();
+    if (response.status === 401 && data.signIn) {
+      window.location.href = data.signIn;
+      return;
+    }
+    if (!response.ok) {
+      setReviewStatus(data.error ?? "Review could not be saved.");
+      return;
+    }
+    setReviewBody("");
+    setReviewStatus("Your verified review is live.");
+    await refreshMarketplace();
+  }
 
   async function openLibrary() {
     setLibraryOpen(true);
@@ -243,7 +298,7 @@ export default function Home() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         name: form.get("name"),
-        problem: `[Goal: ${rallyGoals.find((goal) => goal.id === rallyGoal)?.title}] ${form.get("problem")}`,
+        problem: `${remixParent ? `[Built on: ${remixParent}] ` : ""}[Goal: ${rallyGoals.find((goal) => goal.id === rallyGoal)?.title}] ${form.get("problem")}`,
         outcome: form.get("outcome"),
         proof: form.get("proof"),
         accessModel: form.get("accessModel"),
@@ -926,10 +981,13 @@ export default function Home() {
         <div className="cards">
           {filtered.map((tool) => {
             const i = tools.indexOf(tool);
+            const stat = marketStats[tool.slug] ?? { runs: 0, reviewCount: 0, averageRating: null, reviews: [] };
             return (
               <article
                 className="tool-card"
                 key={tool.title}
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   setActive(i);
                   setJoined(false);
@@ -938,9 +996,13 @@ export default function Home() {
                     .querySelector("#preview")
                     ?.scrollIntoView({ behavior: "smooth" });
                 }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") event.currentTarget.click();
+                }}
               >
                 <div className={`tool-visual ${tool.tone}`}>
-                  <span className="tool-icon">{tool.icon}</span>
+                  <img src={tool.image} alt="" />
+                  <span className="format-badge">{tool.format}</span>
                   <span className="tag">{tool.tag}</span>
                   <span className="stage-badge">{tool.stage}</span>
                   <span className="peek">TRY IT ↗</span>
@@ -949,9 +1011,10 @@ export default function Home() {
                   <p className="maker">BY {tool.maker.toUpperCase()}</p>
                   <h3>{tool.title}</h3>
                   <p>{tool.blurb}</p>
+                  <div className="delivery-line"><b>{tool.format}</b><span>{tool.outputs}</span></div>
                   <div className="tool-meta">
                     <span>
-                      ★ {tool.rating} · {tool.uses}
+                      {stat.averageRating ? `★ ${stat.averageRating.toFixed(1)} · ${stat.reviewCount} review${stat.reviewCount === 1 ? "" : "s"}` : "☆ No reviews yet"} · {stat.runs} saved run{stat.runs === 1 ? "" : "s"}
                     </span>
                     <b>{tool.price ? `$${tool.price}` : "Free beta"}</b>
                   </div>
@@ -967,6 +1030,10 @@ export default function Home() {
           <p className="kicker">USE A REAL RALLY</p>
           <h2>{selected.title}</h2>
           <p>{selected.blurb}</p>
+          <div className="delivery-options">
+            <span><b>PRIMARY</b>{selected.format}</span>
+            <span><b>TAKE IT WITH YOU</b>{selected.outputs}</span>
+          </div>
           <div className="creator">
             <div className="avatar">
               {selected.maker
@@ -1077,7 +1144,7 @@ export default function Home() {
         ) : (
           <div className="miniapp">
             <div className="mini-top">
-              <span>{selected.icon}</span>
+              <span>PR</span>
               <div>
                 <b>{active === 0 ? "Build the weekend" : "Test rally"}</b>
                 <small>
@@ -1220,6 +1287,62 @@ export default function Home() {
             </p>
           </div>
         )}
+      </section>
+
+      <section className="marketplace-trust" id="reviews">
+        <div className="trust-summary">
+          <p className="kicker">PROOF, NOT MYSTERY NUMBERS</p>
+          <h2>See who used it.<br/><em>Hear what happened.</em></h2>
+          <p>Every saved run is counted from the actual workspace. Reviews can only be left by someone who has used or saved this Rally.</p>
+          <div className="trust-numbers">
+            <span><b>{selectedStats.runs}</b> saved run{selectedStats.runs === 1 ? "" : "s"}</span>
+            <span><b>{selectedStats.averageRating ? selectedStats.averageRating.toFixed(1) : "—"}</b> average rating</span>
+            <span><b>{selectedStats.reviewCount}</b> verified review{selectedStats.reviewCount === 1 ? "" : "s"}</span>
+          </div>
+        </div>
+        <div className="reviews-panel">
+          <div className="review-list">
+            {selectedStats.reviews.length ? selectedStats.reviews.map((review) => (
+              <article key={review.id}>
+                <span>{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</span>
+                <p>“{review.body}”</p>
+                <b>{review.reviewerName} · verified user</b>
+              </article>
+            )) : <div className="empty-reviews"><b>No reviews yet.</b><p>Use this Rally, then leave the first verified review. We will never fill this space with invented testimonials.</p></div>}
+          </div>
+          <form className="review-form" onSubmit={submitReview}>
+            <b>How did this Rally help?</b>
+            <label>Rating
+              <select value={reviewRating} onChange={(event) => setReviewRating(Number(event.target.value))}>
+                <option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option>
+              </select>
+            </label>
+            <label>Review
+              <textarea value={reviewBody} onChange={(event) => setReviewBody(event.target.value)} minLength={12} maxLength={500} required placeholder="What did you finish, change, or learn?" />
+            </label>
+            <button className="primary" type="submit">Publish verified review</button>
+            {reviewStatus && <small>{reviewStatus}</small>}
+          </form>
+        </div>
+      </section>
+
+      <section className="rally-lineage">
+        <div className="lineage-head">
+          <div>
+            <p className="kicker">BUILT ON THIS RALLY</p>
+            <h2>Make the useful thing<br/><em>more specific.</em></h2>
+          </div>
+          <p>A buyer can adapt a Rally for an unusually specific need, submit it for review, and sell the approved extension. Every extension keeps a visible link to the original.</p>
+        </div>
+        <div className="lineage-flow">
+          <article><small>ORIGINAL</small><b>{selected.title}</b><p>The tested method and core workspace.</p><span>{selected.maker}</span></article>
+          <i>→</i>
+          <article className="extension-empty"><small>YOUR EXTENSION</small><b>No extensions yet</b><p>Examples: a sensory-friendly weekend, a tiny-shade garden, or a professor-specific study plan.</p><button onClick={() => { setRemixParent(selected.title); document.querySelector("#create")?.scrollIntoView({ behavior: "smooth" }); }}>Build on this Rally →</button></article>
+        </div>
+        <div className="royalty-rule">
+          <div><b>70%</b><span>extension creator</span></div><div><b>10%</b><span>original creator royalty</span></div><div><b>20%</b><span>Pep Rally</span></div>
+          <p><b>Simple lineage, no blockchain.</b> One approved extension points to one original Rally. The split is shown before publishing and on every sale.</p>
+        </div>
       </section>
 
       <section className="launchpad" id="launchpad">
@@ -1445,6 +1568,7 @@ export default function Home() {
             This is structured intake for the first concierge creator cohort.
             Tell us what exists; Pep Rally saves a reviewable product brief.
           </p>
+          {remixParent && <div className="remix-notice"><small>BUILDING ON</small><b>{remixParent}</b><span>Approved extensions keep visible credit and reserve 10% for the original creator.</span><button onClick={() => setRemixParent("")}>Start an original Rally instead</button></div>}
           <div className="source-paths">
             <button
               className={creatorPath === "live" ? "selected" : ""}
