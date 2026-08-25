@@ -61,7 +61,7 @@ export default function Home() {
   return <main className="consumer-home">
     <nav className="store-nav">
       <a href="#top" className="brand"><span className="brand-mark">P</span>Pep Rally</a>
-      <div className="nav-links"><a href="#shop">Shop planners</a><a href="#how">How it works</a><a href="#questions">Questions</a></div>
+      <div className="nav-links"><a href="#shop">Shop planners</a><a href="#how">How it works</a><a href="/build">Build your own</a><a href="#questions">Questions</a></div>
       <button className="nav-button" onClick={openLibrary}>My planners</button>
     </nav>
 
@@ -78,10 +78,12 @@ export default function Home() {
 
     <section className="simple-how" id="how"><header><small>HOW IT WORKS</small><h2>From “where do I start?”<br/>to <em>“done.”</em></h2></header><div><article><b>01</b><h3>Tell it what’s real</h3><p>Your dates, people, budget, space, sunlight, location, preferences, and constraints.</p></article><article><b>02</b><h3>Get a working plan</h3><p>Not a blank template—a useful first version already shaped around your situation.</p></article><article><b>03</b><h3>Use it as you go</h3><p>Make decisions, track progress, save changes, and return whenever you need it.</p></article></div></section>
 
+    <section className="builder-invite"><div><small>HAVE YOUR OWN IDEA?</small><h2>You bring the useful idea.<br/><em>We help it work.</em></h2><p>Build the first version inside Pep Rally, then add the pieces that usually stop people: payments, messages, accounts, live data, hosting, and a place to sell it.</p><a className="primary" href="/build">Build my own planner →</a></div><div className="builder-invite-list"><span><b>Start with the outcome</b>Who is it for, and what will they have when they’re done?</span><span><b>Shape the experience</b>Choose the questions, steps, tools, and final result.</span><span><b>Add what it needs</b>Payments, email, texts, maps, weather, calendars, files, or AI.</span><span><b>Test before you launch</b>Invite a small group, see where they get stuck, and improve it.</span></div></section>
+
     <section className="what-you-get"><div><small>WHAT YOU’RE BUYING</small><h2>A workspace.<br/><em>Not another PDF.</em></h2><p>Your planner lives online and remembers your work. It combines the plan, the tools, and the running details in one place.</p></div><div className="get-list"><span><b>Your private workspace</b>Saved to your account so you can come back anytime.</span><span><b>A personalized starting plan</b>Built from your answers instead of generic advice.</span><span><b>Tools for doing the job</b>Budgets, lists, weather, reservations, messages, tasks, and notes where they belong.</span><span><b>Useful ways to take it with you</b>Share links, email, text, calendar, and printable options where they make sense.</span></div></section>
 
     <section className="consumer-faq" id="questions"><header><small>GOOD QUESTIONS</small><h2>Before you start.</h2></header><div><details open><summary>Is this an app or a download?</summary><p>It’s a small private web app. You use it in your browser, it saves your work, and it can send or export useful pieces when you need them.</p></details><details><summary>Will it make every decision for me?</summary><p>No. It gives you a strong starting point, keeps the details organized, and shows you what needs attention. You stay in control.</p></details><details><summary>Does Pep Rally move group money?</summary><p>The Bachelorette Blueprint tracks balances and creates or stores payment-request links. PayPal, Cash App, Venmo, Stripe, or your chosen provider securely moves the funds.</p></details><details><summary>Does the Garden Planner replace local advice?</summary><p>No. It uses your setup and live weather to make the plan more useful, but local planting dates, soil safety, and region-specific guidance should still be checked locally.</p></details></div></section>
 
-    <footer className="consumer-footer"><a href="#top" className="brand"><span className="brand-mark">P</span>Pep Rally</a><p>Plans you can actually use.</p><div><a href="#shop">Shop</a><a href="/sell">Sell a planner</a></div><span>Private preview</span></footer>
+    <footer className="consumer-footer"><a href="#top" className="brand"><span className="brand-mark">P</span>Pep Rally</a><p>Plans you can actually use—or build yourself.</p><div><a href="#shop">Shop</a><a href="/build">Build your own</a></div><span>Private preview</span></footer>
   </main>;
 }

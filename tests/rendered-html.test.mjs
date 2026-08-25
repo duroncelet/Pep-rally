@@ -3,9 +3,9 @@ import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("ships a clear consumer storefront", async () => {
-  const [page, sell, layout, css] = await Promise.all([
+  const [page, builder, layout, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/sell/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/build/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
@@ -18,9 +18,15 @@ test("ships a clear consumer storefront", async () => {
   assert.match(page, /bachelorette-pool\.jpg/);
   assert.match(page, /lush-garden\.jpg/);
   assert.doesNotMatch(page, /moat|creator|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
-  assert.match(sell, /SELL A PLANNER/);
+  assert.match(page, /Build your own/);
+  assert.match(builder, /BUILD INSIDE PEP RALLY/);
+  assert.match(builder, /Take payments/);
+  assert.match(builder, /Send text messages/);
+  assert.match(builder, /Use live weather/);
+  assert.match(builder, /Partner access needed/);
   assert.match(css, /\.consumer-home/);
   assert.match(css, /\.product-grid/);
+  assert.match(css, /\.build-workbench/);
 });
 
 test("includes durable review storage and deployable assets", async () => {
