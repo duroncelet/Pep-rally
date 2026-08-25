@@ -934,9 +934,10 @@ export default function Home() {
       <section className="proof-strip">
         <div>
           <small>WORKING TODAY</small>
-          <b>1 complete Rally + 1 example</b>
-          <span>Full Bachelorette workspace + free Garden Planner</span>
-          <a href="/rally/bachelorette">Open live workspace →</a>
+          <b>2 executable Rally workspaces</b>
+          <span>Full Bachelorette headquarters + weather-aware Garden Planner</span>
+          <a href="/rally/bachelorette">Open Bachelorette →</a>
+          <a href="/rally/garden">Open Garden →</a>
         </div>
         <div>
           <small>BUYER OUTCOME</small>
@@ -1135,6 +1136,7 @@ export default function Home() {
             <button className="primary full" onClick={() => setSaved(true)}>
               {saved ? "Saved to My Rally ✓" : "Save my free garden plan"}
             </button>
+            <a className="workspace-link" href="/rally/garden">Open the full garden workspace →</a>
             <p className="confidence-note">
               This is a simple planning aid, not local horticultural advice.
               Check plant timing and safety for your region, pets, and

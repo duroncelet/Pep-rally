@@ -39,3 +39,26 @@ test("includes durable review storage and deployable assets", async () => {
     access(new URL("../dist/server/index.js", import.meta.url)),
   ]);
 });
+
+test("ships both executable Rally workspaces", async () => {
+  const [bachelorette, garden, weather, gardenHub, schema, migration] = await Promise.all([
+    readFile(new URL("../app/rally/bachelorette/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/rally/garden/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/garden-weather/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/garden-hub/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0005_calm_karen_page.sql", import.meta.url), "utf8"),
+  ]);
+
+  for (const feature of ["GROUP CHAT", "MONEY", "PLACES + RESERVATIONS", "DÉCOR + DETAILS", "PACKING + SAFETY"]) assert.match(bachelorette, new RegExp(feature.replace(/[+]/g, "\\+")));
+  for (const feature of ["Rows / in-ground", "Raised beds", "Pots / containers", "LIVE WEATHER", "GARDEN JOURNAL"]) assert.match(garden, new RegExp(feature.replace(/[\/]/g, "\\/")));
+  assert.match(weather, /api\.open-meteo\.com/);
+  assert.match(weather, /geocoding-api\.open-meteo\.com/);
+  assert.match(gardenHub, /gardenPlans/);
+  assert.match(schema, /gardenPlans/);
+  assert.match(migration, /CREATE TABLE `garden_plans`/);
+  await Promise.all([
+    access(new URL("../dist/server/index.js", import.meta.url)),
+    access(new URL("../dist/client", import.meta.url)),
+  ]);
+});

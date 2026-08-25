@@ -62,3 +62,10 @@ export const rallyReviews = sqliteTable("rally_reviews", {
   uniqueIndex("idx_rally_reviews_tool_reviewer").on(table.toolSlug, table.reviewerUserId),
   index("idx_rally_reviews_tool_updated").on(table.toolSlug, table.updatedAt),
 ]);
+
+export const gardenPlans = sqliteTable("garden_plans", {
+  id: text("id").primaryKey(),
+  ownerUserId: text("owner_user_id").notNull().unique(),
+  data: text("data").notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+}, (table) => [index("idx_garden_plans_owner").on(table.ownerUserId)]);
