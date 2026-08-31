@@ -11,10 +11,10 @@ const products = [
     title: "The Bachelorette Blueprint",
     eyebrow: "THE ONE-STOP PARTY PLANNER",
     image: "/rallies/bachelorette-pool.jpg",
-    price: "$18",
+    price: "Free example",
     href: "/rally/bachelorette",
     blurb: "Plan the people, money, places, reservations, itinerary, décor, packing, and group updates—without running the weekend from twelve different apps.",
-    included: ["Guest list + RSVPs", "Budget + payment requests", "Itinerary + reservations", "Group updates + chat", "Décor + packing lists", "Saved private workspace"],
+    included: ["Anonymous stay budget + lodging picker", "Guest list + RSVPs", "Budget + payment requests", "Itinerary + reservations", "Group updates + chat", "Décor + packing lists"],
     color: "coral",
   },
   {
@@ -22,7 +22,7 @@ const products = [
     title: "The Little Garden Planner",
     eyebrow: "A FREE WEATHER-AWARE GARDEN PLAN",
     image: "/rallies/lush-garden.jpg",
-    price: "Free",
+    price: "Free example",
     href: "/rally/garden",
     blurb: "Turn your actual space, sunlight, setup, location, and favorite crops into a garden plan you can use all season.",
     included: ["Rows, beds, pots, or indoor", "Visual growing layout", "Live seven-day weather", "Weather-aware care tasks", "Editable crop plan", "Garden journal"],
@@ -32,8 +32,6 @@ const products = [
 
 export default function Home() {
   const [stats, setStats] = useState<Record<string, Stat>>({});
-  const [opening, setOpening] = useState(false);
-  const [status, setStatus] = useState("");
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [library, setLibrary] = useState<Array<{ id: string; title: string; summary: string; toolSlug: string }>>([]);
@@ -47,15 +45,6 @@ export default function Home() {
     const response = await fetch("/api/rallies"); const data = await response.json();
     if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
     setLibrary(data.rallies ?? []); setLibraryLoading(false);
-  }
-
-  async function openBachelorette() {
-    setOpening(true); setStatus("Opening your private workspace…");
-    const response = await fetch("/api/checkout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ toolSlug: "bachelorette-blueprint", title: "My bachelorette weekend", inputs: { destination: "Palm Springs", guests: 1, budget: 450, tripDays: 3, vibe: "Poolside & playful" }, summary: "Private Bachelorette Blueprint workspace" }) });
-    const data = await response.json();
-    if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
-    if (response.ok) window.location.href = "/rally/bachelorette";
-    else { setOpening(false); setStatus(data.error ?? "Could not open the workspace."); }
   }
 
   return <main className="consumer-home">
@@ -72,17 +61,17 @@ export default function Home() {
       <div className="shop-hero-images" aria-label="Bachelorette and garden planning workspaces"><figure><img src="/rallies/bachelorette-pool.jpg" alt="Friends planning a sunny weekend together"/><figcaption><b>Weekend handled.</b><span>People · money · places · plans</span></figcaption></figure><figure><img src="/rallies/lush-garden.jpg" alt="A lush raised-bed and container garden"/><figcaption><b>Garden growing.</b><span>Layout · weather · care · notes</span></figcaption></figure></div>
     </section>
 
-    <section className="consumer-proof"><span><b>2</b> working planners</span><span><b>Private</b> saved workspaces</span><span><b>Useful</b> from the first five minutes</span></section>
+    <section className="consumer-proof"><span><b>2</b> free example Rallies</span><span><b>Private</b> saved workspaces</span><span><b>Useful</b> from the first five minutes</span></section>
 
-    <section className="storefront" id="shop"><header><small>CHOOSE YOUR PLAN</small><h2>What are we getting done?</h2><p>Each planner opens as a private workspace. Answer a few questions, get a useful starting plan, then edit and use it as life happens.</p></header><div className="product-grid">{products.map((product) => { const stat = stats[product.slug] ?? { runs: 0, reviewCount: 0, averageRating: null, reviews: [] }; return <article className={`product-card ${product.color}`} key={product.slug}><div className="product-photo"><img src={product.image} alt=""/><span>{product.price}</span></div><div className="product-copy"><small>{product.eyebrow}</small><h3>{product.title}</h3><p>{product.blurb}</p><ul>{product.included.map((item) => <li key={item}>{item}</li>)}</ul><div className="product-stats"><span>{stat.runs} saved plan{stat.runs === 1 ? "" : "s"}</span><span>{stat.averageRating ? `★ ${stat.averageRating.toFixed(1)} from ${stat.reviewCount}` : "New · no reviews yet"}</span></div>{product.slug === "bachelorette-blueprint" ? <><button className="primary full" onClick={openBachelorette} disabled={opening}>{opening ? "Opening…" : "Get the Blueprint · $18"}</button><small className="demo-note">Private preview: test checkout, no charge yet.</small></> : <a className="primary full center-link" href={product.href}>Start my free garden plan</a>}</div></article>; })}</div>{status && <p className="store-status">{status}</p>}</section>
+    <section className="storefront" id="shop"><header><small>TRY A FREE RALLY</small><h2>What are we getting done?</h2><p>These two examples are free. Each opens as a private workspace: answer a few questions, get a useful starting plan, then edit and use it as life happens.</p></header><div className="product-grid">{products.map((product) => { const stat = stats[product.slug] ?? { runs: 0, reviewCount: 0, averageRating: null, reviews: [] }; return <article className={`product-card ${product.color}`} key={product.slug}><div className="product-photo"><img src={product.image} alt=""/><span>{product.price}</span></div><div className="product-copy"><small>{product.eyebrow}</small><h3>{product.title}</h3><p>{product.blurb}</p><ul>{product.included.map((item) => <li key={item}>{item}</li>)}</ul><div className="product-stats"><span>{stat.runs} saved plan{stat.runs === 1 ? "" : "s"}</span><span>{stat.averageRating ? `★ ${stat.averageRating.toFixed(1)} from ${stat.reviewCount}` : "New · no reviews yet"}</span></div><a className="primary full center-link" href={product.href}>{product.slug === "garden-planner" ? "Start my free garden plan" : "Open the free Blueprint"}</a></div></article>; })}</div></section>
 
     <section className="simple-how" id="how"><header><small>HOW IT WORKS</small><h2>From “where do I start?”<br/>to <em>“done.”</em></h2></header><div><article><b>01</b><h3>Tell it what’s real</h3><p>Your dates, people, budget, space, sunlight, location, preferences, and constraints.</p></article><article><b>02</b><h3>Get a working plan</h3><p>Not a blank template—a useful first version already shaped around your situation.</p></article><article><b>03</b><h3>Use it as you go</h3><p>Make decisions, track progress, save changes, and return whenever you need it.</p></article></div></section>
 
     <section className="builder-invite"><div><small>HAVE YOUR OWN IDEA?</small><h2>You bring the useful idea.<br/><em>We help it work.</em></h2><p>Build the first version inside Pep Rally, then add the pieces that usually stop people: payments, messages, accounts, live data, hosting, and a place to sell it.</p><a className="primary" href="/build">Build my own planner →</a></div><div className="builder-invite-list"><span><b>Start with the outcome</b>Who is it for, and what will they have when they’re done?</span><span><b>Shape the experience</b>Choose the questions, steps, tools, and final result.</span><span><b>Add what it needs</b>Payments, email, texts, maps, weather, calendars, files, or AI.</span><span><b>Test before you launch</b>Invite a small group, see where they get stuck, and improve it.</span></div></section>
 
-    <section className="what-you-get"><div><small>WHAT YOU’RE BUYING</small><h2>A workspace.<br/><em>Not another PDF.</em></h2><p>Your planner lives online and remembers your work. It combines the plan, the tools, and the running details in one place.</p></div><div className="get-list"><span><b>Your private workspace</b>Saved to your account so you can come back anytime.</span><span><b>A personalized starting plan</b>Built from your answers instead of generic advice.</span><span><b>Tools for doing the job</b>Budgets, lists, weather, reservations, messages, tasks, and notes where they belong.</span><span><b>Useful ways to take it with you</b>Share links, email, text, calendar, and printable options where they make sense.</span></div></section>
+    <section className="what-you-get"><div><small>WHAT YOU GET</small><h2>A workspace.<br/><em>Not another PDF.</em></h2><p>Your Rally lives online and remembers your work. It combines the plan, the tools, and the running details in one place.</p></div><div className="get-list"><span><b>Your private workspace</b>Saved to your account so you can come back anytime.</span><span><b>A personalized starting plan</b>Built from your answers instead of generic advice.</span><span><b>Tools for doing the job</b>Budgets, lists, weather, reservations, messages, tasks, and notes where they belong.</span><span><b>Useful ways to take it with you</b>Share links, email, text, calendar, and printable options where they make sense.</span></div></section>
 
-    <section className="consumer-faq" id="questions"><header><small>GOOD QUESTIONS</small><h2>Before you start.</h2></header><div><details open><summary>Is this an app or a download?</summary><p>It’s a small private web app. You use it in your browser, it saves your work, and it can send or export useful pieces when you need them.</p></details><details><summary>Will it make every decision for me?</summary><p>No. It gives you a strong starting point, keeps the details organized, and shows you what needs attention. You stay in control.</p></details><details><summary>Does Pep Rally move group money?</summary><p>The Bachelorette Blueprint tracks balances and creates or stores payment-request links. PayPal, Cash App, Venmo, Stripe, or your chosen provider securely moves the funds.</p></details><details><summary>Does the Garden Planner replace local advice?</summary><p>No. It uses your setup and live weather to make the plan more useful, but local planting dates, soil safety, and region-specific guidance should still be checked locally.</p></details></div></section>
+    <section className="consumer-faq" id="questions"><header><small>GOOD QUESTIONS</small><h2>Before you start.</h2></header><div><details open><summary>Are these examples really free?</summary><p>Yes. The Bachelorette Blueprint and Little Garden Planner are free examples of what a Rally can be. Future Rallies from independent builders may be free or paid.</p></details><details><summary>Is this an app or a download?</summary><p>It’s a small private web app. You use it in your browser, it saves your work, and it can send or export useful pieces when you need them.</p></details><details><summary>Will it make every decision for me?</summary><p>No. It gives you a strong starting point, keeps the details organized, and shows you what needs attention. You stay in control.</p></details><details><summary>Does Pep Rally move group money?</summary><p>The Bachelorette Blueprint tracks balances and creates or stores payment-request links. PayPal, Cash App, Venmo, Stripe, or your chosen provider securely moves the funds.</p></details><details><summary>Does the Garden Planner replace local advice?</summary><p>No. It uses your setup and live weather to make the plan more useful, but local planting dates, soil safety, and region-specific guidance should still be checked locally.</p></details></div></section>
 
     <footer className="consumer-footer"><a href="#top" className="brand"><span className="brand-mark">P</span>Pep Rally</a><p>Plans you can actually use—or build yourself.</p><div><a href="#shop">Shop</a><a href="/build">Build your own</a></div><span>Private preview</span></footer>
   </main>;

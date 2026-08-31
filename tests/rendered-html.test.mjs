@@ -12,7 +12,9 @@ test("ships a clear consumer storefront", async () => {
 
   assert.match(layout, /Pep Rally/);
   assert.match(page, /Plan the thing/);
-  assert.match(page, /WHAT YOU’RE BUYING/);
+  assert.match(page, /WHAT YOU GET/);
+  assert.match(page, /TRY A FREE RALLY/);
+  assert.doesNotMatch(page, /Get the Blueprint · \$18|test checkout/i);
   assert.match(page, /A workspace/);
   assert.match(page, /Not another PDF/);
   assert.match(page, /bachelorette-pool\.jpg/);
@@ -56,7 +58,7 @@ test("ships both executable Rally workspaces", async () => {
     readFile(new URL("../drizzle/0005_calm_karen_page.sql", import.meta.url), "utf8"),
   ]);
 
-  for (const feature of ["GROUP CHAT", "MONEY", "PLACES + RESERVATIONS", "DÉCOR + DETAILS", "PACKING + SAFETY"]) assert.match(bachelorette, new RegExp(feature.replace(/[+]/g, "\\+")));
+  for (const feature of ["ANONYMOUS BUDGET PULSE", "Hotels", "Airbnb", "VRBO", "GROUP CHAT", "MONEY", "PLACES + RESERVATIONS", "DÉCOR + DETAILS", "PACKING + SAFETY"]) assert.match(bachelorette, new RegExp(feature.replace(/[+]/g, "\\+")));
   for (const feature of ["Rows / in-ground", "Raised beds", "Pots / containers", "LIVE WEATHER", "GARDEN JOURNAL"]) assert.match(garden, new RegExp(feature.replace(/[\/]/g, "\\/")));
   assert.match(weather, /api\.open-meteo\.com/);
   assert.match(weather, /geocoding-api\.open-meteo\.com/);
