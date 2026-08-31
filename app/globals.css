@@ -3245,6 +3245,70 @@ footer > span {
 .connection-model article > b { color: var(--coral); }
 .connection-model h3 { font-family: "Fraunces"; font-size: 21px; }
 .connection-model article p { color: #666; font-size: 11px; line-height: 1.55; }
+.build-nav-actions { display: flex; align-items: center; gap: 18px; }
+.connection-center-link { display: inline-block; color: var(--yellow); margin-top: 14px; font-size: 11px; font-weight: 900; text-decoration: underline; }
+.connections-page { min-height: 100vh; background: var(--cream); color: var(--ink); }
+.connections-hero { padding: 82px 7vw 70px; display: grid; grid-template-columns: 1.2fr .8fr; align-items: center; gap: 55px; background: var(--yellow); border-bottom: 2px solid var(--ink); }
+.connections-hero small,
+.connection-section > header small,
+.connection-principle > small { color: var(--coral); font-size: 9px; font-weight: 900; letter-spacing: 1.4px; }
+.connections-hero h1 { font-size: clamp(58px, 7vw, 100px); line-height: .91; letter-spacing: -5px; margin: 14px 0 22px; }
+.connections-hero h1 em,
+.connection-principle h2 em { color: var(--coral); }
+.connections-hero > div > p { max-width: 670px; font-size: 16px; line-height: 1.6; }
+.connections-hero aside { background: white; border: 2px solid var(--ink); border-radius: 15px; box-shadow: 7px 8px 0 var(--ink); padding: 24px; transform: rotate(1deg); }
+.connections-hero aside b { font-family: "Fraunces"; font-size: 25px; }
+.connections-hero aside p { font-size: 12px; line-height: 1.55; }
+.connections-hero aside a { font-size: 10px; font-weight: 900; text-decoration: underline; }
+.connection-check { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; background: rgba(255,255,255,.65); border: 1px solid var(--ink); border-radius: 999px; padding: 8px 12px; font-size: 9px; font-weight: 800; }
+.connection-check i,
+.status-dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; background: #c1a85b; border: 1px solid var(--ink); }
+.connection-check i.ready,
+.status-dot.ready { background: #65b883; }
+.connection-section { padding: 85px 7vw; }
+.connection-section > header { max-width: 850px; margin-bottom: 34px; }
+.connection-section > header h2 { font-size: clamp(44px, 5.5vw, 72px); letter-spacing: -3px; margin: 10px 0 14px; }
+.connection-section > header p { color: #666; font-size: 14px; line-height: 1.6; }
+.connection-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; }
+.connection-card-grid article,
+.account-connection-list article { background: white; border: 1.5px solid var(--ink); border-radius: 12px; padding: 18px; box-shadow: 3px 4px 0 var(--ink); }
+.connection-card-grid article > div,
+.account-connection-list article > div { display: flex; align-items: center; gap: 7px; }
+.connection-card-grid article > div small,
+.account-connection-list article > div small { font-size: 8px; font-weight: 900; }
+.connection-card-grid article > div em { margin-left: auto; background: var(--pink); border-radius: 999px; padding: 5px 7px; font-size: 7px; font-style: normal; font-weight: 900; }
+.connection-card-grid h3,
+.account-connection-list h3,
+.connection-tests h3 { font-family: "Fraunces"; font-size: 23px; margin: 13px 0 7px; }
+.connection-card-grid p,
+.account-connection-list p { color: #666; font-size: 10px; line-height: 1.5; min-height: 46px; }
+.connection-card-grid article > b,
+.account-connection-list article > b { font-size: 8px; line-height: 1.4; }
+.connection-tests { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 32px; }
+.connection-tests article { background: #e8f5dc; border: 1.5px solid var(--ink); border-radius: 12px; padding: 18px; }
+.connection-tests article > small { color: var(--coral); font-size: 8px; font-weight: 900; letter-spacing: 1px; }
+.connection-tests form { display: grid; grid-template-columns: 1fr auto; gap: 7px; }
+.connection-tests input { min-width: 0; border: 1px solid var(--ink); border-radius: 7px; padding: 10px; background: white; }
+.connection-tests button,
+.file-test { border: 1.5px solid var(--ink); border-radius: 999px; padding: 9px 12px; background: white; font-size: 9px; font-weight: 900; box-shadow: 2px 3px 0 var(--ink); cursor: pointer; }
+.connection-tests p { margin: 15px 0 0; min-height: 30px; color: #586052; font-size: 9px; line-height: 1.45; }
+.file-test { display: inline-block; }
+.file-test input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.account-section { background: var(--pink); border-block: 2px solid var(--ink); }
+.account-connection-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.account-connection-list article > em { display: block; margin-top: 10px; color: #777; font-size: 8px; line-height: 1.4; }
+.secret-rule { margin: 24px 0 0; background: var(--ink); color: white; border-radius: 10px; padding: 17px; font-size: 11px; line-height: 1.5; }
+.partner-section { background: #e8f5dc; }
+.partner-table { background: white; border: 1.5px solid var(--ink); border-radius: 13px; overflow: hidden; box-shadow: 5px 6px 0 var(--ink); }
+.partner-row { display: grid; grid-template-columns: .8fr 1.1fr 1.1fr; gap: 14px; padding: 15px 18px; border-bottom: 1px solid var(--line); align-items: center; }
+.partner-row:last-child { border-bottom: 0; }
+.partner-row span,
+.partner-row b { font-size: 10px; line-height: 1.45; }
+.partner-row.labels { background: var(--ink); color: white; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
+.connection-principle { padding: 95px 7vw; text-align: center; background: var(--ink); color: white; }
+.connection-principle h2 { font-size: clamp(45px, 6vw, 78px); letter-spacing: -3px; margin: 12px auto 19px; }
+.connection-principle p { max-width: 850px; margin: 0 auto 26px; color: #d7d4ca; font-size: 13px; line-height: 1.6; }
+.connection-principle .primary { display: inline-block; background: var(--yellow); color: var(--ink); }
 @media (max-width: 850px) {
   .nav-links {
     display: none;
@@ -3266,6 +3330,7 @@ footer > span {
   .consumer-faq,
   .sell-page > section,
   .builder-invite,
+  .connections-hero,
   .build-header,
   .build-workbench {
     grid-template-columns: 1fr;
@@ -3275,6 +3340,9 @@ footer > span {
   .shop-hero-images { min-height: 460px; }
   .product-grid,
   .simple-how > div { grid-template-columns: 1fr; }
+  .connection-card-grid,
+  .account-connection-list { grid-template-columns: 1fr 1fr; }
+  .connection-tests { grid-template-columns: 1fr; }
   .consumer-proof { grid-template-columns: 1fr; gap: 8px; }
   .sunburst {
     width: 190px;
@@ -3361,10 +3429,22 @@ footer > span {
   .add-on-group > div,
   .launch-summary,
   .connection-model > div { grid-template-columns: 1fr; }
+  .connection-card-grid,
+  .account-connection-list { grid-template-columns: 1fr 1fr; }
+  .connection-tests { grid-template-columns: 1fr; }
   .build-header { padding: 55px 22px; }
   .build-workbench { padding: 38px 22px 70px; }
   .build-form { padding: 19px; }
   .connection-model { padding: 70px 22px; }
+  .connections-hero,
+  .connection-section,
+  .connection-principle { padding-left: 22px; padding-right: 22px; }
+  .connections-hero h1 { font-size: 58px; letter-spacing: -3px; }
+  .connection-card-grid,
+  .account-connection-list { grid-template-columns: 1fr; }
+  .partner-row { grid-template-columns: 1fr; gap: 6px; }
+  .partner-row.labels { display: none; }
+  .build-nav-actions a:first-child { display: none; }
   h1 {
     font-size: 55px;
     letter-spacing: -3px;

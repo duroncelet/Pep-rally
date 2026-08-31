@@ -70,3 +70,19 @@ test("ships both executable Rally workspaces", async () => {
     access(new URL("../dist/client", import.meta.url)),
   ]);
 });
+
+test("shows honest, testable connection readiness", async () => {
+  const [page, route, builder] = await Promise.all([
+    readFile(new URL("../app/connections/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/connections/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/build/page.tsx", import.meta.url), "utf8"),
+  ]);
+
+  for (const feature of ["WORKING NOW", "NEEDS ONE PRIVATE ACCOUNT", "DEALS PEP RALLY SHOULD MAKE", "No pretend connections", "Weather lookup", "Private file storage", "Calendar file"]) assert.match(page, new RegExp(feature));
+  assert.match(page, /ChatGPT plugin can help operate a provider/);
+  assert.match(route, /STRIPE_SECRET_KEY/);
+  assert.match(route, /OPENAI_API_KEY/);
+  assert.match(route, /Boolean\(env\.DB\)/);
+  assert.match(route, /Boolean\(env\.ASSETS\)/);
+  assert.match(builder, /See what is genuinely connected today/);
+});
