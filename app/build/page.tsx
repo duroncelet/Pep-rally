@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { rallyConcepts } from "../catalog";
-import { originals } from "../originals";
 
-type MakerApp = { id: string; name: string; problem: string; outcome: string; proof: string; stage: string; sourceType: string; sourceUrl: string | null; accessModel: string; priceCents: number; parentTitle?: string | null; analytics?: { sales: number; earningsCents: number } };
+type MakerApp = { id: string; name: string; problem: string; outcome: string; proof: string; stage: string; sourceType: string; sourceUrl: string | null; accessModel: string; priceCents: number; analytics?: { sales: number; earningsCents: number } };
 
 const addOns = [
   { id: "payments", name: "Take payments", examples: "Stripe or PayPal checkout, receipts, and access after purchase", status: "Connect an account", group: "Sell it" },
@@ -42,8 +41,7 @@ export default function BuildPage() {
   const [uploading, setUploading] = useState(false);
   const [sourceStatus, setSourceStatus] = useState("");
   const [apps, setApps] = useState<MakerApp[]>([]);
-  const [parentSlug, setParentSlug] = useState("");
-  const [parentTitle, setParentTitle] = useState("");
+  const [startingIdeaTitle, setStartingIdeaTitle] = useState("");
 
   const chosen = addOns.filter((item) => selected.includes(item.id));
   const groups = useMemo(() => [...new Set(addOns.map((item) => item.group))], []);
@@ -52,14 +50,11 @@ export default function BuildPage() {
 
   useEffect(() => {
     refreshApps();
-    const adapt = new URLSearchParams(window.location.search).get("adapt");
-    if (!adapt) return;
-    const concept = rallyConcepts.find((item) => item.slug === adapt);
-    const original = originals.find((item) => item.slug === adapt);
+    const idea = new URLSearchParams(window.location.search).get("idea");
+    if (!idea) return;
+    const concept = rallyConcepts.find((item) => item.slug === idea);
     if (concept) {
-      setParentSlug(concept.slug); setParentTitle(concept.title); setName(`${concept.title} — my version`); setBuyer(concept.forWhom); setProblem(`The current workaround is scattered, time-consuming, or too generic for ${concept.forWhom.toLowerCase()}.`); setOutcome(concept.promise); setQuestions(concept.inputs.join("\n")); setResult(concept.outcome.join("\n"));
-    } else if (original) {
-      setParentSlug(original.slug); setParentTitle(original.title); setName(`${original.title} — my version`); setBuyer("People who need a more specific version of this Rally"); setProblem("The original solves the broad problem, but my audience needs a more specific workflow."); setOutcome(original.blurb); setQuestions(original.inputs.join("\n")); setResult(original.outputs.join("\n"));
+      setStartingIdeaTitle(concept.title); setName(concept.title); setBuyer(concept.forWhom); setProblem(`The current workaround is scattered, time-consuming, or too generic for ${concept.forWhom.toLowerCase()}.`); setOutcome(concept.promise); setQuestions(concept.inputs.join("\n")); setResult(concept.outcome.join("\n"));
     }
   }, []);
 
@@ -91,7 +86,7 @@ export default function BuildPage() {
     setSaving(true); setStatus("");
     const builderSpec = [`Buyer: ${buyer}`, `Questions: ${questions}`, `Steps: ${steps}`, `Finished result: ${result}`, `Launch pieces: ${chosen.map((item) => item.name).join(", ")}`].join("\n\n");
     const finalSourceType = entryMode === "build" ? "guided" : sourceType;
-    const response = await fetch("/api/creator-apps", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, problem, outcome, proof, accessModel: price > 0 ? "paid" : "free", price, sourceType: finalSourceType, sourceUrl: finalSourceType === "live" ? sourceUrl : undefined, sourceFileKey: finalSourceType === "code" ? sourceFileKey : undefined, builderSpec: finalSourceType === "guided" ? builderSpec : undefined, parentSlug: parentSlug || undefined, parentTitle: parentTitle || undefined }) });
+    const response = await fetch("/api/creator-apps", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, problem, outcome, proof, accessModel: price > 0 ? "paid" : "free", price, sourceType: finalSourceType, sourceUrl: finalSourceType === "live" ? sourceUrl : undefined, sourceFileKey: finalSourceType === "code" ? sourceFileKey : undefined, builderSpec: finalSourceType === "guided" ? builderSpec : undefined }) });
     const data = await response.json();
     if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
     setSaving(false);
@@ -101,7 +96,7 @@ export default function BuildPage() {
 
   return <main className="build-page">
     <nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div className="build-progress"><span className={step >= 1 ? "active" : ""}>Idea</span><i>→</i><span className={step >= 2 ? "active" : ""}>Experience</span><i>→</i><span className={step >= 3 ? "active" : ""}>Launch pieces</span><i>→</i><span className={step >= 4 ? "active" : ""}>List it</span></div><div className="build-nav-actions"><a href="#my-rallies">My studio</a><a href="/">Back to shop</a></div></nav>
-    <header className="build-header"><div><small>MAKE A RALLY</small><h1>Build it here.<br/><em>Or bring what you made.</em></h1><p>Turn an everyday solution into a polished listing and a mini-app people can open, use, and buy.</p>{parentTitle && <div className="adapt-notice"><b>Starting from {parentTitle}</b><span>Your version keeps visible credit to the original idea while becoming its own product.</span></div>}</div><div className="included-card"><small>EVERY RALLY GETS</small><span>✓ A marketplace listing</span><span>✓ Free or paid access</span><span>✓ A hosted test path</span><span>✓ Customer feedback and reviews</span><span>✓ Saved buyer access</span></div></header>
+    <header className="build-header"><div><small>MAKE A RALLY</small><h1>Build it here.<br/><em>Or bring what you made.</em></h1><p>Turn an everyday solution into a polished listing and a mini-app people can open, use, and buy.</p>{startingIdeaTitle && <div className="idea-notice"><b>Starting with the {startingIdeaTitle} brief</b><span>The researched outcome is prefilled. Your expertise should determine the sources, workflow, and final product.</span></div>}</div><div className="included-card"><small>EVERY RALLY GETS</small><span>✓ A marketplace listing</span><span>✓ Free or paid access</span><span>✓ A hosted test path</span><span>✓ Customer feedback and reviews</span><span>✓ Saved buyer access</span></div></header>
 
     <section className="build-entry-choice"><button className={entryMode === "build" ? "active" : ""} onClick={() => { setEntryMode("build"); setStep(1); }}><small>START WITH AN IDEA</small><b>Build inside Pep Rally</b><span>Shape the outcome, customer experience, and tools from scratch.</span></button><button className={entryMode === "bring" ? "active" : ""} onClick={() => { setEntryMode("bring"); setStep(1); }}><small>ALREADY MADE SOMETHING?</small><b>Upload or link your mini-app</b><span>Bring a live site or upload the project you want to launch.</span></button></section>
 
@@ -115,7 +110,7 @@ export default function BuildPage() {
       </div>
       <aside className="live-build-preview"><small>YOUR WORKING IDEA</small><h2>{name || "Untitled planner"}</h2><p>{outcome || "The finished outcome will appear here as you describe it."}</p><div><span><b>FOR</b>{buyer || "Your future customer"}</span><span><b>ASKS</b>{questions || "The minimum useful questions"}</span><span><b>CREATES</b>{result || "A practical finished result"}</span></div><h3>What it can use</h3>{chosen.length ? <ul>{chosen.map((item) => <li key={item.id}>{item.name}<small>{item.status}</small></li>)}</ul> : <p>No extras selected yet.</p>}<em>Drafting is free during the private preview. Any provider fees or usage costs are shown before launch.</em></aside>
     </section>
-    <section className="maker-studio" id="my-rallies"><header><small>MY RALLY STUDIO</small><h2>Your work, listings, and launches.</h2><p>See what is ready, what needs work, and what has sold. Published metrics are real—even when the honest number is zero.</p></header>{apps.length ? <div className="studio-grid">{apps.map((app) => { const quality = [app.outcome.trim().length >= 40, app.proof.trim().length >= 20, app.sourceType === "live" && Boolean(app.sourceUrl)].filter(Boolean).length; return <article key={app.id}><div><small>{app.stage.toUpperCase()}</small><span>{app.accessModel === "free" ? "Free" : `$${(app.priceCents / 100).toFixed(0)}`}</span></div><h3>{app.name}</h3>{app.parentTitle && <em>Adapted from {app.parentTitle}</em>}<p>{app.outcome}</p><div className="studio-metrics"><span><b>{quality}/3</b>launch checks</span><span><b>{app.analytics?.sales ?? 0}</b>sales</span><span><b>${((app.analytics?.earningsCents ?? 0) / 100).toFixed(0)}</b>earned</span></div><em>{app.sourceType === "live" ? "Live app linked" : app.sourceType === "code" ? "Project uploaded" : "Building inside Pep Rally"}</em>{app.stage === "published" ? <button onClick={() => changeListing(app.id, "unpublish")}>Remove from marketplace</button> : app.sourceType === "live" && app.sourceUrl ? <button className="primary" onClick={() => changeListing(app.id, "publish")}>Publish to marketplace →</button> : <b>Next: prepare the hosted working version</b>}</article>; })}</div> : <div className="studio-empty"><b>Your first Rally will appear here.</b><p>Start with an idea or bring something you already made.</p></div>}{status && <p className="studio-status">{status}</p>}</section>
+    <section className="maker-studio" id="my-rallies"><header><small>MY RALLY STUDIO</small><h2>Your work, listings, and launches.</h2><p>See what is ready, what needs work, and what has sold. Published metrics are real—even when the honest number is zero.</p></header>{apps.length ? <div className="studio-grid">{apps.map((app) => { const quality = [app.outcome.trim().length >= 40, app.proof.trim().length >= 20, app.sourceType === "live" && Boolean(app.sourceUrl)].filter(Boolean).length; return <article key={app.id}><div><small>{app.stage.toUpperCase()}</small><span>{app.accessModel === "free" ? "Free" : `$${(app.priceCents / 100).toFixed(0)}`}</span></div><h3>{app.name}</h3><p>{app.outcome}</p><div className="studio-metrics"><span><b>{quality}/3</b>launch checks</span><span><b>{app.analytics?.sales ?? 0}</b>sales</span><span><b>${((app.analytics?.earningsCents ?? 0) / 100).toFixed(0)}</b>earned</span></div><em>{app.sourceType === "live" ? "Live app linked" : app.sourceType === "code" ? "Project uploaded" : "Building inside Pep Rally"}</em>{app.stage === "published" ? <button onClick={() => changeListing(app.id, "unpublish")}>Remove from marketplace</button> : app.sourceType === "live" && app.sourceUrl ? <button className="primary" onClick={() => changeListing(app.id, "publish")}>Publish to marketplace →</button> : <b>Next: prepare the hosted working version</b>}</article>; })}</div> : <div className="studio-empty"><b>Your first Rally will appear here.</b><p>Start with an idea or bring something you already made.</p></div>}{status && <p className="studio-status">{status}</p>}</section>
 
     <section className="connection-model"><header><small>BUILT FOR LAUNCH</small><h2>Everything around the mini-app, together.</h2><p>Pep Rally packages the pieces that turn a useful personal tool into something other people can find, trust, and use.</p></header><div><article><b>1</b><h3>Sell or share</h3><p>Give it away, set a price, control access, and keep the customer’s Rally in their library.</p></article><article><b>2</b><h3>Learn what works</h3><p>Collect usage signals, reviews, improvement requests, and new versions beside the product.</p></article><article><b>3</b><h3>Keep it running</h3><p>Bring hosting, accounts, payments, messages, data, and support into one launch path.</p></article></div></section>
   </main>;

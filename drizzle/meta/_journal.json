@@ -64,6 +64,13 @@
       "when": 1788299704115,
       "tag": "0008_solid_malice",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1788302044580,
+      "tag": "0009_smooth_whistler",
+      "breakpoints": true
     }
   ]
 }

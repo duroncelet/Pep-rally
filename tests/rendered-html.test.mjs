@@ -13,11 +13,11 @@ test("ships a clear build-and-marketplace homepage", async () => {
   assert.match(layout, /Pep Rally/);
   assert.match(page, /THE MARKETPLACE FOR EVERYDAY MINI-APPS/);
   assert.match(page, /Sell something you made/);
-  assert.match(page, /THE OUTCOME/);
+  assert.match(page, /WHAT THE CUSTOMER GETS/);
   assert.match(page, /FREE PEP RALLY ORIGINALS/);
   assert.doesNotMatch(page, /Get the Blueprint · \$18|test checkout/i);
-  assert.match(page, /A usable mini-app/);
-  assert.match(page, /Not just a file/);
+  assert.match(page, /The working app/);
+  assert.match(page, /Their saved result/);
   assert.match(page, /bachelorette-pool\.jpg/);
   assert.match(page, /lush-garden\.jpg/);
   assert.doesNotMatch(page, /moat|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
@@ -120,7 +120,7 @@ test("shows honest, testable connection readiness", async () => {
   assert.match(migration, /idx_purchases_stripe_session/);
 });
 
-test("ships marketplace discovery, product trust, libraries, analytics, and credited adaptations", async () => {
+test("ships marketplace discovery, product trust, libraries, analytics, and a concrete outcome standard", async () => {
   const [page, catalog, concept, product, reviewPanel, library, builder, creatorApi, schema, migration, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/catalog.ts", import.meta.url), "utf8"),
@@ -131,13 +131,16 @@ test("ships marketplace discovery, product trust, libraries, analytics, and cred
     readFile(new URL("../app/build/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/creator-apps/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
-    readFile(new URL("../drizzle/0008_solid_malice.sql", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0009_smooth_whistler.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
   assert.match(page, /Search by problem or person/);
   assert.match(page, /THE PEP RALLY BUYER PROMISE/);
-  assert.match(page, /ADAPT, CREDIT, IMPROVE/);
+  assert.match(page, /WHAT COUNTS AS A RALLY/);
+  assert.match(page, /Open it\. Finish something\. Keep the result/);
+  assert.match(page, /The working app/);
+  assert.match(page, /Why does this prototype use ChatGPT sign-in/);
   for (const idea of ["NCLEX Study Sprint", "Etsy Profit & Pricing Desk", "Flashcard Shop Studio", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
   assert.match(catalog, /official 2026 NCLEX-RN test plan/);
   assert.match(concept, /This is a researched product direction, not a finished listing/);
@@ -148,12 +151,12 @@ test("ships marketplace discovery, product trust, libraries, analytics, and cred
   assert.match(reviewPanel, /Reviews can only be left after someone saves and uses this Rally/);
   assert.match(library, /Every Rally you save or buy lives here as a working workspace/);
   assert.match(builder, /LISTING QUALITY CHECK/);
-  assert.match(builder, /Starting from/);
+  assert.match(builder, /Starting with the/);
   assert.match(builder, /launch checks/);
   assert.match(creatorApi, /paid_and_unlocked/);
   assert.match(creatorApi, /Strengthen the outcome and maker story/);
-  assert.match(schema, /parentSlug/);
-  assert.match(migration, /parent_slug/);
+  assert.doesNotMatch(page + product + builder + schema, /adapt|remix|lineage|parentSlug|parentTitle/i);
+  assert.match(migration, /DROP COLUMN `parent_slug`/);
   assert.match(css, /\.idea-grid/);
   assert.match(css, /\.pdp-hero/);
   assert.match(css, /\.library-grid/);

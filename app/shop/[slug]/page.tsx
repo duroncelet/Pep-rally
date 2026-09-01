@@ -30,6 +30,6 @@ export default async function ProductPage({ params }: PageProps) {
 
     <ReviewPanel slug={product.slug}/>
 
-    <section className="pdp-adapt"><div><small>MAKE IT YOURS</small><h2>Know a better version?</h2><p>Start an adaptation with visible credit to this Rally. Add your expertise, test a new audience, and publish it as a distinct product.</p></div><a className="primary" href={`/build?adapt=${product.slug}`}>Adapt this Rally →</a></section>
+    <section className="pdp-finish"><div><small>READY TO FINISH SOMETHING?</small><h2>Open the working app.</h2><p>Bring your real details, review the result, and keep the finished workspace in My Rallies.</p></div><a className="primary" href={product.appHref}>Use this Rally →</a></section>
   </main>;
 }

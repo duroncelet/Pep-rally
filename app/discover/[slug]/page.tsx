@@ -23,9 +23,9 @@ export default async function ConceptPage({ params }: PageProps) {
   if (!concept) return <main className="concept-page"><nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a></nav><section className="concept-missing"><h1>This Rally idea moved.</h1><a href="/#marketplace">Browse the marketplace →</a></section></main>;
 
   return <main className={`concept-page concept-${concept.accent}`}>
-    <nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><a href="/#marketplace">Browse ideas</a><a href={`/build?adapt=${concept.slug}`}>Build this Rally</a></div></nav>
+    <nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><a href="/#marketplace">Browse ideas</a><a href={`/build?idea=${concept.slug}`}>Build this Rally</a></div></nav>
     <header className="concept-hero">
-      <div><span className="concept-category">{concept.category} · RALLY IDEA</span><h1>{concept.title}</h1><p>{concept.promise}</p><div className="concept-actions"><a className="primary" href={`/build?adapt=${concept.slug}`}>Build this idea →</a><a href="#blueprint">See how it would work ↓</a></div></div>
+      <div><span className="concept-category">{concept.category} · RALLY IDEA</span><h1>{concept.title}</h1><p>{concept.promise}</p><div className="concept-actions"><a className="primary" href={`/build?idea=${concept.slug}`}>Build this idea →</a><a href="#blueprint">See how it would work ↓</a></div></div>
       <aside><span>{concept.monogram}</span><small>BEST MADE BY</small><b>{concept.maker}</b><p>This is a researched product direction, not a finished listing. A knowledgeable creator can claim it, shape it, and publish the working version.</p></aside>
     </header>
 
@@ -41,6 +41,6 @@ export default async function ConceptPage({ params }: PageProps) {
 
     {concept.sourceNote && <section className="concept-source"><small>WHY THIS IDEA IS HERE</small><p>{concept.sourceNote}</p><a href="https://www.nclex.com/test-plans.page" target="_blank" rel="noreferrer">Review the official NCLEX test plan ↗</a></section>}
 
-    <section className="concept-claim"><div><small>KNOW THIS PROBLEM?</small><h2>Make the version only you could make.</h2><p>Pep Rally starts the product brief. You bring the lived experience, trusted material, and judgment that make it worth using.</p></div><a className="primary" href={`/build?adapt=${concept.slug}`}>Start with this blueprint →</a></section>
+    <section className="concept-claim"><div><small>KNOW THIS PROBLEM?</small><h2>Build the product you wish existed.</h2><p>Pep Rally starts the product brief. You bring the lived experience, trusted material, and judgment that make it worth using.</p></div><a className="primary" href={`/build?idea=${concept.slug}`}>Start with this blueprint →</a></section>
   </main>;
 }
