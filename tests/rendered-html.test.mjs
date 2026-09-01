@@ -23,6 +23,8 @@ test("ships a clear build-and-marketplace homepage", async () => {
   assert.doesNotMatch(page, /moat|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
   assert.match(page, /THE MARKETPLACE/);
   assert.match(page, /Small apps\. Real outcomes/);
+  assert.match(page, /THE SHELF IS OPEN/);
+  assert.doesNotMatch(page, /starter-grid/);
   assert.match(page, /PEP RALLY FAQ/);
   assert.match(page, /free Pep Rally Originals/);
   assert.match(builder, /MAKE A RALLY/);
