@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("ships a clear consumer storefront", async () => {
+test("ships a clear build-and-marketplace homepage", async () => {
   const [page, builder, layout, css] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/build/page.tsx", import.meta.url), "utf8"),
@@ -11,16 +11,20 @@ test("ships a clear consumer storefront", async () => {
   ]);
 
   assert.match(layout, /Pep Rally/);
-  assert.match(page, /Plan the thing/);
-  assert.match(page, /WHAT YOU GET/);
-  assert.match(page, /TRY A FREE RALLY/);
+  assert.match(page, /BUILD, TEST \+ SELL EVERYDAY MINI-APPS/);
+  assert.match(page, /Build or upload a Rally/);
+  assert.match(page, /THE OUTCOME/);
+  assert.match(page, /FREE CASE STUDIES/);
   assert.doesNotMatch(page, /Get the Blueprint · \$18|test checkout/i);
-  assert.match(page, /A workspace/);
-  assert.match(page, /Not another PDF/);
+  assert.match(page, /A usable mini-app/);
+  assert.match(page, /Not just a file/);
   assert.match(page, /bachelorette-pool\.jpg/);
   assert.match(page, /lush-garden\.jpg/);
   assert.doesNotMatch(page, /moat|creator|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
-  assert.match(page, /Build your own/);
+  assert.match(page, /Upload what you made/);
+  assert.match(page, /THE PEP RALLY CONNECTION LAYER/);
+  assert.match(page, /PEP RALLY FAQ/);
+  assert.match(page, /They are free case studies and marketing examples/);
   assert.match(builder, /BUILD INSIDE PEP RALLY/);
   assert.match(builder, /Take payments/);
   assert.match(builder, /Send text messages/);
