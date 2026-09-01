@@ -57,6 +57,13 @@
       "when": 1788297437046,
       "tag": "0007_icy_yellowjacket",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1788299704115,
+      "tag": "0008_solid_malice",
+      "breakpoints": true
     }
   ]
 }

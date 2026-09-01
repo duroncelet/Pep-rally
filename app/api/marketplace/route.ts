@@ -34,6 +34,8 @@ export async function GET() {
     accessModel: creatorApps.accessModel,
     priceCents: creatorApps.priceCents,
     sourceUrl: creatorApps.sourceUrl,
+    parentSlug: creatorApps.parentSlug,
+    parentTitle: creatorApps.parentTitle,
     updatedAt: creatorApps.updatedAt,
   }).from(creatorApps).where(eq(creatorApps.stage, "published")).orderBy(desc(creatorApps.updatedAt)).limit(24);
 

@@ -1,54 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { rallyConcepts } from "./catalog";
+import { originals } from "./originals";
 
 type Review = { id: string; reviewerName: string; rating: number; body: string };
 type Stat = { runs: number; reviewCount: number; averageRating: number | null; reviews: Review[] };
-type CommunityListing = { id: string; name: string; creatorName: string; outcome: string; proof: string; accessModel: "free" | "paid"; priceCents: number; sourceUrl: string | null };
-
-const products = [
-  {
-    slug: "bachelorette-blueprint",
-    title: "The Bachelorette Blueprint",
-    eyebrow: "THE ONE-STOP PARTY PLANNER",
-    image: "/rallies/bachelorette-pool.jpg",
-    price: "Free example",
-    href: "/rally/bachelorette",
-    blurb: "Plan the people, money, places, reservations, itinerary, décor, packing, and group updates—without running the weekend from twelve different apps.",
-    included: ["Anonymous stay budget + lodging picker", "Guest list + RSVPs", "Budget + payment requests", "Itinerary + reservations", "Group updates + chat", "Décor + packing lists"],
-    color: "coral",
-  },
-  {
-    slug: "garden-planner",
-    title: "The Little Garden Planner",
-    eyebrow: "A FREE WEATHER-AWARE GARDEN PLAN",
-    image: "/rallies/lush-garden.jpg",
-    price: "Free example",
-    href: "/rally/garden",
-    blurb: "Turn your actual space, sunlight, setup, location, and favorite crops into a garden plan you can use all season.",
-    included: ["Rows, beds, pots, or indoor", "Visual growing layout", "Live seven-day weather", "Weather-aware care tasks", "Editable crop plan", "Garden journal"],
-    color: "green",
-  },
-];
+type CommunityListing = { id: string; name: string; creatorName: string; outcome: string; proof: string; accessModel: "free" | "paid"; priceCents: number; sourceUrl: string | null; parentSlug?: string | null; parentTitle?: string | null };
 
 export default function Home() {
   const [stats, setStats] = useState<Record<string, Stat>>({});
-  const [libraryOpen, setLibraryOpen] = useState(false);
-  const [libraryLoading, setLibraryLoading] = useState(false);
-  const [library, setLibrary] = useState<Array<{ id: string; title: string; summary: string; toolSlug: string; inputs?: { accessUrl?: string } }>>([]);
   const [listings, setListings] = useState<CommunityListing[]>([]);
   const [marketStatus, setMarketStatus] = useState("");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+
+  const categories = useMemo(() => ["All", ...new Set(rallyConcepts.map((item) => item.category))], []);
+  const visibleIdeas = useMemo(() => rallyConcepts.filter((item) => {
+    const haystack = `${item.title} ${item.category} ${item.forWhom} ${item.promise}`.toLowerCase();
+    return (category === "All" || item.category === category) && haystack.includes(search.trim().toLowerCase());
+  }), [category, search]);
 
   useEffect(() => {
     fetch("/api/marketplace").then((response) => response.ok ? response.json() : null).then((data) => { if (data) { setStats(data.stats ?? {}); setListings(data.listings ?? []); } });
   }, []);
-
-  async function openLibrary() {
-    setLibraryOpen(true); setLibraryLoading(true);
-    const response = await fetch("/api/rallies"); const data = await response.json();
-    if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
-    setLibrary(data.rallies ?? []); setLibraryLoading(false);
-  }
 
   async function buyListing(id: string) {
     setMarketStatus("Opening secure checkout…");
@@ -63,10 +38,8 @@ export default function Home() {
     <nav className="store-nav">
       <a href="#top" className="brand"><span className="brand-mark">P</span>Pep Rally</a>
       <div className="nav-links"><a href="#marketplace">Shop Rallies</a><a href="#shop">Free examples</a><a href="/build">Sell your Rally</a><a href="#questions">Questions</a></div>
-      <button className="nav-button" onClick={openLibrary}>My Rallies</button>
+      <a className="nav-button center-link" href="/library">My Rallies</a>
     </nav>
-
-    {libraryOpen && <div className="checkout-shade" onClick={() => setLibraryOpen(false)}><section className="simple-library" onClick={(event) => event.stopPropagation()}><header><div><small>MY RALLIES</small><h2>Pick up where you left off.</h2></div><button aria-label="Close" onClick={() => setLibraryOpen(false)}>×</button></header>{libraryLoading ? <p>Opening your Rallies…</p> : library.length ? <div>{library.map((item) => <a key={item.id} href={item.inputs?.accessUrl || (item.toolSlug === "garden-planner" ? "/rally/garden" : "/rally/bachelorette")}><b>{item.title}</b><span>{item.summary}</span><em>Open →</em></a>)}</div> : <div className="empty-library"><b>No saved Rallies yet.</b><p>Shop the marketplace, try a free example, or publish something you made.</p></div>}</section></div>}
 
     <section className="shop-hero" id="top">
       <div className="shop-hero-copy"><span className="eyebrow">THE MARKETPLACE FOR EVERYDAY MINI-APPS</span><h1>Someone solved it.<br/><em>Now you can use it.</em></h1><p>Shop small, useful apps made by people who know the problem—or turn your own solution into a Rally and sell it here.</p><div><a className="primary" href="#marketplace">Shop Rallies</a><a className="text-button" href="/build">Sell something you made →</a></div></div>
@@ -75,9 +48,13 @@ export default function Home() {
 
     <section className="consumer-proof"><span><b>Discover</b> useful apps made by real people</span><span><b>Use</b> free or paid Rallies in one library</span><span><b>Sell</b> the solution you already made</span></section>
 
-    <section className="community-marketplace" id="marketplace"><header><div><small>THE MARKETPLACE</small><h2>Small apps. Real outcomes.</h2><p>Made by people who found a better way to handle something—and decided to share it.</p></div><a href="/build">Sell your own Rally →</a></header>{listings.length ? <div className="community-grid">{listings.map((listing, index) => <article key={listing.id} className={`community-card tone-${index % 4}`}><div className="community-card-top"><span>Made by {listing.creatorName}</span><b>{listing.accessModel === "free" ? "Free" : `$${(listing.priceCents / 100).toFixed(0)}`}</b></div><div className="community-icon">{listing.name.slice(0, 1).toUpperCase()}</div><h3>{listing.name}</h3><p>{listing.outcome}</p><small>{listing.proof}</small>{listing.accessModel === "free" && listing.sourceUrl ? <a className="primary center-link" href={listing.sourceUrl} target="_blank" rel="noreferrer">Open free Rally →</a> : <button className="primary" onClick={() => buyListing(listing.id)}>Get this Rally · ${(listing.priceCents / 100).toFixed(0)}</button>}</article>)}</div> : <div className="marketplace-opening"><div><small>THE SHELF IS OPEN</small><h3>Your useful little app belongs here.</h3><p>Share a working mini-app, choose free or paid access, and give people a clear outcome they can use right away.</p><a className="primary center-link" href="/build">Publish a Rally →</a></div><div className="opening-steps"><span><b>1</b> Link or upload it</span><span><b>2</b> Show what it helps someone do</span><span><b>3</b> Set free or paid access</span></div></div>}{marketStatus && <p className="market-status">{marketStatus}</p>}</section>
+    <section className="community-marketplace" id="marketplace"><header><div><small>THE MARKETPLACE</small><h2>Small apps. Real outcomes.</h2><p>Start with a problem you recognize. Open something ready to use, or claim an idea you are uniquely qualified to build.</p></div><a href="/build">Sell your own Rally →</a></header><div className="discovery-tools"><label><span>Search by problem or person</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Try nursing, pricing, travel, roommates…"/></label><div>{categories.map((item) => <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div className="idea-grid">{visibleIdeas.map((idea) => <a href={`/discover/${idea.slug}`} className={`idea-card idea-${idea.accent}`} key={idea.slug}><div><span>{idea.monogram}</span><small>{idea.category} · CREATOR WANTED</small></div><h3>{idea.title}</h3><p>{idea.promise}</p><b>See the product blueprint →</b></a>)}</div>{!visibleIdeas.length && <div className="no-ideas"><b>No exact match yet.</b><p>That may be the Rally only you know how to make.</p><a href="/build">Start it →</a></div>}<div className="ready-divider"><span>MADE AND READY TO USE</span><p>Published creator Rallies appear here after their working version and listing are checked.</p></div>{listings.length ? <div className="community-grid">{listings.map((listing, index) => <article key={listing.id} className={`community-card tone-${index % 4}`}><div className="community-card-top"><span>Made by {listing.creatorName}</span><b>{listing.accessModel === "free" ? "Free" : `$${(listing.priceCents / 100).toFixed(0)}`}</b></div><div className="community-icon">{listing.name.slice(0, 1).toUpperCase()}</div><h3>{listing.name}</h3>{listing.parentTitle && <a className="lineage-chip" href={`/discover/${listing.parentSlug}`}>Adapted from {listing.parentTitle}</a>}<p>{listing.outcome}</p><small>{listing.proof}</small>{listing.accessModel === "free" && listing.sourceUrl ? <a className="primary center-link" href={listing.sourceUrl} target="_blank" rel="noreferrer">Open free Rally →</a> : <button className="primary" onClick={() => buyListing(listing.id)}>Get this Rally · ${(listing.priceCents / 100).toFixed(0)}</button>}</article>)}</div> : <div className="marketplace-opening"><div><small>THE SHELF IS OPEN</small><h3>Your useful little app belongs here.</h3><p>Share a working mini-app, choose free or paid access, and give people a clear outcome they can use right away.</p><a className="primary center-link" href="/build">Publish a Rally →</a></div><div className="opening-steps"><span><b>1</b> Link or upload it</span><span><b>2</b> Show what it helps someone do</span><span><b>3</b> Set free or paid access</span></div></div>}{marketStatus && <p className="market-status">{marketStatus}</p>}</section>
 
-    <section className="storefront" id="shop"><header><small>FREE PEP RALLY ORIGINALS</small><h2>Try one before you buy one.</h2><p>These two working examples are free. Open one, use the tools, and see exactly what a Rally feels like.</p></header><div className="product-grid">{products.map((product) => { const stat = stats[product.slug] ?? { runs: 0, reviewCount: 0, averageRating: null, reviews: [] }; return <article className={`product-card ${product.color}`} key={product.slug}><div className="product-photo"><img src={product.image} alt=""/><span>{product.price}</span></div><div className="product-copy"><small>{product.eyebrow}</small><h3>{product.title}</h3><p>{product.blurb}</p><ul>{product.included.map((item) => <li key={item}>{item}</li>)}</ul><div className="product-stats"><span>{stat.runs} saved plan{stat.runs === 1 ? "" : "s"}</span><span>{stat.averageRating ? `★ ${stat.averageRating.toFixed(1)} from ${stat.reviewCount}` : "New · no reviews yet"}</span></div><a className="primary full center-link" href={product.href}>Try the free Rally</a></div></article>; })}</div></section>
+    <section className="marketplace-trust"><div className="trust-summary"><p className="kicker">THE PEP RALLY BUYER PROMISE</p><h2>Know what it does before you let it into your life.</h2><p>Every full listing should show the inputs, finished outcome, permissions, maker, update history, support, and real reviews. Paid Rallies must open and match their listing or the buyer can request marketplace review.</p><div className="trust-numbers"><span><b>Use first</b>Reviews unlock after a saved workspace or purchase</span><span><b>No mystery</b>Data and outside services are disclosed up front</span><span><b>Human say</b>Messages, bookings, payments, and high-stakes choices stay with you</span></div></div><div className="trust-checklist"><small>WHAT A COMPLETE LISTING SHOWS</small><span>01 · A clear one-sentence outcome</span><span>02 · A working demo or realistic preview</span><span>03 · What you bring and what you receive</span><span>04 · Permissions, sources, and human decisions</span><span>05 · Price, support, updates, and refund expectations</span><span>06 · Verified usage and reviews—never invented numbers</span></div></section>
+
+    <section className="rally-lineage"><div className="lineage-head"><div><p className="kicker">ADAPT, CREDIT, IMPROVE</p><h2>Good ideas can grow branches.</h2></div><p>A creator can start from a public Rally blueprint or adapt an existing Rally for a more specific audience. The new version keeps visible credit, explains what changed, and becomes its own product. Revenue sharing can be activated when a paid original is part of the adaptation.</p></div><div className="lineage-flow"><article><small>ORIGINAL</small><b>A useful general solution</b><p>The first maker proves the workflow and publishes the working Rally.</p><span>Credit stays attached</span></article><i>→</i><article className="extension-empty"><small>ADAPTATION</small><b>A sharper version for a real niche</b><p>A nurse educator, travel adviser, teacher, farmer, or seller adds expertise and a new audience.</p><a href="/build">Start an adaptation →</a></article></div></section>
+
+    <section className="storefront" id="shop"><header><small>FREE PEP RALLY ORIGINALS</small><h2>Try one before you buy one.</h2><p>These two working examples are free. See the full listing, then open the mini-app and use it.</p></header><div className="product-grid">{originals.map((product) => { const stat = stats[product.slug] ?? { runs: 0, reviewCount: 0, averageRating: null, reviews: [] }; return <article className={`product-card ${product.color}`} key={product.slug}><div className="product-photo"><img src={product.image} alt=""/><span>{product.price}</span></div><div className="product-copy"><small>{product.eyebrow}</small><h3>{product.title}</h3><p>{product.blurb}</p><ul>{product.included.map((item) => <li key={item}>{item}</li>)}</ul><div className="product-stats"><span>{stat.runs} saved plan{stat.runs === 1 ? "" : "s"}</span><span>{stat.averageRating ? `★ ${stat.averageRating.toFixed(1)} from ${stat.reviewCount}` : "New · no reviews yet"}</span></div><a className="primary full center-link" href={`/shop/${product.slug}`}>See the full Rally →</a></div></article>; })}</div></section>
 
     <section className="simple-how" id="how"><header><small>HOW PEP RALLY WORKS</small><h2>From “I made this for myself”<br/>to <em>“other people can use it.”</em></h2></header><div><article><b>01</b><h3>Bring the useful thing</h3><p>Start with an everyday problem you understand. Build the mini-app inside Pep Rally, or upload and link the version you already made.</p></article><article><b>02</b><h3>Add the hard parts</h3><p>Choose what it needs: accounts, payments, email, text, files, live data, calendars, maps, AI, or hosting.</p></article><article><b>03</b><h3>Test it with real people</h3><p>Share a working preview, watch where people get stuck, collect reviews and requests, and improve the outcome.</p></article><article><b>04</b><h3>Launch it as a Rally</h3><p>Publish a usable mini-app with a clear listing, price or free access, saved customer work, support, and an improvement history.</p></article></div></section>
 

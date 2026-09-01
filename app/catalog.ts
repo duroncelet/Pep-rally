@@ -1,0 +1,162 @@
+export type RallyConcept = {
+  slug: string;
+  title: string;
+  category: string;
+  forWhom: string;
+  promise: string;
+  inputs: string[];
+  outcome: string[];
+  guardrail: string;
+  maker: string;
+  status: "working" | "idea";
+  href?: string;
+  accent: "coral" | "green" | "blue" | "yellow";
+  monogram: string;
+  sourceNote?: string;
+};
+
+export const rallyConcepts: RallyConcept[] = [
+  {
+    slug: "nclex-study-sprint",
+    title: "NCLEX Study Sprint",
+    category: "Study",
+    forWhom: "Nursing students preparing for the NCLEX-RN",
+    promise: "Turn your own class notes and missed topics into a focused seven-day review plan, source-linked flashcards, and an error log.",
+    inputs: ["Your notes or lecture slides", "Exam date and available study time", "Topics you missed or feel unsure about"],
+    outcome: ["A daily study plan", "Editable active-recall cards", "A missed-topic tracker", "Questions tied back to your uploaded sources"],
+    guardrail: "Study support only. It should never invent or reproduce live exam questions, diagnose readiness, or replace official materials.",
+    maker: "A nursing student or educator",
+    status: "idea",
+    accent: "blue",
+    monogram: "NS",
+    sourceNote: "Grounded in the official 2026 NCLEX-RN test plan and recurring student workflows: flashcards, practice, rationales, and reviewing missed topics.",
+  },
+  {
+    slug: "clinical-rotation-pocket-prep",
+    title: "Clinical Rotation Pocket Prep",
+    category: "Study",
+    forWhom: "Nursing students heading into clinicals",
+    promise: "Build a de-identified shift-prep checklist from the unit, learning goals, and instructor requirements.",
+    inputs: ["Unit type", "Learning goals", "Instructor checklist"],
+    outcome: ["Pre-shift prep list", "Questions to ask", "Post-shift reflection", "Reusable skills log"],
+    guardrail: "No patient names, identifiers, medical records, diagnosis, or treatment recommendations.",
+    maker: "A clinical instructor or recent nursing graduate",
+    status: "idea",
+    accent: "green",
+    monogram: "CR",
+  },
+  {
+    slug: "etsy-profit-pricing-desk",
+    title: "Etsy Profit & Pricing Desk",
+    category: "Sell",
+    forWhom: "Small product sellers who are tired of mystery margins",
+    promise: "Turn materials, labor, packaging, fees, and shipping into a price you can explain—and profit scenarios you can compare.",
+    inputs: ["Materials and labor", "Packaging and shipping", "Marketplace fees and target margin"],
+    outcome: ["True unit cost", "Three price scenarios", "Break-even quantity", "Shareable pricing worksheet"],
+    guardrail: "The seller chooses the final price; fee assumptions stay visible and editable.",
+    maker: "An experienced Etsy seller or bookkeeper",
+    status: "idea",
+    accent: "coral",
+    monogram: "EP",
+  },
+  {
+    slug: "flashcard-shop-studio",
+    title: "Flashcard Shop Studio",
+    category: "Teach",
+    forWhom: "Teachers and subject experts who make study materials",
+    promise: "Turn an original study guide into a polished, previewable flashcard mini-app that can be shared free or sold.",
+    inputs: ["Original notes or curriculum", "Audience and difficulty", "Visual style and review cadence"],
+    outcome: ["A study deck", "Multiple practice modes", "A sample preview", "A sellable Rally listing"],
+    guardrail: "Creators must own or have permission to use every source and image.",
+    maker: "A teacher, tutor, or study-guide creator",
+    status: "idea",
+    accent: "yellow",
+    monogram: "FS",
+  },
+  {
+    slug: "travel-proposal-studio",
+    title: "Travel Proposal Studio",
+    category: "Plan",
+    forWhom: "Independent travel advisers building client options",
+    promise: "Turn a client brief into three clear stay-and-itinerary directions with tradeoffs, links, and a client-ready proposal.",
+    inputs: ["Destination and dates", "Budget and traveler preferences", "Advisor hotel and activity shortlist"],
+    outcome: ["Three comparable directions", "Hotel and activity shortlist", "Client decision page", "Proposal and follow-up draft"],
+    guardrail: "Live price and availability must be rechecked before booking; the adviser approves every recommendation.",
+    maker: "A travel adviser",
+    status: "idea",
+    accent: "blue",
+    monogram: "TP",
+  },
+  {
+    slug: "farmers-market-morning-board",
+    title: "Farmers Market Morning Board",
+    category: "Work",
+    forWhom: "Small growers preparing for market day",
+    promise: "Combine the forecast, harvest list, preorders, inventory, and stand plan into one morning pack list.",
+    inputs: ["Harvest-ready crops", "Preorders and inventory", "Market location and forecast"],
+    outcome: ["Harvest quantities", "Packing checklist", "Stand layout", "Weather-aware market notes"],
+    guardrail: "The grower confirms food-safety, harvest, and pricing decisions.",
+    maker: "A market gardener or farmstand operator",
+    status: "idea",
+    accent: "green",
+    monogram: "FM",
+  },
+  {
+    slug: "iep-meeting-organizer",
+    title: "IEP Meeting Organizer",
+    category: "School",
+    forWhom: "Families and educators preparing for an IEP meeting",
+    promise: "Organize goals, observations, questions, and documents into a calm meeting agenda and follow-up record.",
+    inputs: ["Existing goals and documents", "Recent observations", "Questions and priorities"],
+    outcome: ["Meeting agenda", "Question list", "Evidence organizer", "Decision and follow-up log"],
+    guardrail: "Organization support—not legal, educational, or eligibility advice. The family and school make decisions together.",
+    maker: "A special educator or experienced parent advocate",
+    status: "idea",
+    accent: "yellow",
+    monogram: "IE",
+  },
+  {
+    slug: "roommate-move-out-splitter",
+    title: "Roommate Move-Out Splitter",
+    category: "Home",
+    forWhom: "Roommates trying to leave without a final group-chat war",
+    promise: "Split shared tasks and costs, collect condition photos, and create a final agreement everyone can review.",
+    inputs: ["Roommates and shared items", "Bills, deposits, and chores", "Condition photos and deadlines"],
+    outcome: ["Task assignments", "Expense split", "Deposit evidence folder", "Final sign-off summary"],
+    guardrail: "Everyone reviews the split before any payment request or message is sent.",
+    maker: "Someone who has survived a complicated move",
+    status: "idea",
+    accent: "coral",
+    monogram: "RM",
+  },
+  {
+    slug: "care-circle-coordinator",
+    title: "Care Circle Coordinator",
+    category: "Care",
+    forWhom: "Families coordinating practical support for someone they love",
+    promise: "Turn offers to help into a shared schedule for meals, rides, visits, errands, and updates.",
+    inputs: ["What help is welcome", "Dates and volunteers", "Communication preferences"],
+    outcome: ["Shared help calendar", "Volunteer assignments", "Update drafts", "Unfilled-needs list"],
+    guardrail: "No diagnosis or treatment advice; private health details stay out unless explicitly and safely handled.",
+    maker: "A caregiver or community organizer",
+    status: "idea",
+    accent: "green",
+    monogram: "CC",
+  },
+  {
+    slug: "home-project-bid-compare",
+    title: "Home Project Bid Compare",
+    category: "Home",
+    forWhom: "Homeowners comparing estimates that never use the same language",
+    promise: "Normalize contractor bids into the same scope, allowances, exclusions, timing, and payment schedule.",
+    inputs: ["Two or more estimates", "Must-haves and budget", "Questions for each contractor"],
+    outcome: ["Side-by-side scope", "Missing-item flags", "Question list", "Decision record"],
+    guardrail: "The homeowner verifies licenses, insurance, contract terms, and the final hiring decision.",
+    maker: "A homeowner, contractor, or project manager",
+    status: "idea",
+    accent: "blue",
+    monogram: "HB",
+  },
+];
+
+export const findConcept = (slug: string) => rallyConcepts.find((item) => item.slug === slug);

@@ -119,3 +119,42 @@ test("shows honest, testable connection readiness", async () => {
   assert.match(migration, /stripe_session_id/);
   assert.match(migration, /idx_purchases_stripe_session/);
 });
+
+test("ships marketplace discovery, product trust, libraries, analytics, and credited adaptations", async () => {
+  const [page, catalog, concept, product, reviewPanel, library, builder, creatorApi, schema, migration, css] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/catalog.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/discover/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/shop/[slug]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/shop/[slug]/ReviewPanel.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/library/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/build/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/creator-apps/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0008_solid_malice.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /Search by problem or person/);
+  assert.match(page, /THE PEP RALLY BUYER PROMISE/);
+  assert.match(page, /ADAPT, CREDIT, IMPROVE/);
+  for (const idea of ["NCLEX Study Sprint", "Etsy Profit & Pricing Desk", "Flashcard Shop Studio", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
+  assert.match(catalog, /official 2026 NCLEX-RN test plan/);
+  assert.match(concept, /This is a researched product direction, not a finished listing/);
+  assert.match(concept, /Build this idea/);
+  assert.match(product, /What you bring/);
+  assert.match(product, /DATA \+ PERMISSIONS/);
+  assert.match(product, /Pep Rally buyer promise/);
+  assert.match(reviewPanel, /Reviews can only be left after someone saves and uses this Rally/);
+  assert.match(library, /Every Rally you save or buy lives here as a working workspace/);
+  assert.match(builder, /LISTING QUALITY CHECK/);
+  assert.match(builder, /Starting from/);
+  assert.match(builder, /launch checks/);
+  assert.match(creatorApi, /paid_and_unlocked/);
+  assert.match(creatorApi, /Strengthen the outcome and maker story/);
+  assert.match(schema, /parentSlug/);
+  assert.match(migration, /parent_slug/);
+  assert.match(css, /\.idea-grid/);
+  assert.match(css, /\.pdp-hero/);
+  assert.match(css, /\.library-grid/);
+});
