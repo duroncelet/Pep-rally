@@ -1,19 +1,34 @@
 import { getChatGPTUser, chatGPTSignInPath } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
-import { purchases, savedRallies } from "../../../db/schema";
+import { eq } from "drizzle-orm";
+import { purchases } from "../../../db/schema";
+import { createCheckoutSession, isStripeTestMode } from "../../stripe";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const user = await getChatGPTUser();
-  if (!user) return Response.json({ error: "Sign in required", signIn: chatGPTSignInPath("/") }, { status: 401 });
-  const body = await request.json() as { toolSlug?: string; title?: string; inputs?: unknown; summary?: string };
-  if (body.toolSlug !== "bachelorette-blueprint" || !body.title || !body.summary) return Response.json({ error: "Product unavailable" }, { status: 400 });
+  if (!user) return Response.json({ error: "Sign in required", signIn: chatGPTSignInPath("/connections") }, { status: 401 });
+  const secret = process.env.STRIPE_SECRET_KEY;
+  if (!secret) return Response.json({ error: "Add Pep Rally’s private Stripe test key first.", needsCredential: true }, { status: 503 });
+  if (!isStripeTestMode(secret)) return Response.json({ error: "This proof only accepts a Stripe test-mode key. No real charge will be created." }, { status: 409 });
+  const origin = new URL(request.url).origin;
   const now = new Date();
   const purchaseId = crypto.randomUUID();
-  const rallyId = crypto.randomUUID();
   const db = getDb();
-  await db.insert(purchases).values({ id: purchaseId, buyerUserId: user.userId, toolSlug: body.toolSlug, title: body.title, amountCents: 1800, platformFeeCents: 360, creatorEarningsCents: 1440, status: "test_succeeded", createdAt: now });
-  await db.insert(savedRallies).values({ id: rallyId, userId: user.userId, toolSlug: body.toolSlug, title: body.title, inputs: JSON.stringify(body.inputs ?? {}), summary: body.summary, createdAt: now, updatedAt: now });
-  return Response.json({ purchaseId, rallyId, mode: "test", receipt: { paid: 18, creatorEarnings: 14.4, platformFee: 3.6 } }, { status: 201 });
+  await db.insert(purchases).values({ id: purchaseId, buyerUserId: user.userId, toolSlug: "bachelorette-blueprint", title: "Bachelorette Blueprint · payment proof", amountCents: 100, platformFeeCents: 20, creatorEarningsCents: 80, status: "creating_checkout", createdAt: now });
+  try {
+    const session = await createCheckoutSession(secret, {
+      purchaseId,
+      buyerUserId: user.userId,
+      buyerEmail: user.email,
+      successUrl: `${origin}/purchase/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${origin}/connections?checkout=cancelled`,
+    });
+    await db.update(purchases).set({ stripeSessionId: session.id, status: "checkout_open" }).where(eq(purchases.id, purchaseId));
+    return Response.json({ purchaseId, url: session.url, mode: "test" }, { status: 201 });
+  } catch (error) {
+    await db.update(purchases).set({ status: "checkout_failed" }).where(eq(purchases.id, purchaseId));
+    return Response.json({ error: error instanceof Error ? error.message : "Stripe could not create Checkout." }, { status: 502 });
+  }
 }

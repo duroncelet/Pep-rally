@@ -20,8 +20,13 @@ export const purchases = sqliteTable("purchases", {
   platformFeeCents: integer("platform_fee_cents").notNull(),
   creatorEarningsCents: integer("creator_earnings_cents").notNull(),
   status: text("status").notNull(),
+  stripeSessionId: text("stripe_session_id"),
+  fulfilledAt: integer("fulfilled_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-}, (table) => [index("idx_purchases_buyer_created").on(table.buyerUserId, table.createdAt)]);
+}, (table) => [
+  index("idx_purchases_buyer_created").on(table.buyerUserId, table.createdAt),
+  uniqueIndex("idx_purchases_stripe_session").on(table.stripeSessionId),
+]);
 
 export const creatorApps = sqliteTable("creator_apps", {
   id: text("id").primaryKey(),

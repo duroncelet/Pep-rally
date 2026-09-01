@@ -72,10 +72,16 @@ test("ships both executable Rally workspaces", async () => {
 });
 
 test("shows honest, testable connection readiness", async () => {
-  const [page, route, builder] = await Promise.all([
+  const [page, route, builder, checkout, stripe, webhook, success, schema, migration] = await Promise.all([
     readFile(new URL("../app/connections/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/connections/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/build/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/checkout/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/stripe.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/stripe/webhook/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/purchase/success/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0006_mute_vampiro.sql", import.meta.url), "utf8"),
   ]);
 
   for (const feature of ["WORKING NOW", "NEEDS ONE PRIVATE ACCOUNT", "DEALS PEP RALLY SHOULD MAKE", "No pretend connections", "Weather lookup", "Private file storage", "Calendar file"]) assert.match(page, new RegExp(feature));
@@ -85,4 +91,15 @@ test("shows honest, testable connection readiness", async () => {
   assert.match(route, /Boolean\(env\.DB\)/);
   assert.match(route, /Boolean\(env\.ASSETS\)/);
   assert.match(builder, /See what is genuinely connected today/);
+  assert.match(page, /Pay → verify → save → unlock/);
+  assert.match(checkout, /isStripeTestMode/);
+  assert.doesNotMatch(checkout, /test_succeeded/);
+  assert.match(stripe, /payment_status/);
+  assert.match(stripe, /onConflictDoNothing/);
+  assert.match(webhook, /stripe-signature/);
+  assert.match(success, /PAYMENT VERIFIED · ACCESS UNLOCKED/);
+  assert.match(schema, /stripeSessionId/);
+  assert.match(schema, /fulfilledAt/);
+  assert.match(migration, /stripe_session_id/);
+  assert.match(migration, /idx_purchases_stripe_session/);
 });

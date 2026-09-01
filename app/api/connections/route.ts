@@ -18,7 +18,7 @@ export async function GET() {
       emailHandoff: { ready: true, note: "Opens the customer’s email app for review and sending" },
       textHandoff: { ready: true, note: "Opens the customer’s text app for review and sending" },
       calendarExport: { ready: true, note: "Downloadable calendar files need no account connection" },
-      stripe: { ready: Boolean(process.env.STRIPE_SECRET_KEY), note: process.env.STRIPE_SECRET_KEY ? "Private Stripe credential is configured" : "Private Stripe credential has not been configured" },
+      stripe: { ready: Boolean(process.env.STRIPE_SECRET_KEY), note: process.env.STRIPE_SECRET_KEY ? `${process.env.STRIPE_SECRET_KEY.startsWith("sk_test_") ? "Stripe test mode" : "Stripe live mode"} credential is configured${process.env.STRIPE_WEBHOOK_SECRET ? " with verified webhooks" : "; add the webhook secret for background fulfillment"}` : "Private Stripe credential has not been configured" },
       openai: { ready: Boolean(process.env.OPENAI_API_KEY), note: process.env.OPENAI_API_KEY ? "Private OpenAI credential is configured" : "Private OpenAI credential has not been configured" },
     },
   });
