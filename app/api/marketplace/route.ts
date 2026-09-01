@@ -1,7 +1,7 @@
 import { and, avg, count, desc, eq } from "drizzle-orm";
 import { getChatGPTUser, chatGPTSignInPath } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
-import { rallyReviews, savedRallies } from "../../../db/schema";
+import { creatorApps, rallyReviews, savedRallies } from "../../../db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,17 @@ export async function GET() {
     body: rallyReviews.body,
     updatedAt: rallyReviews.updatedAt,
   }).from(rallyReviews).orderBy(desc(rallyReviews.updatedAt)).limit(24);
+  const communityRows = await db.select({
+    id: creatorApps.id,
+    name: creatorApps.name,
+    creatorName: creatorApps.creatorName,
+    outcome: creatorApps.outcome,
+    proof: creatorApps.proof,
+    accessModel: creatorApps.accessModel,
+    priceCents: creatorApps.priceCents,
+    sourceUrl: creatorApps.sourceUrl,
+    updatedAt: creatorApps.updatedAt,
+  }).from(creatorApps).where(eq(creatorApps.stage, "published")).orderBy(desc(creatorApps.updatedAt)).limit(24);
 
   const stats = Object.fromEntries([...validSlugs].map((toolSlug) => {
     const runs = runRows.find((row) => row.toolSlug === toolSlug)?.runs ?? 0;
@@ -37,7 +48,8 @@ export async function GET() {
     }];
   }));
 
-  return Response.json({ stats });
+  const listings = communityRows.map((item) => ({ ...item, sourceUrl: item.accessModel === "free" ? item.sourceUrl : null }));
+  return Response.json({ stats, listings });
 }
 
 export async function POST(request: Request) {

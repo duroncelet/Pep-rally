@@ -11,40 +11,50 @@ test("ships a clear build-and-marketplace homepage", async () => {
   ]);
 
   assert.match(layout, /Pep Rally/);
-  assert.match(page, /BUILD, TEST \+ SELL EVERYDAY MINI-APPS/);
-  assert.match(page, /Build or upload a Rally/);
+  assert.match(page, /THE MARKETPLACE FOR EVERYDAY MINI-APPS/);
+  assert.match(page, /Sell something you made/);
   assert.match(page, /THE OUTCOME/);
-  assert.match(page, /FREE CASE STUDIES/);
+  assert.match(page, /FREE PEP RALLY ORIGINALS/);
   assert.doesNotMatch(page, /Get the Blueprint · \$18|test checkout/i);
   assert.match(page, /A usable mini-app/);
   assert.match(page, /Not just a file/);
   assert.match(page, /bachelorette-pool\.jpg/);
   assert.match(page, /lush-garden\.jpg/);
-  assert.doesNotMatch(page, /moat|creator|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
-  assert.match(page, /Upload what you made/);
-  assert.match(page, /THE PEP RALLY CONNECTION LAYER/);
+  assert.doesNotMatch(page, /moat|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
+  assert.match(page, /THE MARKETPLACE/);
+  assert.match(page, /Small apps\. Real outcomes/);
   assert.match(page, /PEP RALLY FAQ/);
-  assert.match(page, /They are free case studies and marketing examples/);
-  assert.match(builder, /BUILD INSIDE PEP RALLY/);
+  assert.match(page, /free Pep Rally Originals/);
+  assert.match(builder, /MAKE A RALLY/);
+  assert.match(builder, /Upload or link your mini-app/);
+  assert.match(builder, /Publish to marketplace/);
+  assert.match(builder, /MY RALLY STUDIO/);
   assert.match(builder, /Take payments/);
   assert.match(builder, /Send text messages/);
   assert.match(builder, /Use live weather/);
-  assert.match(builder, /Partner access needed/);
+  assert.match(builder, /Available by request/);
   assert.match(css, /\.consumer-home/);
   assert.match(css, /\.product-grid/);
   assert.match(css, /\.build-workbench/);
 });
 
 test("includes durable review storage and deployable assets", async () => {
-  const [schema, route, migration] = await Promise.all([
+  const [schema, route, migration, creatorRoute, creatorMigration] = await Promise.all([
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/marketplace/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../drizzle/0004_light_lucky_pierre.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/creator-apps/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0007_icy_yellowjacket.sql", import.meta.url), "utf8"),
   ]);
 
   assert.match(schema, /rallyReviews/);
   assert.match(route, /Use or save this Rally before reviewing it/);
   assert.match(migration, /CREATE TABLE `rally_reviews`/);
+  assert.match(route, /creatorApps/);
+  assert.match(route, /published/);
+  assert.match(creatorRoute, /export async function PATCH/);
+  assert.match(creatorRoute, /publish/);
+  assert.match(creatorMigration, /creator_name/);
   await Promise.all([
     access(new URL("../public/rallies/bachelorette-pool.jpg", import.meta.url)),
     access(new URL("../public/rallies/lush-garden.jpg", import.meta.url)),
@@ -94,7 +104,7 @@ test("shows honest, testable connection readiness", async () => {
   assert.match(route, /OPENAI_API_KEY/);
   assert.match(route, /Boolean\(env\.DB\)/);
   assert.match(route, /Boolean\(env\.ASSETS\)/);
-  assert.match(builder, /See what is genuinely connected today/);
+  assert.match(builder, /Everything around the mini-app, together/);
   assert.match(page, /Pay → verify → save → unlock/);
   assert.match(checkout, /isStripeTestMode/);
   assert.doesNotMatch(checkout, /test_succeeded/);

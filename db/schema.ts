@@ -32,6 +32,7 @@ export const creatorApps = sqliteTable("creator_apps", {
   id: text("id").primaryKey(),
   creatorUserId: text("creator_user_id").notNull(),
   creatorEmail: text("creator_email").notNull(),
+  creatorName: text("creator_name").notNull().default("Pep Rally maker"),
   name: text("name").notNull(),
   problem: text("problem").notNull(),
   outcome: text("outcome").notNull(),

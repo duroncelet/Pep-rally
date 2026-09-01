@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../db";
-import { purchases, savedRallies } from "../db/schema";
+import { creatorApps, purchases, savedRallies } from "../db/schema";
 
 type StripeSession = {
   id: string;
@@ -26,7 +26,7 @@ async function stripeRequest(secret: string, path: string, init?: RequestInit) {
   return data;
 }
 
-export async function createCheckoutSession(secret: string, input: { purchaseId: string; buyerUserId: string; buyerEmail: string; successUrl: string; cancelUrl: string }) {
+export async function createCheckoutSession(secret: string, input: { purchaseId: string; buyerUserId: string; buyerEmail: string; successUrl: string; cancelUrl: string; title: string; description: string; amountCents: number; toolSlug: string }) {
   const params = new URLSearchParams();
   params.set("mode", "payment");
   params.set("success_url", input.successUrl);
@@ -34,13 +34,13 @@ export async function createCheckoutSession(secret: string, input: { purchaseId:
   params.set("client_reference_id", input.purchaseId);
   params.set("customer_email", input.buyerEmail);
   params.set("line_items[0][price_data][currency]", "usd");
-  params.set("line_items[0][price_data][unit_amount]", "100");
-  params.set("line_items[0][price_data][product_data][name]", "Bachelorette Blueprint · Pep Rally payment proof");
-  params.set("line_items[0][price_data][product_data][description]", "A Stripe test-mode checkout that unlocks a saved executable workspace. No real money moves.");
+  params.set("line_items[0][price_data][unit_amount]", String(input.amountCents));
+  params.set("line_items[0][price_data][product_data][name]", input.title);
+  params.set("line_items[0][price_data][product_data][description]", input.description.slice(0, 500));
   params.set("line_items[0][quantity]", "1");
   params.set("metadata[purchase_id]", input.purchaseId);
   params.set("metadata[buyer_user_id]", input.buyerUserId);
-  params.set("metadata[tool_slug]", "bachelorette-blueprint");
+  params.set("metadata[tool_slug]", input.toolSlug);
   const session = await stripeRequest(secret, "/v1/checkout/sessions", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: params });
   if (!session.id || !session.url) throw new Error("Stripe did not return a hosted Checkout URL");
   return session;
@@ -64,18 +64,29 @@ export async function fulfillCheckoutSession(sessionId: string, expectedUserId?:
   const [purchase] = await db.select().from(purchases).where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, buyerUserId))).limit(1);
   if (!purchase || purchase.stripeSessionId !== session.id || purchase.amountCents !== session.amount_total) throw new Error("Checkout does not match the saved purchase");
   const now = new Date();
+  let title = "My Bachelorette Blueprint";
+  let summary = "Payment verified. Your executable Bachelorette planning workspace is ready.";
+  let accessUrl = "/rally/bachelorette";
+  if (purchase.toolSlug.startsWith("creator-app:")) {
+    const creatorAppId = purchase.toolSlug.slice("creator-app:".length);
+    const [creatorApp] = await db.select().from(creatorApps).where(eq(creatorApps.id, creatorAppId)).limit(1);
+    if (!creatorApp?.sourceUrl || creatorApp.stage !== "published") throw new Error("The purchased Rally is not currently available");
+    title = creatorApp.name;
+    summary = creatorApp.outcome;
+    accessUrl = creatorApp.sourceUrl;
+  }
   await db.insert(savedRallies).values({
     id: `purchase-${purchase.id}`,
     userId: buyerUserId,
     toolSlug: purchase.toolSlug,
-    title: "My Bachelorette Blueprint",
-    inputs: JSON.stringify({ source: "stripe_test_checkout", purchaseId: purchase.id }),
-    summary: "Payment verified. Your executable Bachelorette planning workspace is ready.",
+    title,
+    inputs: JSON.stringify({ source: "stripe_test_checkout", purchaseId: purchase.id, accessUrl }),
+    summary,
     createdAt: now,
     updatedAt: now,
   }).onConflictDoNothing();
   await db.update(purchases).set({ status: "paid_and_unlocked", fulfilledAt: purchase.fulfilledAt || now }).where(eq(purchases.id, purchase.id));
-  return { fulfilled: true, status: "paid", session, purchase };
+  return { fulfilled: true, status: "paid", session, purchase, accessUrl, title };
 }
 
 export async function verifyStripeSignature(payload: string, signatureHeader: string, secret: string) {
