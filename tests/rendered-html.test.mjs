@@ -26,6 +26,8 @@ test("ships a clear build-and-marketplace homepage", async () => {
   assert.match(page, /THE SHELF IS OPEN/);
   assert.doesNotMatch(page, /starter-grid/);
   assert.match(page, /PEP RALLY FAQ/);
+  assert.match(page, /href="#faq">FAQ/);
+  assert.doesNotMatch(page + layout, /useful little app/i);
   assert.match(page, /free Pep Rally Originals/);
   assert.match(builder, /MAKE A RALLY/);
   assert.match(builder, /Upload or link your mini-app/);
