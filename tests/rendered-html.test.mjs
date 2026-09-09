@@ -66,6 +66,13 @@ test("includes durable review storage and deployable assets", async () => {
   ]);
 });
 
+test("offers the product brief as a Markdown download", async () => {
+  const route = await readFile(new URL("../app/api/product-brief/route.ts", import.meta.url), "utf8");
+  assert.ok(route.includes("text/markdown"));
+  assert.ok(route.includes('attachment; filename="Pep-Rally-Product-Brief.md"'));
+  assert.match(route, /The product promise/);
+});
+
 test("ships both executable Rally workspaces", async () => {
   const [bachelorette, garden, weather, gardenHub, schema, migration] = await Promise.all([
     readFile(new URL("../app/rally/bachelorette/page.tsx", import.meta.url), "utf8"),
