@@ -62,6 +62,7 @@ test("includes durable review storage and deployable assets", async () => {
   await Promise.all([
     access(new URL("../public/rallies/bachelorette-pool.jpg", import.meta.url)),
     access(new URL("../public/rallies/lush-garden.jpg", import.meta.url)),
+    access(new URL("../public/downloads/Pep-Rally-Source.zip", import.meta.url)),
     access(new URL("../dist/server/index.js", import.meta.url)),
   ]);
 });
