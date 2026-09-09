@@ -27,6 +27,7 @@ export default function LibraryPage() {
     if (item.inputs?.accessUrl) return item.inputs.accessUrl;
     if (item.toolSlug === "garden-planner") return "/rally/garden";
     if (item.toolSlug === "bachelorette-blueprint") return "/rally/bachelorette";
+    if (item.toolSlug.startsWith("catalog:")) return `/rally/market/${item.toolSlug.slice("catalog:".length)}`;
     return "/#marketplace";
   }
 

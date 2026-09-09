@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { getDb } from "../db";
 import { creatorApps, purchases, savedRallies } from "../db/schema";
+import { findConcept } from "./catalog";
 
 type StripeSession = {
   id: string;
@@ -74,6 +75,12 @@ export async function fulfillCheckoutSession(sessionId: string, expectedUserId?:
     title = creatorApp.name;
     summary = creatorApp.outcome;
     accessUrl = creatorApp.sourceUrl;
+  } else if (purchase.toolSlug.startsWith("catalog:")) {
+    const concept = findConcept(purchase.toolSlug.slice("catalog:".length));
+    if (!concept) throw new Error("The purchased Rally is not currently available");
+    title = concept.title;
+    summary = concept.promise;
+    accessUrl = `/rally/market/${concept.slug}`;
   }
   await db.insert(savedRallies).values({
     id: `purchase-${purchase.id}`,

@@ -12,6 +12,7 @@ export type RallyConcept = {
   href?: string;
   accent: "coral" | "green" | "blue" | "yellow";
   monogram: string;
+  priceCents: number;
   sourceNote?: string;
 };
 
@@ -29,6 +30,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "blue",
     monogram: "NS",
+    priceCents: 1400,
     sourceNote: "Grounded in the official 2026 NCLEX-RN test plan and recurring student workflows: flashcards, practice, rationales, and reviewing missed topics.",
   },
   {
@@ -44,6 +46,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "green",
     monogram: "CR",
+    priceCents: 1200,
   },
   {
     slug: "etsy-profit-pricing-desk",
@@ -58,6 +61,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "coral",
     monogram: "EP",
+    priceCents: 1800,
   },
   {
     slug: "flashcard-shop-studio",
@@ -72,6 +76,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "yellow",
     monogram: "FS",
+    priceCents: 1600,
   },
   {
     slug: "travel-proposal-studio",
@@ -86,6 +91,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "blue",
     monogram: "TP",
+    priceCents: 2400,
   },
   {
     slug: "farmers-market-morning-board",
@@ -100,6 +106,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "green",
     monogram: "FM",
+    priceCents: 1200,
   },
   {
     slug: "iep-meeting-organizer",
@@ -114,6 +121,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "yellow",
     monogram: "IE",
+    priceCents: 1200,
   },
   {
     slug: "roommate-move-out-splitter",
@@ -128,6 +136,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "coral",
     monogram: "RM",
+    priceCents: 900,
   },
   {
     slug: "care-circle-coordinator",
@@ -142,6 +151,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "green",
     monogram: "CC",
+    priceCents: 900,
   },
   {
     slug: "home-project-bid-compare",
@@ -156,6 +166,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "idea",
     accent: "blue",
     monogram: "HB",
+    priceCents: 1800,
   },
 ];
 

@@ -12,23 +12,25 @@ test("ships a clear build-and-marketplace homepage", async () => {
 
   assert.match(layout, /Pep Rally/);
   assert.match(page, /THE MARKETPLACE FOR EVERYDAY MINI-APPS/);
-  assert.match(page, /Sell something you made/);
-  assert.match(page, /WHAT THE CUSTOMER GETS/);
-  assert.match(page, /FREE PEP RALLY ORIGINALS/);
+  assert.match(page, /Make money from what you built/);
+  assert.match(page, /FOR PEOPLE SHOPPING/);
+  assert.match(page, /FREE · READY TO USE/);
   assert.doesNotMatch(page, /Get the Blueprint · \$18|test checkout/i);
   assert.match(page, /The working app/);
-  assert.match(page, /Their saved result/);
+  assert.match(page, /Keep the outcome/);
   assert.match(page, /bachelorette-pool\.jpg/);
   assert.match(page, /lush-garden\.jpg/);
   assert.doesNotMatch(page, /moat|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
-  assert.match(page, /THE MARKETPLACE/);
+  assert.match(page, /SHOP THE MARKETPLACE/);
   assert.match(page, /Small apps\. Real outcomes/);
-  assert.match(page, /THE SHELF IS OPEN/);
+  assert.match(page, /Put it on the shelf/);
   assert.doesNotMatch(page, /starter-grid/);
   assert.match(page, /PEP RALLY FAQ/);
   assert.match(page, /href="#faq">FAQ/);
   assert.doesNotMatch(page + layout, /useful little app/i);
-  assert.match(page, /free Pep Rally Originals/);
+  assert.match(page, /Try a complete Rally/);
+  assert.ok(page.indexOf('id="free"') < page.indexOf('id="marketplace"'));
+  assert.ok(page.indexOf('id="marketplace"') < page.indexOf('id="creators"'));
   assert.match(builder, /MAKE A RALLY/);
   assert.match(builder, /Upload or link your mini-app/);
   assert.match(builder, /Publish to marketplace/);
@@ -162,8 +164,10 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
   assert.match(page, /Why does this prototype use ChatGPT sign-in/);
   for (const idea of ["NCLEX Study Sprint", "Etsy Profit & Pricing Desk", "Flashcard Shop Studio", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
   assert.match(catalog, /official 2026 NCLEX-RN test plan/);
-  assert.match(concept, /This is a researched product direction, not a finished listing/);
-  assert.match(concept, /Build this idea/);
+  assert.match(concept, /PurchaseButton/);
+  assert.match(concept, /Try the working preview/);
+  assert.match(concept, /Build this Rally instead/);
+  assert.doesNotMatch(concept, /Build this idea|Build the product you wish existed/);
   assert.match(product, /What you bring/);
   assert.match(product, /DATA \+ PERMISSIONS/);
   assert.match(product, /Pep Rally buyer promise/);
@@ -179,4 +183,23 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
   assert.match(css, /\.idea-grid/);
   assert.match(css, /\.pdp-hero/);
   assert.match(css, /\.library-grid/);
+});
+
+test("turns marketplace previews into usable, purchasable Rally flows", async () => {
+  const [workspace, purchaseButton, checkout, stripe, library] = await Promise.all([
+    readFile(new URL("../app/rally/market/[slug]/RallyWorkspace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/discover/[slug]/PurchaseButton.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/checkout/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/stripe.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/library/page.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(workspace, /Create my first result/);
+  assert.match(workspace, /Save this workspace/);
+  assert.match(workspace, /YOUR OUTCOME/);
+  assert.match(purchaseButton, /Get this Rally/);
+  assert.match(checkout, /conceptSlug/);
+  assert.match(checkout, /catalog:/);
+  assert.match(stripe, /rally\/market/);
+  assert.match(library, /catalog:/);
 });
