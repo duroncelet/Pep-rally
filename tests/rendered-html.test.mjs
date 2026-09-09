@@ -73,6 +73,15 @@ test("offers the product brief as a Markdown download", async () => {
   assert.match(route, /The product promise/);
 });
 
+test("offers a code-inclusive technical handoff", async () => {
+  const route = await readFile(new URL("../app/api/technical-handoff/route.ts", import.meta.url), "utf8");
+  assert.ok(route.includes("text/markdown"));
+  assert.ok(route.includes('attachment; filename="Pep-Rally-Technical-Handoff.md"'));
+  assert.match(route, /Stripe checkout/);
+  assert.match(route, /Core outcome contract/);
+  assert.match(route, /```tsx/);
+});
+
 test("ships both executable Rally workspaces", async () => {
   const [bachelorette, garden, weather, gardenHub, schema, migration] = await Promise.all([
     readFile(new URL("../app/rally/bachelorette/page.tsx", import.meta.url), "utf8"),
