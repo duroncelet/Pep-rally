@@ -77,13 +77,14 @@ test("offers the product brief as a Markdown download", async () => {
 });
 
 test("ships a usable sign-in product and downloadable outcomes", async () => {
-  const [home, demo, bachelorette, garden, workspace, helper] = await Promise.all([
+  const [home, demo, bachelorette, garden, workspace, helper, customization] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/demo/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/bachelorette/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/garden/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/market/[slug]/RallyWorkspace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/download-markdown.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/customization-kit.ts", import.meta.url), "utf8"),
   ]);
 
   assert.doesNotMatch(home, /href="\/demo">Demo/);
@@ -95,6 +96,10 @@ test("ships a usable sign-in product and downloadable outcomes", async () => {
   assert.match(bachelorette, /Money snapshot/);
   assert.match(garden, /weather-aware actions/);
   assert.match(helper, /URL\.createObjectURL/);
+  for (const tool of ["ChatGPT", "Claude", "Gemini", "Codex", "Cursor", "Replit Agent"]) assert.match(customization, new RegExp(tool));
+  assert.match(customization, /Pep Rally source ZIP/);
+  assert.match(customization, /Not the executable app code by itself/);
+  assert.match(customization, /Never paste API keys or payment credentials/);
 });
 
 test("offers a decision-ready product requirements document", async () => {
