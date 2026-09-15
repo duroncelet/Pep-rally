@@ -3483,6 +3483,8 @@ footer > span {
 
 .demo-page { min-height: 100vh; background: var(--cream); }
 .demo-page > nav { height: 76px; padding: 0 7vw; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--ink); background: var(--cream); }
+.demo-doc-links { display: flex; gap: 18px; align-items: center; }
+.demo-doc-links > a:first-child { color: inherit; font-size: 10px; font-weight: 900; }
 .demo-page > header { padding: 78px 7vw 68px; background: var(--yellow); border-bottom: 2px solid var(--ink); }
 .demo-page > header h1 { max-width: 1000px; margin: 11px 0 20px; font-size: clamp(58px, 8vw, 112px); line-height: .86; letter-spacing: -5px; }
 .demo-page > header h1 em { color: #cf4f65; }
@@ -3656,6 +3658,7 @@ footer > span {
   .demo-page > header h1 { letter-spacing: -3px; }
   .demo-route article { grid-template-columns: 55px 1fr; }
   .demo-route article > a { grid-column: 1 / -1; }
+  .demo-doc-links > a:first-child { display: none; }
   .ready-divider { align-items: start; flex-direction: column; }
   .concept-hero h1 { font-size: 54px; }
   .pdp-photo img { height: 400px; }

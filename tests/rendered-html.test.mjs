@@ -99,6 +99,21 @@ test("ships a guided demo and downloadable outcomes", async () => {
   assert.match(helper, /URL\.createObjectURL/);
 });
 
+test("offers a decision-ready product requirements document", async () => {
+  const [prd, route, demo] = await Promise.all([
+    readFile(new URL("../Pep-Rally-PRD.md", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/prd/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/demo/page.tsx", import.meta.url), "utf8"),
+  ]);
+
+  for (const section of ["Executive summary", "Core journeys", "Minimum sellable beta", "Delivery and entitlement model", "Creator economics and milestones", "Success metrics", "Acceptance criteria for first real transaction", "Open decisions"]) assert.match(prd, new RegExp(section));
+  assert.match(prd, /The app is the product/);
+  assert.match(prd, /Completed buyer outcomes per week/);
+  assert.match(route, /text\/markdown/);
+  assert.match(route, /Pep-Rally-PRD-v0\.1\.md/);
+  assert.match(demo, /Download PRD \.md/);
+});
+
 test("offers a code-inclusive technical handoff", async () => {
   const route = await readFile(new URL("../app/api/technical-handoff/route.ts", import.meta.url), "utf8");
   assert.ok(route.includes("text/markdown"));
