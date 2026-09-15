@@ -70,7 +70,10 @@ export default function BacheloretteRally() {
   useEffect(() => {
     (async () => {
       const response = await fetch("/api/party-hub"); const data = await response.json();
-      if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
+      if (response.status === 401 && data.signIn) {
+        if (["localhost", "127.0.0.1"].includes(window.location.hostname)) { setLoading(false); return; }
+        window.location.href = data.signIn; return;
+      }
       const plan = data.plan;
       if (plan?.version === 4 || plan?.version === 3) {
         setBrideName(plan.brideName); setCity(plan.city); setStartDate(plan.startDate); setEndDate(plan.endDate); setVibe(plan.vibe); setBrideTraits(plan.brideTraits); setMustAvoid(plan.mustAvoid);
@@ -163,7 +166,7 @@ export default function BacheloretteRally() {
   const owners = guests.length ? guests : firstGuests;
 
   return <main className="rally-room bach-room">
-    <header className="rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><small>BACHELORETTE BLUEPRINT · EXECUTABLE FULL WORKSPACE</small><h1>{partyName}</h1><p>{city} · {confirmed} confirmed · ${groupBudget.toLocaleString()} working budget</p></div><div className="rally-header-actions"><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button></div></header>
+    <header className="rally-header photo-rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div className="rally-header-copy"><small>BACHELORETTE BLUEPRINT · EXECUTABLE FULL WORKSPACE</small><h1>{partyName}</h1><p>{city} · {confirmed} confirmed · ${groupBudget.toLocaleString()} working budget</p></div><figure className="rally-cover"><img src="/rallies/bachelorette-pool.jpg" alt="Friends relaxing together beside a sunny pool"/><figcaption><b>Free Rally</b><span>A complete party-planning workspace</span></figcaption></figure><div className="rally-header-actions"><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button></div></header>
     <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
 
     {tab === "overview" && <section className="rally-content"><div className="rally-stats"><article><small>CONFIRMED</small><b>{confirmed}/{guests.length}</b><span>guests</span></article><article><small>COLLECTED</small><b>${collected.toLocaleString()}</b><span>${outstanding.toLocaleString()} remaining</span></article><article><small>DECISIONS</small><b>{decisionsNeeded}</b><span>need attention</span></article><article><small>PLANNED</small><b>${expenseTotal.toLocaleString()}</b><span>${Math.max(0, groupBudget - expenseTotal).toLocaleString()} cushion</span></article></div><div className="workspace-command-grid"><article className="command-main"><small>THE BRIEF</small><h2>{vibe}</h2><p>{brideTraits}</p><span>Skip: {mustAvoid}</span><button onClick={() => setTab("setup")}>Edit the brief →</button></article><article><small>NEXT RESERVATION</small><h3>{venues.find((venue) => venue.status !== "Reserved")?.name || "Add your first venue"}</h3><button onClick={() => setTab("places")}>Plan places →</button></article><article><small>GROUP UPDATE</small><p>{updateText}</p><div className="rally-actions"><a href={`mailto:?subject=${encodeURIComponent(partyName)}&body=${encodeURIComponent(updateText)}`}>Email</a><a href={`sms:?&body=${encodeURIComponent(updateText)}`}>Text</a></div></article><article><small>CHAT</small><h3>{messages.length} message{messages.length === 1 ? "" : "s"}</h3><p>Keep durable decisions beside the plan.</p><button onClick={() => setTab("chat")}>Open chat →</button></article></div></section>}

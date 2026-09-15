@@ -48,7 +48,10 @@ export default function GardenRally() {
     (async () => {
       const response = await fetch("/api/garden-hub");
       const data = await response.json();
-      if (response.status === 401 && data.signIn) { window.location.href = data.signIn; return; }
+      if (response.status === 401 && data.signIn) {
+        if (["localhost", "127.0.0.1"].includes(window.location.hostname)) { setLoading(false); return; }
+        window.location.href = data.signIn; return;
+      }
       if (data.plan?.version === 1) {
         const plan = data.plan;
         setLocation(plan.location); setSpace(plan.space); setBedCount(plan.bedCount); setLength(plan.length); setWidth(plan.width);
@@ -120,9 +123,10 @@ export default function GardenRally() {
   const nav = ["setup", "plan", "layout", "weather", "tasks", "journal"] as const;
 
   return <main className="rally-room garden-room">
-    <header className="rally-header garden-header">
+    <header className="rally-header photo-rally-header garden-header">
       <a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a>
-      <div><small>THE LITTLE GARDEN PLANNER · EXECUTABLE WORKSPACE</small><h1>Your garden, growing.</h1><p>{space} · {totalArea} {space === "Pots / containers" ? "containers" : "sq ft"} · {location}</p></div>
+      <div className="rally-header-copy"><small>THE LITTLE GARDEN PLANNER · EXECUTABLE WORKSPACE</small><h1>Your garden, growing.</h1><p>{space} · {totalArea} {space === "Pots / containers" ? "containers" : "sq ft"} · {location}</p></div>
+      <figure className="rally-cover"><img src="/rallies/lush-garden.jpg" alt="A lush edible garden with raised beds, herbs, flowers, and containers"/><figcaption><b>Free Rally</b><span>From your space and weather to a growing plan</span></figcaption></figure>
       <div className="rally-header-actions"><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button></div>
     </header>
     <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>

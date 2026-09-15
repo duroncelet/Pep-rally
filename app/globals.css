@@ -5,6 +5,7 @@
   gap: 9px;
   margin: 25px 0;
 }
+
 .source-paths button {
   min-height: 125px;
   border: 1.5px solid #1f2440;
@@ -1230,6 +1231,63 @@
 .rally-header p {
   margin: 0;
   font-size: 12px;
+}
+.photo-rally-header {
+  grid-template-columns: auto minmax(260px, 1fr) minmax(230px, 330px) auto;
+  gap: 24px;
+  min-height: 235px;
+  padding-block: 20px;
+}
+.photo-rally-header .rally-header-copy {
+  min-width: 0;
+}
+.photo-rally-header .rally-header-copy h1 {
+  max-width: 720px;
+}
+.rally-cover {
+  position: relative;
+  height: 178px;
+  margin: 0;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 15px;
+  background: white;
+  box-shadow: 5px 6px 0 var(--ink);
+  transform: rotate(1deg);
+}
+.rally-cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.rally-cover figcaption {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  left: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: rgba(251, 247, 238, .94);
+  font-size: 8px;
+  line-height: 1.25;
+}
+.rally-cover figcaption b {
+  flex: 0 0 auto;
+  font-family: "Fraunces";
+  font-size: 17px;
+}
+.rally-cover figcaption span {
+  text-align: right;
+}
+.photo-rally-header .rally-header-actions {
+  flex-direction: column;
+  align-items: stretch;
 }
 .rally-nav {
   position: sticky;
@@ -3724,5 +3782,38 @@ footer > span {
   }
   footer div {
     width: 100%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .photo-rally-header {
+    grid-template-columns: auto minmax(280px, 1fr) minmax(220px, 310px);
+  }
+  .photo-rally-header .rally-header-actions {
+    grid-column: 2 / -1;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 780px) {
+  .photo-rally-header {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    padding: 22px 5vw 26px;
+  }
+  .photo-rally-header .rally-header-copy,
+  .photo-rally-header .rally-cover,
+  .photo-rally-header .rally-header-actions {
+    grid-column: auto;
+  }
+  .rally-cover {
+    width: 100%;
+    height: 190px;
+    transform: none;
+  }
+  .photo-rally-header .rally-header-actions {
+    flex-direction: row;
   }
 }
