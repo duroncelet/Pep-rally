@@ -42,3 +42,16 @@ export async function PATCH(request: Request) {
   await db.update(creatorApps).set({ stage, updatedAt: new Date() }).where(eq(creatorApps.id, app.id));
   return Response.json({ ok: true, stage });
 }
+
+export async function DELETE(request: Request) {
+  const user = await getChatGPTUser();
+  if (!user) return Response.json({ error: "Sign in required", signIn: chatGPTSignInPath("/build") }, { status: 401 });
+  const body = await request.json() as { id?: string };
+  if (!body.id) return Response.json({ error: "Choose a Rally to delete" }, { status: 400 });
+  const db = getDb();
+  const [app] = await db.select().from(creatorApps).where(and(eq(creatorApps.id, body.id), eq(creatorApps.creatorUserId, user.userId))).limit(1);
+  if (!app) return Response.json({ error: "Rally not found" }, { status: 404 });
+  if (app.stage === "published") return Response.json({ error: "Remove this Rally from the marketplace before deleting it." }, { status: 409 });
+  await db.delete(creatorApps).where(and(eq(creatorApps.id, body.id), eq(creatorApps.creatorUserId, user.userId)));
+  return Response.json({ ok: true });
+}
