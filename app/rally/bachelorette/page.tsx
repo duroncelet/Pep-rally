@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../download-markdown";
+import { buildCustomizationKit } from "../../customization-kit";
 
 type Guest = { id: string; name: string; contact: string; rsvp: "Yes" | "Maybe" | "No"; paid: number; needs: string };
 type Task = { id: string; text: string; owner: string; done: boolean; due: string };
@@ -125,6 +126,19 @@ export default function BacheloretteRally() {
     downloadMarkdown(`${safeFileName(partyName)}-plan.md`, markdown);
   }
 
+  function downloadCustomization() {
+    const markdown = buildCustomizationKit({
+      title: "The Bachelorette Blueprint",
+      promise: "Turn a group’s people, budgets, preferences, places, and responsibilities into a weekend plan everyone can act on.",
+      audience: "A bachelorette organizer coordinating a real group trip",
+      inputs: ["Destination and dates", "Guest list and needs", "Private budget comfort", "Bride’s vibe and boundaries", "Lodging, places, and expenses"],
+      outputs: ["A realistic shared budget", "A lodging ceiling and shortlist", "A day-by-day itinerary", "Assignments, payment requests, group updates, and a portable plan"],
+      guardrail: "Guests decide what they can contribute. The organizer reviews every message, booking, purchase, and payment request.",
+      currentAnswers: { "Destination and dates": `${city} · ${startDate || "dates undecided"} to ${endDate || "dates undecided"}`, "Guest list and needs": guests.map((guest) => `${guest.name}: ${guest.rsvp}${guest.needs ? `, ${guest.needs}` : ""}`).join("; "), "Private budget comfort": budgetResponses.length ? `${budgetResponses.length} replies; $${medianContribution} median` : "Not collected yet", "Bride’s vibe and boundaries": `${vibe}; ${brideTraits}; avoid ${mustAvoid}`, "Lodging, places, and expenses": `${stayOptions.length} stays; ${venues.length} places; $${expenseTotal} planned` },
+    });
+    downloadMarkdown("bachelorette-blueprint-customization-kit.md", markdown);
+  }
+
   function makeProviderLink() {
     const handle = paymentHandle.trim().replace(/^[@$]/, "");
     if (!handle) { setPaymentStatus("Add the organizer’s provider handle or paste an existing payment link."); return; }
@@ -149,7 +163,7 @@ export default function BacheloretteRally() {
   const owners = guests.length ? guests : firstGuests;
 
   return <main className="rally-room bach-room">
-    <header className="rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><small>BACHELORETTE BLUEPRINT · EXECUTABLE FULL WORKSPACE</small><h1>{partyName}</h1><p>{city} · {confirmed} confirmed · ${groupBudget.toLocaleString()} working budget</p></div><div className="rally-header-actions"><button onClick={downloadOutcome}>Download outcome .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button></div></header>
+    <header className="rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><small>BACHELORETTE BLUEPRINT · EXECUTABLE FULL WORKSPACE</small><h1>{partyName}</h1><p>{city} · {confirmed} confirmed · ${groupBudget.toLocaleString()} working budget</p></div><div className="rally-header-actions"><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button></div></header>
     <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
 
     {tab === "overview" && <section className="rally-content"><div className="rally-stats"><article><small>CONFIRMED</small><b>{confirmed}/{guests.length}</b><span>guests</span></article><article><small>COLLECTED</small><b>${collected.toLocaleString()}</b><span>${outstanding.toLocaleString()} remaining</span></article><article><small>DECISIONS</small><b>{decisionsNeeded}</b><span>need attention</span></article><article><small>PLANNED</small><b>${expenseTotal.toLocaleString()}</b><span>${Math.max(0, groupBudget - expenseTotal).toLocaleString()} cushion</span></article></div><div className="workspace-command-grid"><article className="command-main"><small>THE BRIEF</small><h2>{vibe}</h2><p>{brideTraits}</p><span>Skip: {mustAvoid}</span><button onClick={() => setTab("setup")}>Edit the brief →</button></article><article><small>NEXT RESERVATION</small><h3>{venues.find((venue) => venue.status !== "Reserved")?.name || "Add your first venue"}</h3><button onClick={() => setTab("places")}>Plan places →</button></article><article><small>GROUP UPDATE</small><p>{updateText}</p><div className="rally-actions"><a href={`mailto:?subject=${encodeURIComponent(partyName)}&body=${encodeURIComponent(updateText)}`}>Email</a><a href={`sms:?&body=${encodeURIComponent(updateText)}`}>Text</a></div></article><article><small>CHAT</small><h3>{messages.length} message{messages.length === 1 ? "" : "s"}</h3><p>Keep durable decisions beside the plan.</p><button onClick={() => setTab("chat")}>Open chat →</button></article></div></section>}

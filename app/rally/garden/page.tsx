@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../download-markdown";
+import { buildCustomizationKit } from "../../customization-kit";
 
 type GardenTask = { id: string; text: string; done: boolean; timing: string };
 type JournalEntry = { id: string; date: string; note: string };
@@ -102,6 +103,19 @@ export default function GardenRally() {
     downloadMarkdown(`${safeFileName(location)}-garden-plan.md`, markdown);
   }
 
+  function downloadCustomization() {
+    const markdown = buildCustomizationKit({
+      title: "The Little Garden Planner",
+      promise: "Turn a gardener’s real space, light, location, watering setup, and crops into a maintainable layout and current care plan.",
+      audience: "A home gardener planning rows, raised beds, pots, or an indoor growing space",
+      inputs: ["Location", "Growing setup and dimensions", "Sun and watering", "Experience and goal", "Crops"],
+      outputs: ["A prioritized crop plan", "A visual growing layout", "Live weather-aware actions", "A care board, journal, and portable plan"],
+      guardrail: "The gardener confirms planting dates, varieties, soil safety, pests, and local advice with a trusted extension or nursery.",
+      currentAnswers: { Location: location, "Growing setup and dimensions": `${space}; ${totalArea} ${space === "Pots / containers" ? "containers" : "sq ft"}`, "Sun and watering": `${sun}; ${watering}`, "Experience and goal": `${experience}; ${goal}`, Crops: crops.join(", ") },
+    });
+    downloadMarkdown(`${safeFileName(location)}-garden-customization-kit.md`, markdown);
+  }
+
   if (loading) return <main className="rally-loading">Opening your garden…</main>;
   const nav = ["setup", "plan", "layout", "weather", "tasks", "journal"] as const;
 
@@ -109,7 +123,7 @@ export default function GardenRally() {
     <header className="rally-header garden-header">
       <a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a>
       <div><small>THE LITTLE GARDEN PLANNER · EXECUTABLE WORKSPACE</small><h1>Your garden, growing.</h1><p>{space} · {totalArea} {space === "Pots / containers" ? "containers" : "sq ft"} · {location}</p></div>
-      <div className="rally-header-actions"><button onClick={downloadOutcome}>Download outcome .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button></div>
+      <div className="rally-header-actions"><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button></div>
     </header>
     <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
 

@@ -90,7 +90,8 @@ test("ships a usable sign-in product and downloadable outcomes", async () => {
   assert.match(home, /Sign in \/ My Rallies/);
   assert.match(home, /Why do I sign in/);
   assert.match(demo, /redirect\("\/"\)/);
-  for (const source of [bachelorette, garden, workspace]) assert.match(source, /Download outcome \.md/);
+  for (const source of [bachelorette, garden, workspace]) assert.match(source, /Customize this Rally \.md|Download customization prompts \.md/);
+  for (const source of [bachelorette, garden, workspace]) assert.match(source, /Download my (plan|outcome) \.md/);
   assert.match(bachelorette, /Money snapshot/);
   assert.match(garden, /weather-aware actions/);
   assert.match(helper, /URL\.createObjectURL/);
@@ -219,17 +220,28 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
 });
 
 test("turns marketplace previews into usable, purchasable Rally flows", async () => {
-  const [workspace, purchaseButton, checkout, stripe, library] = await Promise.all([
+  const [home, catalog, workspace, results, customization, purchaseButton, checkout, stripe, library] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/catalog.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/market/[slug]/RallyWorkspace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/rally-results.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/customization-kit.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/discover/[slug]/PurchaseButton.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/checkout/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/stripe.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/library/page.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(workspace, /Create my first result/);
-  assert.match(workspace, /Save this workspace/);
+  assert.match(home, /WORKING RALLIES · OPEN ONE/);
+  assert.match(home, /href=\{`\/rally\/market\/\$\{rally\.slug\}`\}/);
+  assert.doesNotMatch(catalog, /status: "idea"/);
+  assert.match(workspace, /Create my working result/);
+  assert.match(workspace, /Save to My Rallies/);
   assert.match(workspace, /YOUR OUTCOME/);
+  assert.match(workspace, /createWorkingResult/);
+  for (const slug of ["nclex-study-sprint", "etsy-profit-pricing-desk", "travel-proposal-studio", "farmers-market-morning-board", "iep-meeting-organizer", "roommate-move-out-splitter", "care-circle-coordinator", "home-project-bid-compare"]) assert.match(results, new RegExp(slug));
+  assert.match(customization, /Prompt 1 — Change it for my exact situation/);
+  assert.match(customization, /Prompt 4 — Test the customer outcome/);
   assert.match(purchaseButton, /Get this Rally/);
   assert.match(checkout, /conceptSlug/);
   assert.match(checkout, /catalog:/);
