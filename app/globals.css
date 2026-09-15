@@ -3478,6 +3478,35 @@ footer > span {
 .review-layout select, .review-layout textarea { padding: 10px; border: 1px solid var(--ink); border-radius: 7px; background: white; font: inherit; }
 .review-layout textarea { min-height: 85px; resize: vertical; }
 
+.rally-header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+.rally-header-actions > button:first-child { padding: 11px 13px; border: 1.5px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 9px; font-weight: 900; cursor: pointer; }
+
+.demo-page { min-height: 100vh; background: var(--cream); }
+.demo-page > nav { height: 76px; padding: 0 7vw; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--ink); background: var(--cream); }
+.demo-page > header { padding: 78px 7vw 68px; background: var(--yellow); border-bottom: 2px solid var(--ink); }
+.demo-page > header h1 { max-width: 1000px; margin: 11px 0 20px; font-size: clamp(58px, 8vw, 112px); line-height: .86; letter-spacing: -5px; }
+.demo-page > header h1 em { color: #cf4f65; }
+.demo-page > header > p { max-width: 760px; color: #575148; font-size: 17px; line-height: 1.65; }
+.demo-promise { max-width: 980px; margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.demo-promise span { padding: 15px; border: 1.5px solid var(--ink); border-radius: 9px; background: rgba(255,255,255,.7); font-size: 10px; line-height: 1.5; }
+.demo-promise b { display: block; font-family: "Fraunces"; font-size: 20px; }
+.demo-route { padding: 80px 7vw; }
+.demo-route-head { display: flex; justify-content: space-between; gap: 50px; align-items: end; margin-bottom: 28px; }
+.demo-route-head h2, .demo-truth h2 { margin: 8px 0; font-size: clamp(43px, 5vw, 68px); }
+.demo-route-head > p { max-width: 520px; color: #666; line-height: 1.55; }
+.demo-route article { padding: 18px 0; display: grid; grid-template-columns: 70px 1fr auto; gap: 24px; align-items: center; border-top: 1px solid var(--line); }
+.demo-route article:last-child { border-bottom: 1px solid var(--line); }
+.demo-number { width: 54px; height: 54px; display: grid; place-items: center; border: 2px solid var(--ink); border-radius: 14px; background: #f7c9d8; box-shadow: 3px 4px 0 var(--ink); font-family: "Fraunces"; font-size: 20px; transform: rotate(-2deg); }
+.demo-route article small { color: #8b776c; }
+.demo-route article h3 { margin: 5px 0; font-size: 27px; }
+.demo-route article p { max-width: 760px; margin: 0; color: #666; line-height: 1.55; }
+.demo-truth { padding: 80px 7vw; display: grid; grid-template-columns: 1fr .65fr; gap: 8vw; align-items: center; background: #e8f5dc; border-top: 2px solid var(--ink); }
+.demo-truth > div > p { max-width: 760px; color: #596354; font-size: 16px; line-height: 1.7; }
+.demo-truth aside { padding: 24px; border: 2px solid var(--ink); border-radius: 14px; background: white; box-shadow: 6px 7px 0 var(--ink); }
+.demo-truth aside b { font-family: "Fraunces"; font-size: 27px; }
+.demo-truth aside p { color: #666; line-height: 1.6; }
+.demo-truth aside a { color: inherit; font-size: 10px; font-weight: 900; }
+
 .library-page > header { padding: 82px 7vw 55px; background: var(--yellow); border-bottom: 2px solid var(--ink); }
 .library-page > header h1 { max-width: 950px; margin: 12px 0; font-size: clamp(55px, 7vw, 95px); }
 .library-page > header p { max-width: 760px; font-size: 16px; line-height: 1.6; }
@@ -3544,7 +3573,10 @@ footer > span {
     grid-template-columns: 1fr;
   }
   .creator-path,
-  .market-workspace-grid { grid-template-columns: 1fr; }
+  .market-workspace-grid,
+  .demo-truth { grid-template-columns: 1fr; }
+  .demo-promise { grid-template-columns: 1fr; }
+  .demo-route-head { align-items: start; flex-direction: column; gap: 12px; }
   .build-progress { display: none; }
   .live-build-preview { position: static; }
   .shop-hero-images { min-height: 460px; }
@@ -3619,6 +3651,11 @@ footer > span {
   .pdp-outcome > div,
   .library-grid,
   .library-promise { grid-template-columns: 1fr; }
+  .rally-header-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+  .demo-page > header, .demo-route, .demo-truth { padding-left: 22px; padding-right: 22px; }
+  .demo-page > header h1 { letter-spacing: -3px; }
+  .demo-route article { grid-template-columns: 55px 1fr; }
+  .demo-route article > a { grid-column: 1 / -1; }
   .ready-divider { align-items: start; flex-direction: column; }
   .concept-hero h1 { font-size: 54px; }
   .pdp-photo img { height: 400px; }

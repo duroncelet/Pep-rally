@@ -76,6 +76,29 @@ test("offers the product brief as a Markdown download", async () => {
   assert.match(route, /The product promise/);
 });
 
+test("ships a guided demo and downloadable outcomes", async () => {
+  const [home, demo, demoRoute, bachelorette, garden, workspace, helper] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/demo/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/demo-brief/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/rally/bachelorette/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/rally/garden/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/rally/market/[slug]/RallyWorkspace.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/download-markdown.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(home, /href="\/demo">Demo/);
+  assert.match(demo, /Five minutes/);
+  assert.match(demo, /Two real outcomes/);
+  assert.match(demo, /Run the Bachelorette Rally/);
+  assert.match(demoRoute, /text\/markdown/);
+  assert.match(demoRoute, /Pep-Rally-Demo-Brief\.md/);
+  for (const source of [bachelorette, garden, workspace]) assert.match(source, /Download outcome \.md/);
+  assert.match(bachelorette, /Money snapshot/);
+  assert.match(garden, /weather-aware actions/);
+  assert.match(helper, /URL\.createObjectURL/);
+});
+
 test("offers a code-inclusive technical handoff", async () => {
   const route = await readFile(new URL("../app/api/technical-handoff/route.ts", import.meta.url), "utf8");
   assert.ok(route.includes("text/markdown"));
