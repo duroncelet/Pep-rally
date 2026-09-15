@@ -192,6 +192,8 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
 
   assert.match(page, /Search by problem or person/);
   assert.match(page, /THE PEP RALLY BUYER PROMISE/);
+  for (const promise of ["Try it first", "Know what connects", "You stay in control"]) assert.match(page, new RegExp(promise));
+  assert.doesNotMatch(page, /Try the outcome|No mystery|Human say/);
   assert.match(page, /WHAT COUNTS AS A RALLY/);
   assert.match(page, /Open it\. Finish something\. Keep the result/);
   assert.match(page, /The working app/);
