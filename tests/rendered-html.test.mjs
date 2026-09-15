@@ -76,23 +76,20 @@ test("offers the product brief as a Markdown download", async () => {
   assert.match(route, /The product promise/);
 });
 
-test("ships a guided demo and downloadable outcomes", async () => {
-  const [home, demo, demoRoute, bachelorette, garden, workspace, helper] = await Promise.all([
+test("ships a usable sign-in product and downloadable outcomes", async () => {
+  const [home, demo, bachelorette, garden, workspace, helper] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/demo/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/demo-brief/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/bachelorette/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/garden/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/market/[slug]/RallyWorkspace.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/download-markdown.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.match(home, /href="\/demo">Demo/);
-  assert.match(demo, /Five minutes/);
-  assert.match(demo, /Two real outcomes/);
-  assert.match(demo, /Run the Bachelorette Rally/);
-  assert.match(demoRoute, /text\/markdown/);
-  assert.match(demoRoute, /Pep-Rally-Demo-Brief\.md/);
+  assert.doesNotMatch(home, /href="\/demo">Demo/);
+  assert.match(home, /Sign in \/ My Rallies/);
+  assert.match(home, /Why do I sign in/);
+  assert.match(demo, /redirect\("\/"\)/);
   for (const source of [bachelorette, garden, workspace]) assert.match(source, /Download outcome \.md/);
   assert.match(bachelorette, /Money snapshot/);
   assert.match(garden, /weather-aware actions/);
@@ -100,10 +97,9 @@ test("ships a guided demo and downloadable outcomes", async () => {
 });
 
 test("offers a decision-ready product requirements document", async () => {
-  const [prd, route, demo] = await Promise.all([
+  const [prd, route] = await Promise.all([
     readFile(new URL("../Pep-Rally-PRD.md", import.meta.url), "utf8"),
     readFile(new URL("../app/api/prd/route.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/demo/page.tsx", import.meta.url), "utf8"),
   ]);
 
   for (const section of ["Executive summary", "Core journeys", "Minimum sellable beta", "Delivery and entitlement model", "Creator economics and milestones", "Success metrics", "Acceptance criteria for first real transaction", "Open decisions"]) assert.match(prd, new RegExp(section));
@@ -111,7 +107,6 @@ test("offers a decision-ready product requirements document", async () => {
   assert.match(prd, /Completed buyer outcomes per week/);
   assert.match(route, /text\/markdown/);
   assert.match(route, /Pep-Rally-PRD-v0\.1\.md/);
-  assert.match(demo, /Download PRD \.md/);
 });
 
 test("offers a code-inclusive technical handoff", async () => {
@@ -199,7 +194,7 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
   assert.match(page, /WHAT COUNTS AS A RALLY/);
   assert.match(page, /Open it\. Finish something\. Keep the result/);
   assert.match(page, /The working app/);
-  assert.match(page, /Why does this prototype use ChatGPT sign-in/);
+  assert.match(page, /Why do I sign in/);
   for (const idea of ["NCLEX Study Sprint", "Etsy Profit & Pricing Desk", "Flashcard Shop Studio", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
   assert.match(catalog, /official 2026 NCLEX-RN test plan/);
   assert.match(concept, /PurchaseButton/);
