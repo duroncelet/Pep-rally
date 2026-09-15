@@ -3337,6 +3337,7 @@ footer > span {
 .connection-section > header h2 { font-size: clamp(44px, 5.5vw, 72px); letter-spacing: -3px; margin: 10px 0 14px; }
 .connection-section > header p { color: #666; font-size: 14px; line-height: 1.6; }
 .connection-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; }
+.connection-card-grid.consumer-connection-grid { grid-template-columns: repeat(5, 1fr); }
 .connection-card-grid article,
 .account-connection-list article { background: white; border: 1.5px solid var(--ink); border-radius: 12px; padding: 18px; box-shadow: 3px 4px 0 var(--ink); }
 .connection-card-grid article > div,
@@ -3425,7 +3426,8 @@ footer > span {
 .market-workspace > header small { color: var(--coral); font-size: 9px; font-weight: 900; letter-spacing: 1.3px; }
 .market-workspace > header h1 { margin: 12px 0; font-size: clamp(54px, 7vw, 96px); line-height: .92; }
 .market-workspace > header p { max-width: 850px; color: #5b5650; font-size: 16px; line-height: 1.6; }
-.customization-download { margin-top: 13px; padding: 11px 14px; border: 1.5px solid var(--ink); border-radius: 999px; background: white; box-shadow: 3px 4px 0 var(--ink); font: inherit; font-size: 9px; font-weight: 900; cursor: pointer; }
+.customization-download { display: inline-block; width: fit-content; margin-top: 13px; padding: 11px 14px; border: 1.5px solid var(--ink); border-radius: 999px; background: white; color: var(--ink); box-shadow: 3px 4px 0 var(--ink); font: inherit; font-size: 9px; font-weight: 900; cursor: pointer; }
+.market-workspace nav > div { display: flex; align-items: center; gap: 20px; font-size: 11px; font-weight: 850; }
 .market-workspace-grid { padding: 65px 7vw 90px; display: grid; grid-template-columns: .8fr 1.2fr; gap: 24px; align-items: start; }
 .market-workspace-grid form, .market-workspace-grid > aside { padding: 24px; border: 2px solid var(--ink); border-radius: 14px; background: white; box-shadow: 5px 6px 0 var(--ink); }
 .market-workspace-grid form { display: grid; gap: 13px; }
@@ -3445,6 +3447,12 @@ footer > span {
 .market-workspace-grid .result-summary { margin-top: -2px; color: #53614f; font-size: 12px; line-height: 1.55; }
 .market-workspace-grid .rally-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .market-workspace-grid .rally-actions button { padding: 10px 12px; border: 1.5px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 8px; font-weight: 900; }
+.preview-lock { margin-top: 5px; padding: 18px; border: 1.5px solid var(--ink); border-radius: 10px; background: var(--pink); }
+.preview-lock > small { display: block; }
+.preview-lock > b { display: block; margin: 8px 0 5px; font-family: "Fraunces"; font-size: 23px; }
+.preview-lock > p { margin: 0 0 14px; color: #5c5651; font-size: 10px; line-height: 1.5; }
+.preview-lock > a { display: inline-block; color: var(--ink); background: var(--yellow); font-size: 9px; }
+.workspace-listing-link { width: fit-content; color: var(--ink); font-size: 10px; font-weight: 900; text-decoration: underline; }
 .workspace-review { padding: 14px; border-radius: 9px; background: var(--yellow); }
 .workspace-review b { font-family: "Fraunces"; font-size: 19px; }
 .workspace-review p { margin: 5px 0 0; font-size: 10px; line-height: 1.5; }

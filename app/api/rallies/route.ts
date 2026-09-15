@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { getChatGPTUser, chatGPTSignInPath } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
-import { savedRallies } from "../../../db/schema";
+import { purchases, savedRallies } from "../../../db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +17,14 @@ export async function POST(request: Request) {
   if (!user) return Response.json({ error: "Sign in required", signIn: chatGPTSignInPath("/") }, { status: 401 });
   const body = await request.json() as { toolSlug?: string; title?: string; inputs?: unknown; summary?: string };
   if (!body.toolSlug || !body.title || !body.summary) return Response.json({ error: "Missing rally details" }, { status: 400 });
+  if (body.toolSlug.startsWith("catalog:")) {
+    const [purchase] = await getDb().select({ id: purchases.id }).from(purchases).where(and(
+      eq(purchases.buyerUserId, user.userId),
+      eq(purchases.toolSlug, body.toolSlug),
+      eq(purchases.status, "paid_and_unlocked"),
+    )).limit(1);
+    if (!purchase) return Response.json({ error: "Purchase this Rally before saving it to your library.", purchaseRequired: true }, { status: 402 });
+  }
   const now = new Date();
   const id = crypto.randomUUID();
   await getDb().insert(savedRallies).values({ id, userId: user.userId, toolSlug: body.toolSlug, title: body.title, inputs: JSON.stringify(body.inputs ?? {}), summary: body.summary, createdAt: now, updatedAt: now });

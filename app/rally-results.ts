@@ -8,8 +8,10 @@ function answer(concept: RallyConcept, answers: Record<string, string>, index: n
 }
 
 function pieces(value: string) {
-  return value.split(/\n|,|;/).map((item) => item.trim()).filter(Boolean).slice(0, 8);
+  return value.split(/\n|,|;/).map((item) => item.trim().replace(/^(and|or)\s+/i, "").replace(/[.]+$/, "")).filter(Boolean).slice(0, 8);
 }
+
+function sentence(value: string) { return value.trim().replace(/[.!?]+$/, ""); }
 
 export function createWorkingResult(concept: RallyConcept, answers: Record<string, string>): WorkingResult {
   const first = answer(concept, answers, 0, "the material you provide");
@@ -19,9 +21,9 @@ export function createWorkingResult(concept: RallyConcept, answers: Record<strin
   switch (concept.slug) {
     case "nclex-study-sprint": {
       const weakAreas = pieces(third);
-      return { headline: "Your seven-day NCLEX study sprint", summary: `A source-grounded review plan built around ${second}.`, sections: [
+      return { headline: "Your seven-day NCLEX study sprint", summary: `A structured review plan built around ${sentence(second)}.`, sections: [
         { title: "Seven-day plan", items: ["Day 1 · Sort your notes by NCLEX client-needs category and mark uncertain claims.", `Day 2 · Active recall: ${weakAreas[0] || "your first weak area"}.`, `Day 3 · Practice and rationale review: ${weakAreas[1] || "your second weak area"}.`, "Day 4 · Mixed recall; log why every missed choice was tempting.", `Day 5 · Teach-back: ${weakAreas[2] || "the hardest concept"}.`, "Day 6 · Timed mixed set and targeted correction.", "Day 7 · Light recall, logistics, and rest plan."] },
-        { title: "Flashcard queue", intro: "Turn statements from your own notes into question-first cards.", items: pieces(first).slice(0, 5).map((line) => `Front: What must I recall about “${line}”? · Back: verify against the uploaded source.`).concat(weakAreas.map((area) => `Explain ${area} without looking; then add the missing rationale.`)) },
+        { title: "Flashcard queue", intro: "Turn statements from your own notes into question-first cards.", items: pieces(first).slice(0, 5).map((line) => `Front: What must I recall about “${line}”? · Back: check the answer against your notes or an official source.`).concat(weakAreas.map((area) => `Explain ${area} without looking; then add the missing rationale.`)) },
         { title: "Missed-topic log", items: ["Question/topic", "My incorrect reasoning", "Correct principle + source", "What clue should change my answer next time?"] },
       ]};
     }

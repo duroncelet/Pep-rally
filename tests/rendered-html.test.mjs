@@ -151,7 +151,7 @@ test("ships both executable Rally workspaces", async () => {
   ]);
 });
 
-test("shows honest, testable connection readiness", async () => {
+test("keeps the public connection page consumer-safe while preserving secure connection infrastructure", async () => {
   const [page, route, builder, checkout, stripe, webhook, success, schema, migration] = await Promise.all([
     readFile(new URL("../app/connections/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/connections/route.ts", import.meta.url), "utf8"),
@@ -164,14 +164,14 @@ test("shows honest, testable connection readiness", async () => {
     readFile(new URL("../drizzle/0006_mute_vampiro.sql", import.meta.url), "utf8"),
   ]);
 
-  for (const feature of ["WORKING NOW", "NEEDS ONE PRIVATE ACCOUNT", "DEALS PEP RALLY SHOULD MAKE", "No pretend connections", "Weather lookup", "Private file storage", "Calendar file"]) assert.match(page, new RegExp(feature));
-  assert.match(page, /ChatGPT plugin can help operate a provider/);
+  assert.match(page, /CONNECTIONS \+ PERMISSIONS/);
+  for (const feature of ["Helpful tools", "YOU APPROVE THE FINAL STEP", "YOUR INFORMATION", "Payment requests"]) assert.match(page, new RegExp(feature));
+  assert.doesNotMatch(page, /NEEDS ONE PRIVATE ACCOUNT|DEALS PEP RALLY SHOULD MAKE|private credential|ChatGPT plugin|OPENAI_API_KEY|STRIPE_SECRET_KEY/);
   assert.match(route, /STRIPE_SECRET_KEY/);
   assert.match(route, /OPENAI_API_KEY/);
   assert.match(route, /Boolean\(env\.DB\)/);
   assert.match(route, /Boolean\(env\.ASSETS\)/);
   assert.match(builder, /Everything around the mini-app, together/);
-  assert.match(page, /Pay → verify → save → unlock/);
   assert.match(checkout, /isStripeTestMode/);
   assert.doesNotMatch(checkout, /test_succeeded/);
   assert.match(stripe, /payment_status/);
@@ -230,8 +230,8 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
   assert.match(css, /\.library-grid/);
 });
 
-test("turns marketplace previews into usable, purchasable Rally flows", async () => {
-  const [home, catalog, workspace, results, customization, purchaseButton, checkout, stripe, library] = await Promise.all([
+test("turns marketplace previews into usable, purchase-gated Rally flows", async () => {
+  const [home, catalog, workspace, results, customization, purchaseButton, checkout, stripe, library, accessRoute, ralliesRoute] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/catalog.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/rally/market/[slug]/RallyWorkspace.tsx", import.meta.url), "utf8"),
@@ -241,15 +241,19 @@ test("turns marketplace previews into usable, purchasable Rally flows", async ()
     readFile(new URL("../app/api/checkout/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/stripe.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/library/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/rally-access/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/rallies/route.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.match(home, /WORKING RALLIES · OPEN ONE/);
-  assert.match(home, /href=\{`\/rally\/market\/\$\{rally\.slug\}`\}/);
+  assert.match(home, /PEP RALLY STARTERS · PREVIEW ONE/);
+  assert.match(home, /href=\{`\/discover\/\$\{rally\.slug\}`\}/);
   assert.doesNotMatch(catalog, /status: "idea"/);
   assert.match(workspace, /Create my working result/);
   assert.match(workspace, /Save to My Rallies/);
   assert.match(workspace, /YOUR OUTCOME/);
   assert.match(workspace, /createWorkingResult/);
+  assert.match(workspace, /WORKING PREVIEW COMPLETE/);
+  assert.match(workspace, /access === "unlocked"/);
   for (const slug of ["nclex-study-sprint", "etsy-profit-pricing-desk", "travel-proposal-studio", "farmers-market-morning-board", "iep-meeting-organizer", "roommate-move-out-splitter", "care-circle-coordinator", "home-project-bid-compare"]) assert.match(results, new RegExp(slug));
   assert.match(customization, /Prompt 1 — Change it for my exact situation/);
   assert.match(customization, /Prompt 4 — Test the customer outcome/);
@@ -258,4 +262,6 @@ test("turns marketplace previews into usable, purchasable Rally flows", async ()
   assert.match(checkout, /catalog:/);
   assert.match(stripe, /rally\/market/);
   assert.match(library, /catalog:/);
+  assert.match(accessRoute, /paid_and_unlocked/);
+  assert.match(ralliesRoute, /purchaseRequired/);
 });
