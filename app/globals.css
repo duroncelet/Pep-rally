@@ -1,4 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700;9..144,800&display=swap");
+.guest-preview-note { width:min(1180px,calc(100% - 36px)); margin:14px auto 18px; padding:13px 17px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; border:1.5px solid #1f2440; border-radius:10px; background:#e8f5dc; font-size:11px; }
+.guest-preview-note b { font-family:"Fraunces"; font-size:16px; }
+.listing-footer { padding:24px 7vw; display:grid; grid-template-columns:1fr 1fr auto; align-items:center; gap:18px; background:#1f2440; color:white; font-size:10px; }
+.listing-footer span { display:flex; flex-direction:column; gap:3px; }
+.listing-footer b { font-family:"Fraunces"; font-size:17px; color:#f7c94b; }
+.listing-footer div { display:flex; gap:14px; flex-wrap:wrap; justify-content:flex-end; }
+.listing-footer a { color:white; text-decoration:underline; }
 .creator-loop { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:22px 0; }
 .creator-loop span { display:flex; flex-direction:column; gap:5px; padding:14px; border:1px solid #d8d1c3; border-radius:10px; background:#fff; font-size:12px; }
 .creator-loop b { font-family:"Fraunces"; font-size:17px; }
@@ -3611,9 +3618,9 @@ footer > span {
   .idea-grid { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 850px) {
-  .nav-links {
-    display: none;
-  }
+  .store-nav { gap:10px; }
+  .nav-links { display:flex; overflow-x:auto; white-space:nowrap; scrollbar-width:none; }
+  .nav-links a:nth-child(n+3) { display:none; }
   .hero {
     padding-top: 65px;
     min-height: 810px;
@@ -3644,8 +3651,8 @@ footer > span {
     grid-template-columns: 1fr;
   }
   .creator-path,
-  .market-workspace-grid,
-  .build-progress { display: none; }
+  .market-workspace-grid { display:grid; grid-template-columns:1fr; }
+  .build-progress { display:none; }
   .live-build-preview { position: static; }
   .shop-hero-images { min-height: 460px; }
   .product-grid,
@@ -3721,6 +3728,8 @@ footer > span {
   .library-promise { grid-template-columns: 1fr; }
   .rally-header-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
   .ready-divider { align-items: start; flex-direction: column; }
+  .listing-footer { grid-template-columns:1fr; }
+  .listing-footer div { justify-content:flex-start; }
   .concept-hero h1 { font-size: 54px; }
   .pdp-photo img { height: 400px; }
   .quality-check { grid-template-columns: 1fr; }

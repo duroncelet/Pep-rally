@@ -43,15 +43,17 @@ export default function GardenRally() {
   const [weatherStatus, setWeatherStatus] = useState("Add your location to load a live 7-day forecast.");
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [authState, setAuthState] = useState<"checking" | "guest" | "signed-in">("checking");
+  const [signInPath, setSignInPath] = useState("/signin-with-chatgpt?return_to=%2Frally%2Fgarden");
 
   useEffect(() => {
     (async () => {
       const response = await fetch("/api/garden-hub");
       const data = await response.json();
       if (response.status === 401 && data.signIn) {
-        if (["localhost", "127.0.0.1"].includes(window.location.hostname)) { setLoading(false); return; }
-        window.location.href = data.signIn; return;
+        setAuthState("guest"); setSignInPath(data.signIn); setLoading(false); return;
       }
+      setAuthState("signed-in");
       if (data.plan?.version === 1) {
         const plan = data.plan;
         setLocation(plan.location); setSpace(plan.space); setBedCount(plan.bedCount); setLength(plan.length); setWidth(plan.width);
@@ -100,6 +102,8 @@ export default function GardenRally() {
     if (response.ok) { setSaved(true); setTimeout(() => setSaved(false), 1600); }
   }
 
+  function keepThisRally() { window.location.href = signInPath; }
+
   function downloadOutcome() {
     const forecastRows = weather ? weather.daily.time.map((day, index) => `| ${day} | ${Math.round(weather.daily.temperature_2m_min[index])}° | ${Math.round(weather.daily.temperature_2m_max[index])}° | ${weather.daily.precipitation_probability_max[index]}% |`).join("\n") : "| Load live weather in the Rally | — | — | — |";
     const markdown = `# The Little Garden Planner\n\n> A practical starting plan made with Pep Rally. Confirm planting dates, soil safety, varieties, and pest guidance with a trusted local extension or nursery.\n\n## My garden\n\n- **Location:** ${markdownCell(location)}\n- **Setup:** ${markdownCell(space)}\n- **Size:** ${totalArea} ${space === "Pots / containers" ? "containers" : "sq ft"}\n- **Sun:** ${markdownCell(sun)}\n- **Watering:** ${markdownCell(watering)}\n- **Experience:** ${markdownCell(experience)}\n- **Goal:** ${markdownCell(goal)}\n\n## What to grow first\n\n${suggestedPlants.map((plant, index) => `${index + 1}. **${plant}** — ${plant === "Tomatoes" || plant === "Cucumbers" || plant === "Beans" ? "Use the sunniest edge and support it vertically." : plant === "Lettuce" ? "Use the cooler edge and sow a little at a time." : plant === "Herbs" ? "Keep close to the kitchen and harvest often." : "Group by watering needs and leave room to reach it."}`).join("\n")}\n\n## Layout\n\n${Array.from({ length: Math.min(bedCount, 12) }).map((_, index) => `- **${space === "Pots / containers" ? "Pot" : space === "Rows / in-ground" ? "Row" : "Bed"} ${index + 1}:** ${suggestedPlants[index % suggestedPlants.length]}${index % 2 ? " + Herbs" : " + Flowers on the edge"}`).join("\n")}\n\n## This week's weather-aware actions\n\n${weatherActions.length ? weatherActions.map((action) => `- ${action}`).join("\n") : "- Load the live forecast in the Rally to add weather-aware actions."}\n\n| Date | Low | High | Rain chance |\n|---|---:|---:|---:|\n${forecastRows}\n\n## Care board\n\n${tasks.map((task) => `- [${task.done ? "x" : " "}] ${markdownCell(task.text)} — ${markdownCell(task.timing)}`).join("\n")}\n\n## Garden journal\n\n${journal.length ? journal.map((entry) => `- **${markdownCell(entry.date)}:** ${markdownCell(entry.note)}`).join("\n") : "No notes yet. Record what you plant, change, harvest, and notice."}\n\n---\nCreated with Pep Rally · ${new Date().toLocaleDateString()}${weather ? ` · Weather: ${weather.source}` : ""}\n`;
@@ -127,8 +131,9 @@ export default function GardenRally() {
       <a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a>
       <div className="rally-header-copy"><small>THE LITTLE GARDEN PLANNER · EXECUTABLE WORKSPACE</small><h1>Your garden, growing.</h1><p>{space} · {totalArea} {space === "Pots / containers" ? "containers" : "sq ft"} · {location}</p></div>
       <figure className="rally-cover"><img src="/rallies/lush-garden.jpg" alt="A lush edible garden with raised beds, herbs, flowers, and containers"/><figcaption><b>Free Rally</b><span>From your space and weather to a growing plan</span></figcaption></figure>
-      <div className="rally-header-actions"><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button></div>
+      <div className="rally-header-actions">{authState === "guest" ? <><button onClick={keepThisRally}>Sign in to download</button><button className="primary" onClick={keepThisRally}>Sign in to keep it</button></> : <><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button></>}</div>
     </header>
+    {authState === "guest" && <div className="guest-preview-note"><b>You are trying the full Rally—no sign-in required.</b><span>Your work stays on this screen for this visit. Sign in only when you want to save or download it.</span></div>}
     <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
 
     {tab === "setup" && <section className="rally-content">

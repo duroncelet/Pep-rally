@@ -66,14 +66,16 @@ export default function BacheloretteRally() {
   const [stayOptions, setStayOptions] = useState<StayOption[]>([]);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [authState, setAuthState] = useState<"checking" | "guest" | "signed-in">("checking");
+  const [signInPath, setSignInPath] = useState("/signin-with-chatgpt?return_to=%2Frally%2Fbachelorette");
 
   useEffect(() => {
     (async () => {
       const response = await fetch("/api/party-hub"); const data = await response.json();
       if (response.status === 401 && data.signIn) {
-        if (["localhost", "127.0.0.1"].includes(window.location.hostname)) { setLoading(false); return; }
-        window.location.href = data.signIn; return;
+        setAuthState("guest"); setSignInPath(data.signIn); setLoading(false); return;
       }
+      setAuthState("signed-in");
       const plan = data.plan;
       if (plan?.version === 4 || plan?.version === 3) {
         setBrideName(plan.brideName); setCity(plan.city); setStartDate(plan.startDate); setEndDate(plan.endDate); setVibe(plan.vibe); setBrideTraits(plan.brideTraits); setMustAvoid(plan.mustAvoid);
@@ -118,6 +120,8 @@ export default function BacheloretteRally() {
     if (response.status === 401) { const data = await response.json(); if (data.signIn) window.location.href = data.signIn; return; }
     if (response.ok) { setSaved(true); setTimeout(() => setSaved(false), 1600); }
   }
+
+  function keepThisRally() { window.location.href = signInPath; }
 
   function buildItinerary() {
     const blocks = vibePlans[vibe];
@@ -167,7 +171,8 @@ export default function BacheloretteRally() {
   const owners = guests.length ? guests : firstGuests;
 
   return <main className="rally-room bach-room">
-    <header className="rally-header photo-rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div className="rally-header-copy"><small>BACHELORETTE BLUEPRINT · ORGANIZER WORKSPACE</small><h1>{partyName}</h1><p>{configured ? `${city} · ${confirmed} confirmed · $${groupBudget.toLocaleString()} working budget` : "Start with the bride, dates, and guest list"}</p></div><figure className="rally-cover"><img src="/rallies/bachelorette-pool.jpg" alt="Friends relaxing together beside a sunny pool"/><figcaption><b>Free Rally</b><span>Plan here; review before you send or book</span></figcaption></figure><div className="rally-header-actions"><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button></div></header>
+    <header className="rally-header photo-rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div className="rally-header-copy"><small>BACHELORETTE BLUEPRINT · ORGANIZER WORKSPACE</small><h1>{partyName}</h1><p>{configured ? `${city} · ${confirmed} confirmed · $${groupBudget.toLocaleString()} working budget` : "Start with the bride, dates, and guest list"}</p></div><figure className="rally-cover"><img src="/rallies/bachelorette-pool.jpg" alt="Friends relaxing together beside a sunny pool"/><figcaption><b>Free Rally</b><span>Plan here; review before you send or book</span></figcaption></figure><div className="rally-header-actions">{authState === "guest" ? <><button onClick={keepThisRally}>Sign in to download</button><button className="primary" onClick={keepThisRally}>Sign in to keep it</button></> : <><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button></>}</div></header>
+    {authState === "guest" && <div className="guest-preview-note"><b>You are trying the full Rally—no sign-in required.</b><span>Your work stays on this screen for this visit. Sign in only when you want to save or download it.</span></div>}
     {!configured && <section className="start-rally"><div><small>START HERE</small><b>This is a clean organizer workspace.</b><p>Add the bride, dates, and guests. Pep Rally will turn those choices into a budget, stay guardrail, itinerary, assignments, and ready-to-review group updates.</p></div><button className="primary" onClick={() => setTab("setup")}>Set up the weekend →</button></section>}
     <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
 

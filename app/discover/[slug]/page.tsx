@@ -30,5 +30,6 @@ export default async function RallyListingPage({ params }: PageProps) {
     {rally.sourceNote && <section className="concept-source"><small>WHY THIS RALLY EXISTS</small><p>{rally.sourceNote}</p><a href="https://www.nclex.com/test-plans.page" target="_blank" rel="noreferrer">Review the official NCLEX test plan ↗</a></section>}
 
     <section className="concept-claim"><div><small>READY TO USE IT?</small><h2>This is cool.<br/><em>Make it yours.</em></h2><p>Pay once, open the working Rally, add your real information, and keep the result in My Rallies.</p><a className="creator-side-link" href={`/build?idea=${rally.slug}`}>Know this problem well? Build this Rally instead →</a></div><PurchaseButton slug={rally.slug} priceCents={rally.priceCents}/></section>
+    <footer className="listing-footer"><span><b>Try first.</b> The working preview opens without sign-in.</span><span><b>Keep it.</b> Sign in is required only to purchase, save, or download.</span><div><a href="/policies">Refunds + privacy</a><a href="/policies#support">Support</a><a href="/connections">Service status</a></div></footer>
   </main>;
 }

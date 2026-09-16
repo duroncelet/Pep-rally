@@ -98,7 +98,11 @@ test("ships a usable sign-in product and downloadable outcomes", async () => {
   assert.match(bachelorette, /bachelorette-pool\.jpg/);
   assert.match(garden, /lush-garden\.jpg/);
   assert.match(bachelorette + garden, /photo-rally-header/);
-  assert.match(bachelorette + garden, /127\.0\.0\.1/);
+  for (const source of [bachelorette, garden]) {
+    assert.match(source, /authState.*guest/);
+    assert.match(source, /no sign-in required/);
+    assert.match(source, /Sign in to keep it/);
+  }
   assert.match(helper, /URL\.createObjectURL/);
   for (const tool of ["ChatGPT", "Claude", "Gemini", "Codex", "Cursor", "Replit Agent"]) assert.match(customization, new RegExp(tool));
   assert.match(customization, /Pep Rally source ZIP/);
