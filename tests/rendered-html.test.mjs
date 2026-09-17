@@ -269,3 +269,19 @@ test("turns marketplace previews into usable, purchase-gated Rally flows", async
   assert.match(accessRoute, /paid_and_unlocked/);
   assert.match(ralliesRoute, /purchaseRequired/);
 });
+
+test("ships the first bounded agentic Rally loop", async () => {
+  const [runtime, planner, bachelorette] = await Promise.all([
+    readFile(new URL("../app/agentic/rally-runtime.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/rally/bachelorette/AgenticPlanner.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/rally/bachelorette/page.tsx", import.meta.url), "utf8"),
+  ]);
+  for (const block of ["ask", "generate", "revise", "deliver"]) assert.match(runtime, new RegExp(`type: "${block}"`));
+  assert.match(runtime, /maxSteps: 12/);
+  assert.match(runtime, /previewMaxCostCents/);
+  assert.match(runtime, /validateSpec/);
+  assert.match(planner, /How this was made/);
+  assert.match(planner, /Sign in to keep it/);
+  assert.match(planner, /Revision limit reached/);
+  assert.match(bachelorette, /AgenticPlanner/);
+});

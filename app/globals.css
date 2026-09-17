@@ -1,4 +1,50 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700;9..144,800&display=swap");
+.agentic-shell { width:min(1180px,calc(100% - 36px)); margin:26px auto; border:2px solid #1f2440; border-radius:18px; background:#fff; box-shadow:7px 8px 0 #1f2440; overflow:hidden; }
+.agentic-shell > header { display:grid; grid-template-columns:1fr auto; gap:28px; padding:25px; background:#f3acc9; border-bottom:2px solid #1f2440; }
+.agentic-shell h2 { font-size:clamp(30px,4vw,52px); line-height:1; margin:7px 0 10px; max-width:780px; }
+.agentic-shell header p { margin:0; max-width:690px; font-size:15px; line-height:1.5; }
+.agent-budget { display:grid; grid-template-columns:repeat(3,90px); gap:6px; align-self:center; }
+.agent-budget span { display:flex; flex-direction:column; text-align:center; padding:10px 6px; border:1px solid #1f2440; border-radius:9px; background:#fff; font-size:12px; }
+.agent-budget b { font-family:"Fraunces"; font-size:21px; }
+.agent-start { padding:28px; display:flex; justify-content:space-between; gap:28px; align-items:center; }
+.agent-start b,.agent-question h3,.agent-result h3,.agent-review h3 { font-family:"Fraunces"; }
+.agent-start ul { margin:10px 0 0; padding-left:18px; display:grid; gap:5px; font-size:14px; }
+.agent-question { padding:34px; max-width:760px; margin:auto; display:grid; gap:14px; }
+.agent-question h3 { font-size:34px; margin:0; }
+.agent-question input,.agent-question textarea,.agent-review textarea { width:100%; min-width:0; padding:15px; border:1.5px solid #1f2440; border-radius:10px; background:#fbf7ee; font:inherit; font-size:16px; }
+.agent-progress { height:7px; overflow:hidden; border:1px solid #1f2440; border-radius:999px; background:#eee8dd; }
+.agent-progress span { display:block; height:100%; background:#ff695d; transition:width .2s ease; }
+.agent-choices { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.agent-choices button,.agent-quick button { padding:12px; border:1px solid #1f2440; border-radius:9px; background:#fff; text-align:left; }
+.agent-choices button.selected { background:#f7c94b; box-shadow:3px 3px 0 #1f2440; }
+.agent-result { display:grid; grid-template-columns:1.2fr .8fr; }
+.agent-artifact,.agent-review { padding:28px; }
+.agent-artifact { border-right:2px solid #1f2440; background:#fbf7ee; }
+.agent-artifact > h3 { font-size:39px; margin:7px 0; }
+.agent-artifact > p { font-size:14px; }
+.agent-total { display:flex; justify-content:space-between; align-items:center; margin:20px 0; padding:13px; border:1px solid #1f2440; border-radius:9px; background:#e8f5dc; }
+.agent-total b { font-family:"Fraunces"; font-size:27px; }
+.agent-artifact article { margin:16px 0; padding-top:15px; border-top:1px solid #cfc7b9; }
+.agent-artifact h4 { font-family:"Fraunces"; font-size:22px; margin:0 0 9px; }
+.agent-artifact article > div { display:grid; grid-template-columns:72px 1fr auto; gap:10px; padding:9px 0; }
+.agent-artifact time,.agent-artifact em { font-size:12px; font-weight:800; font-style:normal; }
+.agent-artifact article span { display:flex; flex-direction:column; gap:3px; }
+.agent-artifact article small { font-size:13px; line-height:1.45; color:#625d56; }
+.agent-artifact aside { display:grid; gap:7px; margin-top:18px; padding:15px; border:1px solid #1f2440; border-radius:9px; background:#fff; font-size:13px; }
+.agent-review { display:flex; flex-direction:column; gap:12px; }
+.agent-review h3 { font-size:30px; margin:0; }
+.agent-review > p { font-size:14px; line-height:1.5; }
+.agent-quick { display:flex; flex-wrap:wrap; gap:6px; }
+.agent-quick button { padding:8px 10px; font-size:12px; }
+.agent-provenance { display:grid; gap:8px; margin-top:8px; padding:15px; border-radius:10px; background:#f4efe5; }
+.agent-provenance > span { display:grid; grid-template-columns:25px 1fr; gap:8px; font-size:12px; }
+.agent-provenance i { width:24px; height:24px; display:grid; place-items:center; border-radius:50%; background:#1f2440; color:#fff; font-style:normal; }
+.agent-provenance span span { display:flex; flex-direction:column; gap:2px; }
+.agent-keep { margin-top:auto; padding:15px; border:1px solid #1f2440; border-radius:10px; background:#fff4bf; }
+.agent-keep p { font-size:13px; line-height:1.4; }
+.agent-keep button { margin:4px 6px 0 0; }
+@media(max-width:850px){.agentic-shell > header,.agent-result{grid-template-columns:1fr}.agent-budget{grid-template-columns:repeat(3,1fr)}.agent-artifact{border-right:0;border-bottom:2px solid #1f2440}.agent-start{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){.agentic-shell{width:calc(100% - 20px);margin:14px auto}.agentic-shell > header,.agent-artifact,.agent-review,.agent-question{padding:20px}.agent-budget,.agent-choices{grid-template-columns:1fr}.agent-artifact article > div{grid-template-columns:56px 1fr}.agent-artifact article em{grid-column:2}.agentic-shell h2{font-size:34px}}
 .guest-preview-note { width:min(1180px,calc(100% - 36px)); margin:14px auto 18px; padding:13px 17px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap; border:1.5px solid #1f2440; border-radius:10px; background:#e8f5dc; font-size:11px; }
 .guest-preview-note b { font-family:"Fraunces"; font-size:16px; }
 .listing-footer { padding:24px 7vw; display:grid; grid-template-columns:1fr 1fr auto; align-items:center; gap:18px; background:#1f2440; color:white; font-size:10px; }

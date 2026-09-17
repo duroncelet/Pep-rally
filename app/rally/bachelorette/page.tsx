@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../download-markdown";
 import { buildCustomizationKit } from "../../customization-kit";
+import AgenticPlanner from "./AgenticPlanner";
 
 type Guest = { id: string; name: string; contact: string; rsvp: "Yes" | "Maybe" | "No"; paid: number; needs: string };
 type Task = { id: string; text: string; owner: string; done: boolean; due: string };
@@ -173,6 +174,7 @@ export default function BacheloretteRally() {
   return <main className="rally-room bach-room">
     <header className="rally-header photo-rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div className="rally-header-copy"><small>BACHELORETTE BLUEPRINT · ORGANIZER WORKSPACE</small><h1>{partyName}</h1><p>{configured ? `${city} · ${confirmed} confirmed · $${groupBudget.toLocaleString()} working budget` : "Start with the bride, dates, and guest list"}</p></div><figure className="rally-cover"><img src="/rallies/bachelorette-pool.jpg" alt="Friends relaxing together beside a sunny pool"/><figcaption><b>Free Rally</b><span>Plan here; review before you send or book</span></figcaption></figure><div className="rally-header-actions">{authState === "guest" ? <><button onClick={keepThisRally}>Sign in to download</button><button className="primary" onClick={keepThisRally}>Sign in to keep it</button></> : <><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button></>}</div></header>
     {authState === "guest" && <div className="guest-preview-note"><b>You are trying the full Rally—no sign-in required.</b><span>Your work stays on this screen for this visit. Sign in only when you want to save or download it.</span></div>}
+    <AgenticPlanner signedIn={authState === "signed-in"} onSignIn={keepThisRally} onSaveWorkspace={save}/>
     {!configured && <section className="start-rally"><div><small>START HERE</small><b>This is a clean organizer workspace.</b><p>Add the bride, dates, and guests. Pep Rally will turn those choices into a budget, stay guardrail, itinerary, assignments, and ready-to-review group updates.</p></div><button className="primary" onClick={() => setTab("setup")}>Set up the weekend →</button></section>}
     <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
 
