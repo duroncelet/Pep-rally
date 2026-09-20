@@ -1,0 +1,1 @@
+ALTER TABLE `creator_apps` ADD `creator_name` text DEFAULT 'Pep Rally maker' NOT NULL;
