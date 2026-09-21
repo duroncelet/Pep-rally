@@ -1,16 +1,16 @@
-import { destinationFor, validTripDates } from "../../rally/bachelorette/destinations";
+import { validTripDates } from "../../rally/bachelorette/destinations";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const query = new URL(request.url).searchParams;
-  const destination = destinationFor(query.get("city") || "");
+  const city = query.get("city")?.trim() || "";
   const start = query.get("start") || "", end = query.get("end") || "";
-  if (!destination || !validTripDates(start, end)) return Response.json({ error: "Choose a featured city and valid arrival/departure dates, up to 31 days apart." }, { status: 400 });
+  if (city.length < 2 || !validTripDates(start, end)) return Response.json({ error: "Enter any city and valid arrival/departure dates, up to 31 days apart." }, { status: 400 });
   const key = process.env.TICKETMASTER_API_KEY;
   if (!key) return Response.json({ error: "In-app concert listings are not connected yet. Use the Ticketmaster search below, then save your choice here.", needsCredential: true }, { status: 503 });
   try {
     // Local dates avoid shifting a late-night event onto the wrong trip day.
-    const params = new URLSearchParams({ apikey: key, city: destination.name, stateCode: destination.state, countryCode: "US", classificationName: "music", localStartDateTime: `${start}T00:00:00,${end}T23:59:59`, size: "20", sort: "date,asc" });
+    const params = new URLSearchParams({ apikey: key, city, countryCode: "US", classificationName: "music", localStartDateTime: `${start}T00:00:00,${end}T23:59:59`, size: "20", sort: "date,asc" });
     const response = await fetch(`https://app.ticketmaster.com/discovery/v2/events.json?${params}`, { signal: AbortSignal.timeout(12000) });
     if (!response.ok) throw new Error("provider");
     const data = await response.json() as { _embedded?: { events?: Array<{ id: string; name: string; url: string; dates?: { start?: { localDate?: string; localTime?: string }; status?: { code?: string } }; _embedded?: { venues?: Array<{ name?: string }> } }> } };
