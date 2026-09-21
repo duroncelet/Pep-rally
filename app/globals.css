@@ -3923,3 +3923,29 @@ footer > span {
   letter-spacing: -0.06em;
   text-decoration: none;
 }
+
+/* Destination and money tools share the Rally workspace's visual language. */
+.trip-tools { min-width: 0; }
+.trip-card button, .trip-grid button, .destination-pills button, .agent-keep>button:not(.primary), .agentic-shell>button { border:1.5px solid #23363b; border-radius:12px; padding:10px 15px; background:#fffaf1; color:#23363b; font:inherit; cursor:pointer; }
+.trip-card button:disabled { opacity:.5; cursor:not-allowed; }
+.agent-keep>button { display:block; margin:12px 0; }
+.destination-pills, .trip-fields { display:flex; flex-wrap:wrap; gap:12px; margin:18px 0; }
+.destination-pills button[aria-pressed="true"] { background:#ffc7b8; box-shadow:3px 3px 0 #192a32; }
+.trip-fields label { flex:1 1 180px; display:grid; gap:8px; }
+.trip-card, .destination-feature, .trip-grid>article { border:2px solid #23363b; border-radius:18px; padding:24px; background:#fffaf1; margin:20px 0; }
+.destination-feature { background:#f9dfd5; }
+.destination-feature small { display:block; margin:14px 0; }
+.trip-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.trip-card h3, .trip-grid h3, .destination-feature h3 { font-family:Georgia,serif; font-size:1.6rem; margin:0 0 14px; }
+.trip-card p, .trip-grid p, .destination-feature p { line-height:1.6; }
+.trip-card input:not([type="checkbox"]), .trip-card select, .trip-card textarea, .trip-fields input { width:100%; min-width:0; padding:12px; border:1px solid #657273; border-radius:8px; background:white; font:inherit; box-sizing:border-box; }
+.trip-card textarea { min-height:85px; }
+.trip-card>a { display:inline-block; margin:12px; }
+.forecast-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin:18px 0; }
+.forecast-grid article { padding:14px; background:#e6eee4; border-radius:12px; }
+.forecast-grid strong { display:block; font-size:1.7rem; margin:10px 0; }
+.split-person { display:inline-flex; gap:8px; margin:10px; align-items:center; }
+.bill-row { display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid #ccd0c7; padding:14px 0; }
+.trip-notice { padding:16px; background:#e5efdf; border-radius:12px; }
+.inquiry-copy { white-space:pre-wrap; }
+@media(max-width:650px) { .trip-grid { grid-template-columns:1fr; } .trip-card, .destination-feature, .trip-grid>article { padding:16px; } .trip-fields { flex-direction:column; } .trip-fields label { flex-basis:auto; } .bill-row { align-items:flex-start; } }
