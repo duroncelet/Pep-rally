@@ -3904,3 +3904,22 @@ footer > span {
     flex-direction: row;
   }
 }
+/* Pep Rally-owned account pages */
+.auth-shell {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  gap: 1.5rem;
+  align-content: center;
+  padding: 2rem 1rem;
+  background: #fffaf4;
+}
+
+.auth-home {
+  color: #17130f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 7vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  text-decoration: none;
+}

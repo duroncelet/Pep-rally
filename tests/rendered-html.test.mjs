@@ -129,7 +129,7 @@ test("offers a code-inclusive technical handoff", async () => {
   assert.ok(route.includes('attachment; filename="Pep-Rally-Technical-Handoff.md"'));
   assert.match(route, /Stripe checkout/);
   assert.match(route, /Core outcome contract/);
-  assert.match(route, /```tsx/);
+  assert.match(route, /<Outcome>/);
 });
 
 test("ships both executable Rally workspaces", async () => {
@@ -174,7 +174,7 @@ test("keeps the public connection page consumer-safe while preserving secure con
   assert.match(route, /STRIPE_SECRET_KEY/);
   assert.match(route, /OPENAI_API_KEY/);
   assert.match(route, /Boolean\(env\.DB\)/);
-  assert.match(route, /Boolean\(env\.ASSETS\)/);
+  assert.match(route, /Boolean\(env\.RALLY_UPLOADS\)/);
   assert.match(builder, /Everything around the mini-app, together/);
   assert.match(checkout, /isStripeTestMode/);
   assert.doesNotMatch(checkout, /test_succeeded/);

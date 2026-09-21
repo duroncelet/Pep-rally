@@ -1,0 +1,40 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pep-rally",
+  "account_id": "092de6d273ad0a3e49c6c0eda221958f",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-09-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    { "pattern": "peprally.fun", "custom_domain": true },
+    { "pattern": "www.peprally.fun", "custom_domain": true }
+  ],
+  "assets": {
+    "directory": "dist/client",
+    "not_found_handling": "none",
+    "binding": "ASSETS"
+  },
+  "images": {
+    "binding": "IMAGES"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pep-rally",
+      "database_id": "23d0abfc-4278-43cc-88aa-8a3aa3d3e13d",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RALLY_UPLOADS",
+      "bucket_name": "pep-rally-uploads"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  }
+}

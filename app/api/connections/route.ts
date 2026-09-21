@@ -12,7 +12,7 @@ export async function GET() {
     connections: {
       account: { ready: true, note: "Signed-in private workspace" },
       database: { ready: Boolean(env.DB), note: env.DB ? "Saved plans are available" : "Database binding is unavailable" },
-      files: { ready: Boolean(env.ASSETS), note: env.ASSETS ? "Private source uploads are available" : "File storage binding is unavailable" },
+      files: { ready: Boolean(env.RALLY_UPLOADS), note: env.RALLY_UPLOADS ? "Private source uploads are available" : "File storage binding is unavailable" },
       weather: { ready: true, note: "Live Open-Meteo lookup is built in" },
       maps: { ready: true, note: "Live provider search handoffs are built in" },
       emailHandoff: { ready: true, note: "Opens the customer’s email app for review and sending" },

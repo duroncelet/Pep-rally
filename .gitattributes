@@ -1,0 +1,4 @@
+public/downloads/Pep-Rally-Source.zip export-ignore
+dist export-ignore
+node_modules export-ignore
+.wrangler export-ignore

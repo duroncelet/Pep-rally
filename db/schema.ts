@@ -1,5 +1,14 @@
 import { index, sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 
+export const userIdentities = sqliteTable("user_identities", {
+  id: text("id").primaryKey(),
+  clerkUserId: text("clerk_user_id").unique(),
+  legacyUserId: text("legacy_user_id").unique(),
+  email: text("email").notNull().unique(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+}, (table) => [index("idx_user_identities_email").on(table.email)]);
+
 export const savedRallies = sqliteTable("saved_rallies", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),

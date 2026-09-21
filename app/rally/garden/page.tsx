@@ -44,7 +44,7 @@ export default function GardenRally() {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authState, setAuthState] = useState<"checking" | "guest" | "signed-in">("checking");
-  const [signInPath, setSignInPath] = useState("/signin-with-chatgpt?return_to=%2Frally%2Fgarden");
+  const [signInPath, setSignInPath] = useState("/sign-in?redirect_url=%2Frally%2Fgarden");
 
   useEffect(() => {
     (async () => {
