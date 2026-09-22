@@ -142,7 +142,7 @@ test("ships both executable Rally workspaces", async () => {
     readFile(new URL("../drizzle/0005_calm_karen_page.sql", import.meta.url), "utf8"),
   ]);
 
-  for (const feature of ["BUDGET COMFORT CHECK", "Hotels", "Airbnb", "VRBO", "GROUP CHAT", "MONEY", "PLACES + RESERVATIONS", "SHOPPING", "PACKING + SAFETY"]) assert.match(bachelorette, new RegExp(feature.replace(/[+]/g, "\\+")));
+  for (const feature of ["BUDGET COMFORT CHECK", "Hotels", "Airbnb", "VRBO", "ORGANIZER NOTES", "MONEY", "PLACES + RESERVATIONS", "SHOPPING", "PACKING + SAFETY"]) assert.match(bachelorette, new RegExp(feature.replace(/[+]/g, "\\+")));
   for (const feature of ["Rows / in-ground", "Raised beds", "Pots / containers", "LIVE WEATHER", "GARDEN JOURNAL"]) assert.match(garden, new RegExp(feature.replace(/[\/]/g, "\\/")));
   assert.match(weather, /api\.open-meteo\.com/);
   assert.match(weather, /geocoding-api\.open-meteo\.com/);
@@ -280,8 +280,8 @@ test("ships the first bounded agentic Rally loop", async () => {
   assert.match(runtime, /maxSteps: 12/);
   assert.match(runtime, /previewMaxCostCents/);
   assert.match(runtime, /validateSpec/);
-  assert.match(planner, /How this was made/);
-  assert.match(planner, /Sign in to keep it/);
-  assert.match(planner, /Revision limit reached/);
+  assert.match(planner, /validTripDates/);
+  assert.match(planner, /Create my weekend/);
+  assert.doesNotMatch(planner, /Revision limit reached/);
   assert.match(bachelorette, /AgenticPlanner/);
 });

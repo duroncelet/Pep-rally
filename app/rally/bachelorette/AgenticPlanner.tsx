@@ -1,62 +1,44 @@
 "use client";
+import { useState } from "react";
+import { generateBacheloretteArtifact, type ItineraryArtifact } from "../../agentic/rally-runtime";
+import { validTripDates } from "./destinations";
 
-import { useMemo, useState } from "react";
-import { bacheloretteAgentSpec, generateBacheloretteArtifact, reviseBacheloretteArtifact, validateSpec, type ItineraryArtifact, type ProvenanceItem } from "../../agentic/rally-runtime";
-import { downloadMarkdown, markdownCell } from "../../download-markdown";
+type Props = { onApply: (artifact: ItineraryArtifact, answers: Record<string, string>) => void };
+const questions = [
+  { id: "bride", label: "Who are we celebrating?", placeholder: "Her name" },
+  { id: "city", label: "Where are you going?", placeholder: "Any city, with state or country" },
+  { id: "dates", label: "When is the trip?", placeholder: "" },
+  { id: "headcount", label: "How many people, including the bride?", placeholder: "8" },
+  { id: "budget", label: "What is the comfortable budget per person?", placeholder: "450" },
+  { id: "vibe", label: "What feels most like her?", placeholder: "" },
+];
+const vibes = ["Poolside & playful", "Foodie & fabulous", "Wellness & slow", "Big night out", "Crafty & cozy"];
 
-type Props = { signedIn: boolean; onSignIn: () => void; onApply: (artifact: ItineraryArtifact, answers: Record<string, string>) => void };
-
-export default function AgenticPlanner({ signedIn, onSignIn, onApply }: Props) {
-  const questions = bacheloretteAgentSpec.steps.filter((step) => step.type === "ask");
+export default function AgenticPlanner({ onApply }: Props) {
   const [started, setStarted] = useState(false);
-  const [applied, setApplied] = useState(false);
-  const [arrival, setArrival] = useState("");
-  const [departure, setDeparture] = useState("");
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [draft, setDraft] = useState("");
-  const [artifact, setArtifact] = useState<ItineraryArtifact | null>(null);
-  const [feedback, setFeedback] = useState("");
-  const [revisions, setRevisions] = useState(0);
-  const [provenance, setProvenance] = useState<ProvenanceItem[]>([]);
-  const validation = useMemo(() => validateSpec(bacheloretteAgentSpec), []);
-  const current = questions[questionIndex];
-
-  function submitAnswer() {
-    if (!current || !draft.trim()) return;
-    if (current.id === "dates" && (!arrival || !departure || departure < arrival)) return;
-    if (current.inputKind === "number" && (!Number.isFinite(Number(draft)) || Number(draft) <= 0 || (current.id === "headcount" && (!Number.isInteger(Number(draft)) || Number(draft) > 100)))) return;
-    const nextAnswers = { ...answers, [current.id]: draft.trim(), ...(current.id === "dates" ? { startDate: arrival, endDate: departure } : {}) };
-    setAnswers(nextAnswers);
-    setProvenance((items) => [...items, { label: "Asked", detail: current.prompt }]);
-    setDraft("");
-    if (questionIndex < questions.length - 1) setQuestionIndex(questionIndex + 1);
-    else {
-      const result = generateBacheloretteArtifact(nextAnswers);
-      setArtifact(result);
-      setProvenance((items) => [...items, { label: "Generated", detail: "Created a three-day itinerary with a visible budget and booking checklist." }]);
-    }
+  const [error, setError] = useState("");
+  const question = questions[index];
+  function answer(id: string, value: string) { setAnswers(current => ({ ...current, [id]: value })); setError(""); }
+  function next() {
+    if (question.id === "dates") {
+      if (!validTripDates(answers.startDate || "", answers.endDate || "")) { setError("Choose valid dates, with departure on or after arrival and no more than 31 days apart."); return; }
+    } else if (!answers[question.id]?.trim()) { setError("Add an answer to continue."); return; }
+    if (question.id === "headcount" && (!Number.isInteger(Number(answers.headcount)) || Number(answers.headcount) < 1 || Number(answers.headcount) > 100)) { setError("Enter a whole number from 1 to 100."); return; }
+    if (question.id === "budget" && (!Number.isFinite(Number(answers.budget)) || Number(answers.budget) <= 0 || Number(answers.budget) > 100000)) { setError("Enter a budget greater than $0 and up to $100,000."); return; }
+    if (index < questions.length - 1) { setIndex(index + 1); return; }
+    const complete = { ...answers, dates: `${answers.startDate} to ${answers.endDate}` };
+    onApply(generateBacheloretteArtifact(complete), complete);
   }
-
-  function revise() {
-    if (!artifact || !feedback.trim() || revisions >= 3) return;
-    setArtifact(reviseBacheloretteArtifact(artifact, feedback.trim(), answers));
-    setProvenance((items) => [...items, { label: `Revision ${revisions + 1}`, detail: feedback.trim() }]);
-    setFeedback(""); setRevisions(revisions + 1);
-  }
-
-  function download() {
-    if (!artifact) return;
-    const markdown = `# ${artifact.title}\n\n${artifact.summary}\n\n**Estimated total per person:** $${artifact.totalPerPerson.toLocaleString()}\n\n${artifact.days.map((day) => `## ${day.label}\n\n${day.items.map((item) => `- **${item.time} · ${markdownCell(item.title)}** — ${markdownCell(item.note)}${item.estimatedCost ? ` · est. $${item.estimatedCost}` : ""}`).join("\n")}`).join("\n\n")}\n\n## Booking list\n\n${artifact.bookingList.map((item) => `- [ ] ${markdownCell(item)}`).join("\n")}\n\n## How it was made\n\n${provenance.map((item) => `- **${item.label}:** ${markdownCell(item.detail)}`).join("\n")}\n\n---\nCreated with the Pep Rally agentic preview. Review live prices, availability, policies, and every booking before paying.\n`;
-    downloadMarkdown("bachelorette-agentic-itinerary.md", markdown);
-  }
-
-  if (!validation.valid) return <section className="agentic-shell"><b>This Rally needs a creator fix before it can run.</b><p>{validation.errors.join(" ")}</p></section>;
-
-  if (applied) return <section className="agentic-shell"><h2>Your itinerary is in the workspace.</h2><p>Next: rename your guests, explore Destination for weather and dinner options, then use Money for bills. Download a copy or save your Rally before leaving.</p><button onClick={() => setApplied(false)}>Review the original draft</button></section>;
-
-  return <section className="agentic-shell" id="agentic-preview">
-    <header><div><small>YOUR WEEKEND STARTS HERE</small><h2>Plan the weekend through a real back-and-forth.</h2><p>Pep Rally asks only what it needs, drafts the outcome, and revises the affected part without making you restart.</p></div><div className="agent-budget"><span><b>5</b>quick questions</span><span><b>Free</b>to plan</span></div></header>
-    {!started ? <div className="agent-start"><div><b>What you’ll finish</b><p>{bacheloretteAgentSpec.listingContract.deliverableDescription}</p><ul>{bacheloretteAgentSpec.listingContract.claims.map((claim) => <li key={claim}>{claim}</li>)}</ul></div><button className="primary" onClick={() => setStarted(true)}>Plan my weekend →</button></div> : !artifact && current ? <form className="agent-question" onSubmit={(event) => { event.preventDefault(); submitAnswer(); }}><div className="agent-progress"><span style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }}/></div><small>QUESTION {questionIndex + 1} OF {questions.length}</small><h3 id="planner-question">{current.prompt}</h3>{current.id === "dates" ? <div className="trip-fields"><label>Arrival date<input required type="date" value={arrival} onChange={e => { setArrival(e.target.value); setDraft(e.target.value && departure ? `${e.target.value} to ${departure}` : ""); }}/></label><label>Departure date<input required type="date" min={arrival} value={departure} onChange={e => { setDeparture(e.target.value); setDraft(arrival && e.target.value ? `${arrival} to ${e.target.value}` : ""); }}/></label></div> : current.inputKind === "choice" ? <div className="agent-choices">{current.choices?.map((choice) => <button type="button" className={draft === choice ? "selected" : ""} key={choice} onClick={() => setDraft(choice)}>{choice}</button>)}</div> : <input key={current.id} aria-labelledby="planner-question" required autoFocus onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); submitAnswer(); } }} type={current.inputKind === "number" ? "number" : "text"} min={current.inputKind === "number" ? 1 : undefined} value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={current.id === "city" ? "Palm Springs, CA" : current.id === "dates" ? "October 9–11" : current.id === "headcount" ? "8" : "$450"}/>}<button type="submit" className="primary" disabled={!draft.trim()}>{questionIndex === questions.length - 1 ? "Create my itinerary →" : "Continue →"}</button></form> : artifact ? <div className="agent-result"><div className="agent-artifact"><small>DELIVERED · REVIEW BEFORE BOOKING</small><h3>{artifact.title}</h3><p>{artifact.summary}</p><div className="agent-total"><span>Estimated ceiling per person</span><b>${artifact.totalPerPerson.toLocaleString()}</b></div>{artifact.days.map((day) => <article key={day.label}><h4>{day.label}</h4>{day.items.map((item) => <div key={`${day.label}-${item.time}-${item.title}`}><time>{item.time}</time><span><b>{item.title}</b><small>{item.note}</small></span>{item.estimatedCost > 0 && <em>~${item.estimatedCost}</em>}</div>)}</article>)}<aside><b>Booking list</b>{artifact.bookingList.map((item) => <span key={item}>□ {item}</span>)}</aside></div><div className="agent-review"><small>REVIEW + REVISE</small><h3>What should change?</h3><p>Try “make Saturday cheaper,” “swap the dinner,” or “make it more relaxed.” Only the affected section changes.</p><div className="agent-quick"><button onClick={() => setFeedback("Make Saturday cheaper")}>Make it cheaper</button><button onClick={() => setFeedback("Swap the celebration dinner")}>Swap dinner</button><button onClick={() => setFeedback("Make the schedule more relaxed")}>More relaxed</button></div><textarea value={feedback} onChange={(event) => setFeedback(event.target.value)} placeholder="Tell the Rally what to revise…"/><button disabled={!feedback.trim() || revisions >= 3} onClick={revise}>{revisions >= 3 ? "Revision limit reached" : "Revise this plan →"}</button><div className="agent-provenance"><b>How this was made</b>{provenance.map((item, index) => <span key={`${item.label}-${index}`}><i>{index + 1}</i><span><strong>{item.label}</strong>{item.detail}</span></span>)}</div><div className="agent-keep">{signedIn ? <><button className="primary" onClick={() => { onApply(artifact, answers); setApplied(true); }}>Use this itinerary in my workspace</button><button onClick={download}>Download itinerary .md</button></> : <><button className="primary" onClick={() => { onApply(artifact, answers); setApplied(true); }}>Use this itinerary in my workspace</button><button onClick={download}>Download itinerary .md</button><b>Like the result?</b><p>Use this itinerary below, then sign in to save the workspace. You did not need an account to create it.</p><button className="primary" onClick={onSignIn}>Sign in to keep it →</button></>}</div></div></div> : null}
+  return <section className="agentic-shell">
+    <header><div><small>YOUR WEEKEND STARTS HERE</small><h2>Make a plan everyone can get behind.</h2><p>A few details, then one editable plan for your people, places and budget.</p></div></header>
+    {!started ? <div className="agent-start"><p>You can choose activities, add your own ideas and share the finished plan.</p><button className="primary" onClick={() => setStarted(true)}>Plan your weekend →</button></div> : <form className="agent-question" onSubmit={e => { e.preventDefault(); next(); }}>
+      <small>QUESTION {index + 1} OF {questions.length}</small><h3 id="planner-question">{question.label}</h3>
+      {question.id === "dates" ? <div className="trip-fields"><label>Arrival date<input type="date" required value={answers.startDate || ""} onChange={e => answer("startDate", e.target.value)}/></label><label>Departure date<input type="date" min={answers.startDate} required value={answers.endDate || ""} onChange={e => answer("endDate", e.target.value)}/></label></div> : question.id === "vibe" ? <div className="agent-choices">{vibes.map(v => <button key={v} type="button" className={answers.vibe === v ? "selected" : ""} aria-pressed={answers.vibe === v} onClick={() => answer("vibe", v)}>{v}</button>)}</div> : <input key={question.id} aria-labelledby="planner-question" autoFocus required type={["budget", "headcount"].includes(question.id) ? "number" : "text"} min="1" step={question.id === "budget" ? "0.01" : "1"} value={answers[question.id] || ""} onChange={e => answer(question.id, e.target.value)} placeholder={question.placeholder}/>}
+      {question.id === "budget" && <p>In USD, excluding travel to the destination. This is a planning limit; you’ll add actual costs later.</p>}
+      {error && <p role="alert">{error}</p>}
+      <div className="rally-actions">{index > 0 && <button type="button" onClick={() => { setIndex(index - 1); setError(""); }}>Back</button>}<button className="primary" type="submit">{index === questions.length - 1 ? "Create my weekend →" : "Continue →"}</button></div>
+    </form>}
   </section>;
 }
