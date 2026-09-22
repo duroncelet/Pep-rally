@@ -100,9 +100,13 @@ test("ships a usable sign-in product and downloadable outcomes", async () => {
   assert.match(bachelorette + garden, /photo-rally-header/);
   for (const source of [bachelorette, garden]) {
     assert.match(source, /authState.*guest/);
-    assert.match(source, /no sign-in required/);
-    assert.match(source, /Sign in to keep it/);
+    assert.match(source, /no sign-in required|No account needed to start/);
+    assert.match(source, /Sign in to keep it|Sign in to save/);
   }
+  const bachHeader = bachelorette.match(/<header[\s\S]*?<\/header>/)?.[0] || "";
+  assert.equal((bachHeader.match(/Sign in to/g) || []).length, 1);
+  assert.doesNotMatch(bachHeader, /onClick=\{download/);
+  assert.match(bachHeader, /The people, plans and split bills/);
   assert.match(helper, /URL\.createObjectURL/);
   for (const tool of ["ChatGPT", "Claude", "Gemini", "Codex", "Cursor", "Replit Agent"]) assert.match(customization, new RegExp(tool));
   assert.match(customization, /Pep Rally source ZIP/);
