@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../download-markdown";
+import { gardenAssignments } from "./assignments";
 import { buildCustomizationKit } from "../../customization-kit";
 
 type GardenTask = { id: string; text: string; done: boolean; timing: string };
@@ -26,7 +27,7 @@ const cropOptions = ["Tomatoes", "Peppers", "Lettuce", "Herbs", "Carrots", "Bean
 
 export default function GardenRally() {
   const [tab, setTab] = useState<"setup" | "plan" | "layout" | "weather" | "tasks" | "journal">("setup");
-  const [location, setLocation] = useState("Oakland, CA");
+  const [location, setLocation] = useState("");
   const [space, setSpace] = useState("Raised beds");
   const [bedCount, setBedCount] = useState(2);
   const [length, setLength] = useState(8);
@@ -35,12 +36,17 @@ export default function GardenRally() {
   const [watering, setWatering] = useState("Hand watering");
   const [experience, setExperience] = useState("Beginner");
   const [goal, setGoal] = useState("Fresh food for the week");
-  const [crops, setCrops] = useState(["Tomatoes", "Herbs", "Lettuce"]);
+  const [crops, setCrops] = useState<string[]>([]);
   const [tasks, setTasks] = useState(starterTasks);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
   const [journalDraft, setJournalDraft] = useState("");
   const [weather, setWeather] = useState<Weather | null>(null);
   const [weatherStatus, setWeatherStatus] = useState("Add your location to load a live 7-day forecast.");
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState("");
+  const [choices, setChoices] = useState<Record<number,string>>({});
+  const weatherRequest = useRef(0);
+  useEffect(() => { weatherRequest.current++; setWeather(null); setWeatherStatus("Load the forecast for your garden."); }, [location]);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authState, setAuthState] = useState<"checking" | "guest" | "signed-in">("checking");
@@ -48,29 +54,35 @@ export default function GardenRally() {
 
   useEffect(() => {
     (async () => {
+      try {
       const response = await fetch("/api/garden-hub");
       const data = await response.json();
       if (response.status === 401 && data.signIn) {
-        setAuthState("guest"); setSignInPath(data.signIn); setLoading(false); return;
+        setAuthState("guest"); setSignInPath(data.signIn);
       }
-      setAuthState("signed-in");
-      if (data.plan?.version === 1) {
-        const plan = data.plan;
+      if (!response.ok && response.status !== 401) throw new Error("load");
+      if (response.ok) setAuthState("signed-in");
+      const pending = sessionStorage.getItem("pep-rally-garden-draft");
+      const plan = pending ? JSON.parse(pending) : data.plan;
+      if (plan?.version === 1 || plan?.version === 2) {
+        setReady(true); setTab("plan"); setChoices(plan.choices || {});
         setLocation(plan.location); setSpace(plan.space); setBedCount(plan.bedCount); setLength(plan.length); setWidth(plan.width);
         setSun(plan.sun); setWatering(plan.watering); setExperience(plan.experience); setGoal(plan.goal); setCrops(plan.crops);
         setTasks(plan.tasks); setJournal(plan.journal ?? []);
       }
       setLoading(false);
+      } catch { setAuthState("guest"); setLoading(false); setError("Your saved garden could not load. Refresh before editing a saved garden."); }
     })();
   }, []);
 
   const totalArea = space === "Pots / containers" ? bedCount : Math.max(1, bedCount * length * width);
-  const suggestedPlants = useMemo(() => {
-    const lowLight = ["Lettuce", "Herbs", "Carrots", "Flowers"];
-    const container = ["Herbs", "Peppers", "Lettuce", "Tomatoes"];
-    const base = sun === "Under 4 hours" ? lowLight : space === "Pots / containers" ? container : cropOptions;
-    return crops.filter((crop) => base.includes(crop)).concat(base.filter((crop) => !crops.includes(crop))).slice(0, 5);
-  }, [crops, space, sun]);
+  const allocation = gardenAssignments(crops, bedCount, choices);
+  const suggestedPlants = [...new Set(allocation.slots.filter(Boolean))];
+  const slotName = space === "Pots / containers" ? "Pot" : space === "Rows / in-ground" ? "Row" : space === "Indoor / windowsill" ? "Growing area" : "Bed";
+  function buildPlan() {
+    if (!location.trim() || !crops.length || !Number.isInteger(bedCount) || bedCount < 1 || bedCount > 30 || !Number.isFinite(length) || !Number.isFinite(width) || length <= 0 || width <= 0) { setError("Add your location, choose at least one crop, and enter 1–30 growing spaces with positive dimensions."); return; }
+    setError(""); setReady(true); setTab("plan"); void loadWeather();
+  }
 
   const weatherActions = useMemo(() => {
     if (!weather) return [];
@@ -89,24 +101,32 @@ export default function GardenRally() {
   }, [weather]);
 
   async function loadWeather() {
-    setWeatherStatus("Loading live weather…");
+    const request = ++weatherRequest.current;
+    setWeatherStatus("Loading live weather…"); setWeather(null);
+    try {
     const response = await fetch(`/api/garden-weather?location=${encodeURIComponent(location)}`);
     const data = await response.json();
+    if (request !== weatherRequest.current) return;
     if (!response.ok) { setWeatherStatus(data.error ?? "Weather is unavailable."); return; }
     setWeather(data); setWeatherStatus(`Live forecast for ${data.place.name}${data.place.region ? `, ${data.place.region}` : ""}`);
+    } catch { if (request === weatherRequest.current) setWeatherStatus("Weather could not load. You can still use your garden plan and retry."); }
   }
 
+  function snapshot() { return { version:2, choices, location, space, bedCount, length, width, sun, watering, experience, goal, crops, tasks, journal }; }
   async function save() {
-    const response = await fetch("/api/garden-hub", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ version: 1, location, space, bedCount, length, width, sun, watering, experience, goal, crops, tasks, journal }) });
-    if (response.status === 401) { const data = await response.json(); if (data.signIn) window.location.href = data.signIn; return; }
-    if (response.ok) { setSaved(true); setTimeout(() => setSaved(false), 1600); }
+    setError("");
+    try {
+      const response = await fetch("/api/garden-hub", { method:"PUT", headers:{"content-type":"application/json"}, body:JSON.stringify(snapshot()) });
+      if (response.status === 401) { keepThisRally(); return; }
+      if (!response.ok) throw new Error("save");
+      sessionStorage.removeItem("pep-rally-garden-draft"); setSaved(true); setTimeout(() => setSaved(false), 1600);
+    } catch { setError("Your garden could not save. Download a copy and try again."); }
   }
-
-  function keepThisRally() { window.location.href = signInPath; }
+  function keepThisRally() { try { sessionStorage.setItem("pep-rally-garden-draft", JSON.stringify(snapshot())); window.location.href = signInPath; } catch { setError("Download your garden before signing in; this browser could not preserve your draft."); } }
 
   function downloadOutcome() {
     const forecastRows = weather ? weather.daily.time.map((day, index) => `| ${day} | ${Math.round(weather.daily.temperature_2m_min[index])}° | ${Math.round(weather.daily.temperature_2m_max[index])}° | ${weather.daily.precipitation_probability_max[index]}% |`).join("\n") : "| Load live weather in the Rally | — | — | — |";
-    const markdown = `# The Little Garden Planner\n\n> A practical starting plan made with Pep Rally. Confirm planting dates, soil safety, varieties, and pest guidance with a trusted local extension or nursery.\n\n## My garden\n\n- **Location:** ${markdownCell(location)}\n- **Setup:** ${markdownCell(space)}\n- **Size:** ${totalArea} ${space === "Pots / containers" ? "containers" : "sq ft"}\n- **Sun:** ${markdownCell(sun)}\n- **Watering:** ${markdownCell(watering)}\n- **Experience:** ${markdownCell(experience)}\n- **Goal:** ${markdownCell(goal)}\n\n## What to grow first\n\n${suggestedPlants.map((plant, index) => `${index + 1}. **${plant}** — ${plant === "Tomatoes" || plant === "Cucumbers" || plant === "Beans" ? "Use the sunniest edge and support it vertically." : plant === "Lettuce" ? "Use the cooler edge and sow a little at a time." : plant === "Herbs" ? "Keep close to the kitchen and harvest often." : "Group by watering needs and leave room to reach it."}`).join("\n")}\n\n## Layout\n\n${Array.from({ length: Math.min(bedCount, 12) }).map((_, index) => `- **${space === "Pots / containers" ? "Pot" : space === "Rows / in-ground" ? "Row" : "Bed"} ${index + 1}:** ${suggestedPlants[index % suggestedPlants.length]}${index % 2 ? " + Herbs" : " + Flowers on the edge"}`).join("\n")}\n\n## This week's weather-aware actions\n\n${weatherActions.length ? weatherActions.map((action) => `- ${action}`).join("\n") : "- Load the live forecast in the Rally to add weather-aware actions."}\n\n| Date | Low | High | Rain chance |\n|---|---:|---:|---:|\n${forecastRows}\n\n## Care board\n\n${tasks.map((task) => `- [${task.done ? "x" : " "}] ${markdownCell(task.text)} — ${markdownCell(task.timing)}`).join("\n")}\n\n## Garden journal\n\n${journal.length ? journal.map((entry) => `- **${markdownCell(entry.date)}:** ${markdownCell(entry.note)}`).join("\n") : "No notes yet. Record what you plant, change, harvest, and notice."}\n\n---\nCreated with Pep Rally · ${new Date().toLocaleDateString()}${weather ? ` · Weather: ${weather.source}` : ""}\n`;
+    const markdown = `# The Little Garden Planner\n\n> A practical starting plan made with Pep Rally. Confirm planting dates, soil safety, varieties, and pest guidance with a trusted local extension or nursery.\n\n## My garden\n\n- **Location:** ${markdownCell(location)}\n- **Setup:** ${markdownCell(space)}\n- **Size:** ${totalArea} ${space === "Pots / containers" ? "containers" : "sq ft"}\n- **Sun:** ${markdownCell(sun)}\n- **Watering:** ${markdownCell(watering)}\n- **Experience:** ${markdownCell(experience)}\n- **Goal:** ${markdownCell(goal)}\n\n## What to grow first\n\n${suggestedPlants.map((plant, index) => `${index + 1}. **${plant}** — ${plant === "Tomatoes" || plant === "Cucumbers" || plant === "Beans" ? "Use the sunniest edge and support it vertically." : plant === "Lettuce" ? "Use the cooler edge and sow a little at a time." : plant === "Herbs" ? "Keep close to the kitchen and harvest often." : "Group by watering needs and leave room to reach it."}`).join("\n")}\n\n## Layout\n\n${allocation.slots.map((plant, index) => `- **${slotName} ${index + 1}:** ${plant || "Unassigned"}`).join("\n")}\n\nNot placed yet: ${allocation.unassigned.join(", ") || "None"}. These are crop groups, not plant quantities; confirm spacing and container size for each variety.\n\n## This week's weather-aware actions\n\n${weatherActions.length ? weatherActions.map((action) => `- ${action}`).join("\n") : "- Load the live forecast in the Rally to add weather-aware actions."}\n\n| Date | Low | High | Rain chance |\n|---|---:|---:|---:|\n${forecastRows}\n\n## Care board\n\n${tasks.map((task) => `- [${task.done ? "x" : " "}] ${markdownCell(task.text)} — ${markdownCell(task.timing)}`).join("\n")}\n\n## Garden journal\n\n${journal.length ? journal.map((entry) => `- **${markdownCell(entry.date)}:** ${markdownCell(entry.note)}`).join("\n") : "No notes yet. Record what you plant, change, harvest, and notice."}\n\n---\nCreated with Pep Rally · ${new Date().toLocaleDateString()}${weather ? ` · Weather: ${weather.source}` : ""}\n`;
     downloadMarkdown(`${safeFileName(location)}-garden-plan.md`, markdown);
   }
 
@@ -124,22 +144,24 @@ export default function GardenRally() {
   }
 
   if (loading) return <main className="rally-loading">Opening your garden…</main>;
-  const nav = ["setup", "plan", "layout", "weather", "tasks", "journal"] as const;
+  const nav = ["plan", "tasks", "setup"] as const;
+  const labels = { plan:"Your garden", tasks:"This week", setup:"Edit garden" };
 
   return <main className="rally-room garden-room">
     <header className="rally-header photo-rally-header garden-header">
       <a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a>
-      <div className="rally-header-copy"><small>THE LITTLE GARDEN PLANNER · EXECUTABLE WORKSPACE</small><h1>Your garden, growing.</h1><p>{space} · {totalArea} {space === "Pots / containers" ? "containers" : "sq ft"} · {location}</p></div>
+      <div className="rally-header-copy"><small>THE LITTLE GARDEN PLANNER</small><h1>Your garden, growing.</h1><p>Give your favorite crops a place to grow.</p></div>
       <figure className="rally-cover"><img src="/rallies/lush-garden.jpg" alt="A lush edible garden with raised beds, herbs, flowers, and containers"/><figcaption><b>Free Rally</b><span>From your space and weather to a growing plan</span></figcaption></figure>
-      <div className="rally-header-actions">{authState === "guest" ? <><button onClick={keepThisRally}>Sign in to download</button><button className="primary" onClick={keepThisRally}>Sign in to keep it</button></> : <><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={downloadOutcome}>Download my plan .md</button><button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button></>}</div>
+      {ready && <div className="rally-header-actions">{authState === "guest" ? <button className="primary" onClick={keepThisRally}>Sign in to save</button> : <button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button>}</div>}
     </header>
-    {authState === "guest" && <div className="guest-preview-note"><b>You are trying the full Rally—no sign-in required.</b><span>Your work stays on this screen for this visit. Sign in only when you want to save or download it.</span></div>}
-    <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
+    {authState === "guest" && <div className="guest-preview-note"><span>Free to use. No account needed to start. Download your plan or sign in to save progress.</span></div>}
+    {error && <p role="alert" className="trip-notice">{error}</p>}
+    {ready && <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{labels[item]}</button>)}</nav>}
 
     {tab === "setup" && <section className="rally-content">
-      <div className="workspace-intro"><div><small>START WITH THE REAL SPACE</small><h2>What are you actually growing in?</h2><p>This changes spacing, watering, crop choices, and maintenance more than a generic plant list ever could.</p></div><div className="workspace-stamp"><b>{experience}</b><span>{goal}</span></div></div>
+      <div className="workspace-intro"><div><small>START WITH THE REAL SPACE</small><h2>What are you actually growing in?</h2><p>Choose your setup, update the starting dimensions to match your space, and select the crops you want to grow.</p></div><div className="workspace-stamp"><b>{experience}</b><span>{goal}</span></div></div>
       <div className="setup-grid">
-        <label>City or postal code<input value={location} onChange={(e) => setLocation(e.target.value)} /></label>
+        <label>City or postal code<input placeholder="Your city, state or country" value={location} onChange={(e) => setLocation(e.target.value)} /></label>
         <label>Growing setup<select value={space} onChange={(e) => setSpace(e.target.value)}><option>Rows / in-ground</option><option>Raised beds</option><option>Pots / containers</option><option>Indoor / windowsill</option></select></label>
         <label>{space === "Pots / containers" ? "Number of containers" : "Number of beds / rows"}<input type="number" min="1" max="30" value={bedCount} onChange={(e) => setBedCount(Number(e.target.value))} /></label>
         {space !== "Pots / containers" && <><label>Length (feet)<input type="number" min="1" value={length} onChange={(e) => setLength(Number(e.target.value))} /></label><label>Width (feet)<input type="number" min="1" value={width} onChange={(e) => setWidth(Number(e.target.value))} /></label></>}
@@ -149,31 +171,34 @@ export default function GardenRally() {
         <label>Primary goal<select value={goal} onChange={(e) => setGoal(e.target.value)}><option>Fresh food for the week</option><option>Herbs for cooking</option><option>Flowers and pollinators</option><option>Maximum harvest</option><option>A low-maintenance garden</option></select></label>
       </div>
       <div className="crop-picker"><small>WHAT DO YOU WANT TO GROW?</small>{cropOptions.map((crop) => <button key={crop} className={crops.includes(crop) ? "selected" : ""} onClick={() => setCrops(crops.includes(crop) ? crops.filter((item) => item !== crop) : [...crops, crop])}>{crops.includes(crop) ? "✓ " : "+ "}{crop}</button>)}</div>
-      <button className="primary" onClick={() => { void loadWeather(); setTab("plan"); }}>Build my plan →</button>
+      <button className="primary" onClick={buildPlan}>Plan my garden →</button>
     </section>}
 
     {tab === "plan" && <section className="rally-content">
-      <div className="workspace-intro"><div><small>YOUR WORKING PLAN</small><h2>A small garden you can maintain.</h2><p>Built from your space, light, desired crops, watering setup, and current forecast.</p></div><button onClick={() => { void loadWeather(); setTab("weather"); }}>Refresh weather →</button></div>
+      <div className="workspace-intro"><div><small>YOUR WORKING PLAN</small><h2>A small garden you can maintain.</h2><p>{location} · {bedCount} {slotName.toLowerCase()}{bedCount === 1 ? "" : "s"} · {sun}. Assign one crop group to each space; check variety-specific spacing and pot size before planting.</p></div><button className="primary" onClick={downloadOutcome}>Download garden plan</button></div>
+      {allocation.unassigned.length > 0 && <p role="status" className="trip-notice">Not placed yet: {allocation.unassigned.join(", ")}. Swap an assignment below or add another growing space. We haven’t assumed these crops fit.</p>}
+      {sun === "Under 4 hours" && <p className="confidence-note">Limited direct sun: check each selected variety’s light requirements before planting. Your choices have not been silently replaced.</p>}
       <div className="garden-plan-grid">
-        {suggestedPlants.map((plant, index) => <article key={plant}><small>PRIORITY {index + 1}</small><h3>{plant}</h3><p>{plant === "Tomatoes" || plant === "Cucumbers" || plant === "Beans" ? "Give it the sunniest edge and support it vertically." : plant === "Lettuce" ? "Use the cooler edge and sow a little at a time." : plant === "Herbs" ? "Keep close to the kitchen and harvest often." : "Group by watering needs and leave room to reach it."}</p><span>{space} · {sun}</span></article>)}
+        {suggestedPlants.map((plant, index) => <article key={plant}><small>SELECTED CROP</small><h3>{plant}</h3><p>{plant === "Tomatoes" || plant === "Cucumbers" || plant === "Beans" ? "Give it the sunniest edge and support it vertically." : plant === "Lettuce" ? "Use the cooler edge and sow a little at a time." : plant === "Herbs" ? "Keep close to the kitchen and harvest often." : "Group by watering needs and leave room to reach it."}</p><span>{space} · {sun}</span></article>)}
       </div>
       <div className="weather-actions"><small>THIS WEEK</small>{weatherActions.length ? weatherActions.map((action) => <p key={action}>↗ {action}</p>) : <p>Load the forecast to add weather-aware actions.</p>}</div>
       <p className="confidence-note">This planner turns your inputs and forecast into a workable starting point. Confirm planting dates, varieties, soil safety, and pest guidance with a trusted local extension or nursery.</p>
     </section>}
 
-    {tab === "layout" && <section className="rally-content">
-      <div className="workspace-intro"><div><small>LAYOUT</small><h2>Put every plant somewhere.</h2><p>A simple, editable starting arrangement—not a claim about exact yield.</p></div><b>{totalArea} {space === "Pots / containers" ? "containers" : "sq ft total"}</b></div>
-      <div className={`garden-layout ${space.includes("Pots") ? "pots" : "beds"}`}>{Array.from({ length: Math.min(bedCount, 12) }).map((_, index) => <article key={index}><small>{space === "Pots / containers" ? "POT" : space === "Rows / in-ground" ? "ROW" : "BED"} {index + 1}</small><b>{suggestedPlants[index % suggestedPlants.length]}</b><span>{index % 2 ? "Companion: Herbs" : "Edge: Flowers"}</span></article>)}</div>
+    {tab === "plan" && <section className="rally-content">
+      <div className="workspace-intro"><div><small>LAYOUT</small><h2>Put every plant somewhere.</h2><p>Choose the crop group for each space. This is not a plant-count or yield estimate.</p></div><b>{totalArea} {space === "Pots / containers" ? "containers" : "sq ft total"}</b></div>
+      <div className={`garden-layout ${space.includes("Pots") ? "pots" : "beds"}`}>{allocation.slots.map((plant, index) => <article key={index}><label>{slotName} {index + 1}<select aria-label={`${slotName} ${index + 1} crop`} value={plant} onChange={e => setChoices({...choices, [index]:e.target.value})}><option value="">Leave open</option>{crops.map(crop => <option key={crop}>{crop}</option>)}</select></label></article>)}</div>
       <div className="layout-rules"><span><b>Tall crops</b>Place where they will not shade shorter plants.</span><span><b>Access</b>Keep every planting area within comfortable reach.</span><span><b>Water</b>Group crops with similar moisture needs.</span><span><b>Rotation</b>Record each season before changing beds.</span></div>
     </section>}
 
-    {tab === "weather" && <section className="rally-content">
+    {tab === "tasks" && <section className="rally-content"><div className="rally-title"><div><small>CARE BOARD</small><h2>Do the next right thing.</h2></div><button onClick={() => setTasks([...tasks, { id: crypto.randomUUID(), text: "New garden task", done: false, timing: "This week" }])}>+ Add task</button></div><div className="weather-actions"><small>WEATHER-AWARE ACTIONS</small>{weatherActions.length ? weatherActions.map(action => <p key={action}>{action}</p>) : <p>{weatherStatus}</p>}</div><div className="task-list">{tasks.map((task, index) => <article className={task.done ? "done" : ""} key={task.id}><button className="check" onClick={() => setTasks(tasks.map((item, i) => i === index ? { ...item, done: !item.done } : item))}>{task.done ? "✓" : ""}</button><input value={task.text} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, text: e.target.value } : item))}/><input value={task.timing} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, timing: e.target.value } : item))}/><button onClick={() => setTasks(tasks.filter((item) => item.id !== task.id))}>×</button></article>)}</div></section>}
+
+    {tab === "tasks" && <details className="rally-content garden-forecast"><summary>Seven-day forecast</summary>
       <div className="workspace-intro"><div><small>LIVE WEATHER</small><h2>{weatherStatus}</h2><p>Weather informs watering and protection tasks; it does not replace checking the soil and plants.</p></div><button onClick={loadWeather}>Refresh forecast</button></div>
-      {weather ? <><div className="current-weather"><b>{Math.round(weather.current.temperature_2m)}{weather.currentUnits.temperature_2m}</b><span>Feels like {Math.round(weather.current.apparent_temperature)}{weather.currentUnits.apparent_temperature}<br/>Wind {Math.round(weather.current.wind_speed_10m)} {weather.currentUnits.wind_speed_10m}</span></div><div className="forecast-row">{weather.daily.time.map((day, index) => <article key={day}><small>{new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" })}</small><b>{Math.round(weather.daily.temperature_2m_max[index])}°</b><span>{Math.round(weather.daily.temperature_2m_min[index])}° low</span><i>{weather.daily.precipitation_probability_max[index]}% rain</i></article>)}</div><div className="weather-actions">{weatherActions.map((action) => <p key={action}>↗ {action}</p>)}</div><a className="source-link" href={weather.sourceUrl} target="_blank" rel="noreferrer">Weather data: {weather.source} ↗</a></> : <button className="primary" onClick={loadWeather}>Load live 7-day weather</button>}
-    </section>}
+      {weather ? <><div className="current-weather"><b>{Math.round(weather.current.temperature_2m)}{weather.currentUnits.temperature_2m}</b><span>Feels like {Math.round(weather.current.apparent_temperature)}{weather.currentUnits.apparent_temperature}<br/>Wind {Math.round(weather.current.wind_speed_10m)} {weather.currentUnits.wind_speed_10m}</span></div><div className="forecast-row">{weather.daily.time.map((day, index) => <article key={day}><small>{new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" })}</small><b>{Math.round(weather.daily.temperature_2m_max[index])}°</b><span>{Math.round(weather.daily.temperature_2m_min[index])}° low</span><i>{weather.daily.precipitation_probability_max[index]}% rain</i></article>)}</div><div className="weather-actions">{weatherActions.map((action) => <p key={action}>↗ {action}</p>)}</div><a className="source-link" href={weather.sourceUrl} target="_blank" rel="noreferrer">Weather data: {weather.source} ↗</a></> : <p>{weatherStatus}</p>}
+    </details>}
 
-    {tab === "tasks" && <section className="rally-content"><div className="rally-title"><div><small>CARE BOARD</small><h2>Do the next right thing.</h2></div><button onClick={() => setTasks([...tasks, { id: crypto.randomUUID(), text: "New garden task", done: false, timing: "This week" }])}>+ Add task</button></div><div className="task-list">{tasks.map((task, index) => <article className={task.done ? "done" : ""} key={task.id}><button className="check" onClick={() => setTasks(tasks.map((item, i) => i === index ? { ...item, done: !item.done } : item))}>{task.done ? "✓" : ""}</button><input value={task.text} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, text: e.target.value } : item))}/><input value={task.timing} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, timing: e.target.value } : item))}/><button onClick={() => setTasks(tasks.filter((item) => item.id !== task.id))}>×</button></article>)}</div></section>}
-
-    {tab === "journal" && <section className="rally-content"><div className="workspace-intro"><div><small>GARDEN JOURNAL</small><h2>Turn this season into next season’s method.</h2><p>Log what happened, not just what was supposed to happen.</p></div><span>{journal.length} notes</span></div><form className="journal-compose" onSubmit={(e) => { e.preventDefault(); if (!journalDraft.trim()) return; setJournal([{ id: crypto.randomUUID(), date: new Date().toLocaleDateString(), note: journalDraft.trim() }, ...journal]); setJournalDraft(""); }}><textarea value={journalDraft} onChange={(e) => setJournalDraft(e.target.value)} placeholder="Planted, watered, harvested, noticed…"/><button className="primary">Add note</button></form><div className="journal-list">{journal.length ? journal.map((entry) => <article key={entry.id}><small>{entry.date}</small><p>{entry.note}</p><button onClick={() => setJournal(journal.filter((item) => item.id !== entry.id))}>Remove</button></article>) : <p>No notes yet. Your observations are what make this planner smarter for you over time.</p>}</div></section>}
+    {tab === "tasks" && <details className="rally-content"><summary>Garden journal</summary><div className="workspace-intro"><div><small>GARDEN JOURNAL</small><h2>Turn this season into next season’s method.</h2><p>Log what happened, not just what was supposed to happen.</p></div><span>{journal.length} notes</span></div><form className="journal-compose" onSubmit={(e) => { e.preventDefault(); if (!journalDraft.trim()) return; setJournal([{ id: crypto.randomUUID(), date: new Date().toLocaleDateString(), note: journalDraft.trim() }, ...journal]); setJournalDraft(""); }}><textarea value={journalDraft} onChange={(e) => setJournalDraft(e.target.value)} placeholder="Planted, watered, harvested, noticed…"/><button className="primary">Add note</button></form><div className="journal-list">{journal.length ? journal.map((entry) => <article key={entry.id}><small>{entry.date}</small><p>{entry.note}</p><button onClick={() => setJournal(journal.filter((item) => item.id !== entry.id))}>Remove</button></article>) : <p>No notes yet. Keep a record to refer to next season.</p>}</div></details>}
+    {tab === "plan" && <details className="rally-content"><summary>Customize in another AI tool</summary><p>Download prompts with your garden details. The plan above remains usable here.</p><button onClick={downloadCustomization}>Customize this Rally .md</button></details>}
   </main>;
 }

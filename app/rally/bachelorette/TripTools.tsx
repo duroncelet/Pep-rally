@@ -9,10 +9,7 @@ type Concert = { id: string; name: string; url: string; date: string; time?: str
 export default function TripTools({ city, start, end, count, onCity, onDates, onAdd, onPack, onPlaces, onPacking, onEditDetails }: Props) {
   const destination = destinationFor(city);
   const [weather, setWeather] = useState<Forecast | null>(null);
-  const [concerts, setConcerts] = useState<Concert[]>([]);
   const [weatherBusy, setWeatherBusy] = useState(false);
-  const [eventBusy, setEventBusy] = useState(false);
-  const [eventMessage, setEventMessage] = useState("");
   const [notice, setNotice] = useState("");
   const [dinnerTime, setDinnerTime] = useState("19:00");
   const [dinnerDate, setDinnerDate] = useState(start);
@@ -26,15 +23,6 @@ export default function TripTools({ city, start, end, count, onCity, onDates, on
     try { const r = await fetch(`/api/party-weather?city=${encodeURIComponent(city)}`); setWeather(await r.json()); }
     catch { setWeather({ error: "Weather could not load. Use the official forecast link." }); }
     finally { setWeatherBusy(false); }
-  }
-  async function findConcerts() {
-    setEventBusy(true); setConcerts([]); setEventMessage("");
-    try {
-      const r = await fetch(`/api/party-events?${new URLSearchParams({ city, start, end })}`);
-      const data = await r.json();
-      setConcerts(data.events || []); setEventMessage(data.error || (data.events?.length ? "Live Ticketmaster results. Availability and final prices are confirmed on Ticketmaster." : "No matching concerts returned. Try the provider search for more venues and categories."));
-    } catch { setEventMessage("Events could not load. Search Ticketmaster below."); }
-    finally { setEventBusy(false); }
   }
   const periods = weather?.periods?.filter(p => !start || !end || (p.date >= start && p.date <= end)) || [];
   const add = (name: string, url: string, category: string) => { onAdd(name, url, category); setNotice(`${name} added to Places. Review and confirm the booking there.`); };
@@ -51,7 +39,7 @@ export default function TripTools({ city, start, end, count, onCity, onDates, on
       {weather?.error && <p role="alert">{weather.error}</p>}{weather?.periods && <><p>National Weather Service · updated {weather.updated ? new Date(weather.updated).toLocaleString() : "recently"}</p>{periods.length ? <div className="forecast-grid">{periods.map((p, i) => <article key={i}><b>{p.name} · {p.date}</b><strong>{p.temperature}°{p.unit}</strong><p>{p.forecast}</p><small>Wind {p.wind} · Rain chance {p.rain === null ? "not supplied" : `${p.rain}%`}</small></article>)}</div> : <p>Your dates are outside the available forecast. We won’t substitute today’s weather for your trip.</p>}</>}
     </article>
     <article className="trip-card"><h3>Get the whole group to dinner.</h3><p>{destination?.dinner ? `An idea to research: ${destination.dinner}. ` : ""}For a large party, ask about a group menu or private dining. A search is not a reservation.</p><div className="trip-fields"><label>Dinner date<input type="date" value={date} onChange={e => setDinnerDate(e.target.value)}/></label><label>Time<input type="time" value={dinnerTime} onChange={e => setDinnerTime(e.target.value)}/></label><label>Guests<input type="number" min="1" max="100" value={dinnerSize} onChange={e => setDinnerSize(Math.max(1, Math.min(100, Number(e.target.value))))}/></label></div><label>Dietary, seating or accessibility needs<textarea value={needs} onChange={e => setNeeds(e.target.value)} placeholder="Confirm privately with the group before sharing"/></label><div className="rally-actions"><a href={`https://www.opentable.com/s?${reservation}`} target="_blank" rel="noreferrer">Find tables on OpenTable ↗</a><button onClick={() => add(destination?.dinner || `${city} group dinner`, `https://www.opentable.com/s?${reservation}`, "Group dinner")}>Add dinner to shortlist</button></div><p>Confirm city, date, time and party size on OpenTable. Large groups may need to contact the restaurant directly.</p><details><summary>Your group-dinner inquiry</summary><p className="inquiry-copy">{inquiry}</p><a href={`mailto:?subject=${encodeURIComponent("Group dinner inquiry")}&body=${encodeURIComponent(inquiry)}`}>Open email draft</a></details><small>Reservations are completed with the restaurant or OpenTable; nothing is booked automatically.</small></article>
-    <article className="trip-card"><h3>A concert for the weekend?</h3><p>Search your trip dates. Edit them in Trip details. Check age restrictions, accessible seating, total ticket fees and the ride home before buying.</p><div className="rally-actions"><button disabled={eventBusy || !city || !validTripDates(start, end)} onClick={findConcerts}>{eventBusy ? "Finding concerts…" : "Find concerts for my dates"}</button><a href={`https://www.ticketmaster.com/search?q=${encodeURIComponent(city)}`} target="_blank" rel="noreferrer">Search Ticketmaster ↗</a></div><p role="status">{eventMessage}</p><div className="trip-grid">{concerts.map(c => <article key={c.id}><h4>{c.name}</h4><p>{c.date} · {c.time || "Time TBA"} · {c.venue}</p><small>{c.status}</small><div className="rally-actions"><a href={c.url} target="_blank" rel="noreferrer">Check tickets ↗</a><button onClick={() => add(`${c.name} — ${c.date}`, c.url, "Concert")}>Save to Places</button></div></article>)}</div></article>
+    <article className="trip-card"><h3>A concert for the weekend?</h3><p>Search Ticketmaster, then confirm your trip dates, ticket fees and venue rules there. Save a show’s link in your places below.</p><a href={`https://www.ticketmaster.com/search?q=${encodeURIComponent(city)}`} target="_blank" rel="noreferrer">Search Ticketmaster ↗</a></article>
   </section>;
 }
 

@@ -3932,8 +3932,20 @@ footer > span {
 .add-packing input { padding:12px; border:1px solid #657273; border-radius:8px; font:inherit; width:100%; box-sizing:border-box; }
 .packing-suggestions button, .add-packing button { padding:10px 14px; border:1px solid #23363b; border-radius:10px; background:#fffaf1; margin:5px; font:inherit; cursor:pointer; }
 .packing-print { display:none; }
+.rally-subnav { display:flex; flex-wrap:wrap; gap:10px; padding:18px 6%; border-bottom:1px solid #d8d3c4; }
+.rally-subnav button { background:transparent; border:1px solid #c9c4b6; border-radius:24px; padding:10px 18px; font:inherit; cursor:pointer; }
+.rally-subnav button.active { background:#fff; border-color:var(--ink); }
+.weekend-card { background:#fffaf1; border:1px solid #d8d3c4; border-radius:16px; padding:20px; margin-bottom:14px; }
+.weekend-card summary { cursor:pointer; display:grid; gap:8px; }
+.weekend-card summary strong { font-family:Georgia,serif; font-size:26px; }
+.weekend-card summary small { color:#635f59; }
+.weekend-card > article { margin-top:18px; }
+.garden-layout select { display:block; max-width:100%; width:100%; padding:12px; margin-top:12px; border:1px solid var(--ink); border-radius:10px; background:white; font:inherit; }
+.garden-room details.rally-content { padding-top:20px; padding-bottom:20px; }
+.garden-room summary { cursor:pointer; font-weight:700; }
+@media(max-width:650px) { .garden-room .workspace-intro { align-items:stretch; } .garden-room .workspace-intro>* { min-width:0; max-width:100%; } }
 .bach-room details.rally-content { padding-top:16px; padding-bottom:16px; }
-.bach-room .rally-actions button { border:1.5px solid #23363b; border-radius:12px; padding:10px 15px; background:#fffaf1; color:#23363b; font:inherit; cursor:pointer; }
+.bach-room .rally-actions button:not(.primary) { border:1.5px solid #23363b; border-radius:12px; padding:10px 15px; background:#fffaf1; color:#23363b; font:inherit; cursor:pointer; }
 @media (max-width:650px) {
   .bach-room .workspace-intro { flex-direction:column; align-items:stretch; }
   .bach-room .workspace-intro > * { min-width:0; max-width:100%; }
