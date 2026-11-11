@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../download-markdown";
 import { gardenAssignments } from "./assignments";
+import { gardenWeatherActions } from "./weather-actions";
 import { buildCustomizationKit } from "../../customization-kit";
 
 type GardenTask = { id: string; text: string; done: boolean; timing: string };
@@ -46,7 +47,16 @@ export default function GardenRally() {
   const [error, setError] = useState("");
   const [choices, setChoices] = useState<Record<number,string>>({});
   const weatherRequest = useRef(0);
-  useEffect(() => { weatherRequest.current++; setWeather(null); setWeatherStatus("Load the forecast for your garden."); }, [location]);
+  const lastWeatherLocation = useRef("");
+  useEffect(() => {
+    const nextLocation = location.trim();
+    if (!ready || nextLocation.length < 2 || nextLocation === lastWeatherLocation.current) return;
+    weatherRequest.current++;
+    setWeather(null);
+    setWeatherStatus("Load the forecast for your garden.");
+    const timer = setTimeout(() => { void loadWeather(nextLocation); }, 600);
+    return () => clearTimeout(timer);
+  }, [location, ready]);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authState, setAuthState] = useState<"checking" | "guest" | "signed-in">("checking");
@@ -84,27 +94,14 @@ export default function GardenRally() {
     setError(""); setReady(true); setTab("plan"); void loadWeather();
   }
 
-  const weatherActions = useMemo(() => {
-    if (!weather) return [];
-    const rain = weather.daily.precipitation_sum.reduce((sum, value) => sum + value, 0);
-    const hottest = Math.max(...weather.daily.temperature_2m_max);
-    const coldest = Math.min(...weather.daily.temperature_2m_min);
-    const windiest = Math.max(...weather.daily.wind_speed_10m_max);
-    const actions: string[] = [];
-    if (rain > 20) actions.push("Rainy stretch ahead: pause automatic watering and check drainage after the heaviest day.");
-    else if (rain < 4) actions.push("Dry week ahead: check soil moisture daily; containers may need more frequent watering.");
-    if (hottest >= 32) actions.push("Heat watch: water early, mulch exposed soil, and give tender transplants afternoon shade.");
-    if (coldest <= 4) actions.push("Cold-night watch: delay tender planting or keep row cover ready.");
-    if (windiest >= 35) actions.push("Wind watch: secure trellises, pots, and young stems before the windiest day.");
-    if (!actions.length) actions.push("Conditions look moderate. Keep the normal soil-check and watering rhythm.");
-    return actions;
-  }, [weather]);
+  const weatherActions = useMemo(() => gardenWeatherActions(weather), [weather]);
 
-  async function loadWeather() {
+  async function loadWeather(place = location) {
     const request = ++weatherRequest.current;
+    lastWeatherLocation.current = place.trim();
     setWeatherStatus("Loading live weather…"); setWeather(null);
     try {
-    const response = await fetch(`/api/garden-weather?location=${encodeURIComponent(location)}`);
+    const response = await fetch(`/api/garden-weather?location=${encodeURIComponent(place)}`);
     const data = await response.json();
     if (request !== weatherRequest.current) return;
     if (!response.ok) { setWeatherStatus(data.error ?? "Weather is unavailable."); return; }
@@ -194,7 +191,7 @@ export default function GardenRally() {
     {tab === "tasks" && <section className="rally-content"><div className="rally-title"><div><small>CARE BOARD</small><h2>Do the next right thing.</h2></div><button onClick={() => setTasks([...tasks, { id: crypto.randomUUID(), text: "New garden task", done: false, timing: "This week" }])}>+ Add task</button></div><div className="weather-actions"><small>WEATHER-AWARE ACTIONS</small>{weatherActions.length ? weatherActions.map(action => <p key={action}>{action}</p>) : <p>{weatherStatus}</p>}</div><div className="task-list">{tasks.map((task, index) => <article className={task.done ? "done" : ""} key={task.id}><button className="check" onClick={() => setTasks(tasks.map((item, i) => i === index ? { ...item, done: !item.done } : item))}>{task.done ? "✓" : ""}</button><input value={task.text} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, text: e.target.value } : item))}/><input value={task.timing} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, timing: e.target.value } : item))}/><button onClick={() => setTasks(tasks.filter((item) => item.id !== task.id))}>×</button></article>)}</div></section>}
 
     {tab === "tasks" && <details className="rally-content garden-forecast"><summary>Seven-day forecast</summary>
-      <div className="workspace-intro"><div><small>LIVE WEATHER</small><h2>{weatherStatus}</h2><p>Weather informs watering and protection tasks; it does not replace checking the soil and plants.</p></div><button onClick={loadWeather}>Refresh forecast</button></div>
+      <div className="workspace-intro"><div><small>LIVE WEATHER</small><h2>{weatherStatus}</h2><p>Weather informs watering and protection tasks; it does not replace checking the soil and plants.</p></div><button onClick={() => loadWeather()}>Refresh forecast</button></div>
       {weather ? <><div className="current-weather"><b>{Math.round(weather.current.temperature_2m)}{weather.currentUnits.temperature_2m}</b><span>Feels like {Math.round(weather.current.apparent_temperature)}{weather.currentUnits.apparent_temperature}<br/>Wind {Math.round(weather.current.wind_speed_10m)} {weather.currentUnits.wind_speed_10m}</span></div><div className="forecast-row">{weather.daily.time.map((day, index) => <article key={day}><small>{new Date(`${day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" })}</small><b>{Math.round(weather.daily.temperature_2m_max[index])}°</b><span>{Math.round(weather.daily.temperature_2m_min[index])}° low</span><i>{weather.daily.precipitation_probability_max[index]}% rain</i></article>)}</div><div className="weather-actions">{weatherActions.map((action) => <p key={action}>↗ {action}</p>)}</div><a className="source-link" href={weather.sourceUrl} target="_blank" rel="noreferrer">Weather data: {weather.source} ↗</a></> : <p>{weatherStatus}</p>}
     </details>}
 
