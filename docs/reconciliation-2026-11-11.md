@@ -6,7 +6,7 @@
 - The newer source lives in this local site directory. It was left uncommitted, not placed in a separate application repository.
 - wrangler.jsonc targets Cloudflare Worker pep-rally, peprally.fun and www.peprally.fun, D1 pep-rally and R2 pep-rally-uploads. Production HTTP responses identify Cloudflare and Vinext; /support responds with the app, unlike GitHub main which has no support route.
 - September 28 QA records document deploying newer planner/search/share/support work. The previously recorded deployment ID is 9dcf4a7e-3f30-48a8-ace6-bf3b3c139967. This historical ID is NOT independently reverified today.
-- Cloudflare deployment inventory could not be read: the saved authorization expired. Exact correspondence between today's live bundle and any local source snapshot remains unverified. Do not redeploy main to resolve this.
+- Cloudflare authorization was restored later on November 11. Read-only deployment inventory confirms the active 100% version is 9dcf4a7e-3f30-48a8-ace6-bf3b3c139967, created September 28 at 19:57:22 UTC, matching the historical QA record. The deployment has no source commit tag; do not claim the recovery branch is a byte-for-byte copy (it also contains later unpublished checkout work). Do not redeploy old main.
 
 ## What this branch preserves
 
@@ -25,7 +25,7 @@ Payment safeguards fail closed, separate test/live entitlements and restrict che
 
 ## Gates before follow-on changes or release
 
-1. Restore Cloudflare authorization through the owner login flow and read deployment metadata. Confirm active source/version before deployment.
+1. Active deployment version is now confirmed. Before any future deployment, review the recovery diff and unpublished checkout changes; owner approval is still required.
 2. Review this recovery PR and align Muse with the branch. Do not automatically merge or push to main.
 3. Keep checkout closed/test-only pending owner activation and policy/support validation. Per-run budget enforcement must be deployed and verified before paid inference or the public API.
 4. The runtime budget SQL migration was previously reported to fail on remote application; local tests do not prove production enforcement. Do not apply it blindly.
