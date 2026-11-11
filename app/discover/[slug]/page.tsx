@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { findConcept, rallyConcepts } from "../../catalog";
+import { formatPrice } from "../../format-price";
 import PurchaseButton from "./PurchaseButton";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -19,7 +20,7 @@ export default async function RallyListingPage({ params }: PageProps) {
   return <main className={`concept-page concept-${rally.accent}`}>
     <nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><a href="/#marketplace">Shop Rallies</a><a href={`/rally/market/${rally.slug}`}>Try it</a><a href="/library">My Rallies</a></div></nav>
     <header className="concept-hero">
-      <div><span className="concept-category">{rally.category} · WORKING RALLY PREVIEW</span><h1>{rally.title}</h1><p>{rally.promise}</p><div className="concept-price"><b>${(rally.priceCents / 100).toFixed(0)}</b><span>Working app · saved workspace · updates included</span></div><div className="concept-actions"><PurchaseButton slug={rally.slug} priceCents={rally.priceCents}/><a href={`/rally/market/${rally.slug}`}>Try the working preview →</a></div></div>
+      <div><span className="concept-category">{rally.category} · WORKING RALLY PREVIEW</span><h1>{rally.title}</h1><p>{rally.promise}</p><div className="concept-price"><b>{formatPrice(rally.priceCents)}</b><span>Working app · saved workspace · updates included</span></div><div className="concept-actions"><PurchaseButton slug={rally.slug} priceCents={rally.priceCents}/><a href={`/rally/market/${rally.slug}`}>Try the working preview →</a></div></div>
       <aside><span>{rally.monogram}</span><small>THE OUTCOME</small><b>{rally.outcome[0]}</b><p>Bring your real context, get a first result, review it, and save the finished workspace. This preview is made by Pep Rally to demonstrate what a sellable creator listing can become.</p></aside>
     </header>
 

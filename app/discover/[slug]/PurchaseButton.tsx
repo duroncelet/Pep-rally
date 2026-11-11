@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatPrice } from "../../format-price";
 
 export default function PurchaseButton({ slug, priceCents }: { slug: string; priceCents: number }) {
   const [status, setStatus] = useState("");
@@ -24,5 +25,5 @@ export default function PurchaseButton({ slug, priceCents }: { slug: string; pri
     setStatus(data.needsCredential ? "Paid checkout is opening soon. You can try the working preview today." : data.error ?? "Checkout could not be opened.");
   }
 
-  return <div className="concept-buy"><button className="primary" onClick={purchase}>Get this Rally · ${(priceCents / 100).toFixed(0)}</button>{status && <small>{status}</small>}</div>;
+  return <div className="concept-buy"><button className="primary" onClick={purchase}>Get this Rally · {formatPrice(priceCents)}</button>{status && <small>{status}</small>}</div>;
 }
