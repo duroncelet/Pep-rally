@@ -22,12 +22,17 @@ export function splitBill(amount: number, participants: string[]) {
   return ids.map((id, index) => ({ id, cents: Math.floor(cents / ids.length) + (index < cents % ids.length ? 1 : 0) }));
 }
 
-export function settleBills(bills: SharedBill[]): Settlement[] {
+export function settleBills(bills: SharedBill[], transfers: Settlement[] = []): Settlement[] {
   const balances = new Map<string, number>();
   for (const bill of bills) {
     const shares = splitBill(bill.amount, bill.participants);
     balances.set(bill.paidBy, (balances.get(bill.paidBy) || 0) + Math.round(bill.amount * 100));
     for (const share of shares) balances.set(share.id, (balances.get(share.id) || 0) - share.cents);
+  }
+  for (const transfer of transfers) {
+    if(!Number.isSafeInteger(transfer.cents)||transfer.cents<0) throw new Error('Transfers must be non-negative whole cents.');
+    balances.set(transfer.from,(balances.get(transfer.from)||0)+transfer.cents);
+    balances.set(transfer.to,(balances.get(transfer.to)||0)-transfer.cents);
   }
   const debtors = [...balances].filter(([, n]) => n < 0).map(([id, n]) => ({ id, cents: -n }));
   const creditors = [...balances].filter(([, n]) => n > 0).map(([id, n]) => ({ id, cents: n }));

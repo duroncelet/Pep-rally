@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, like } from "drizzle-orm";
 import { getChatGPTUser } from "../../chatgpt-auth";
 import { findConcept } from "../../catalog";
 import { getDb } from "../../../db";
@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     eq(purchases.buyerUserId, user.userId),
     eq(purchases.toolSlug, `catalog:${slug}`),
     eq(purchases.status, "paid_and_unlocked"),
+    like(purchases.stripeSessionId,process.env.PEP_RALLY_COMMERCE_MODE==="test"?"cs_test_%":"cs_live_%"),
   )).limit(1);
 
   return Response.json({ signedIn: true, unlocked: Boolean(purchase) });

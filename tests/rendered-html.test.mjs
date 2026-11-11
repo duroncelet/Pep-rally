@@ -13,23 +13,23 @@ test("ships a clear build-and-marketplace homepage", async () => {
   assert.match(layout, /Pep Rally/);
   assert.match(page, /THE MARKETPLACE FOR EVERYDAY MINI-APPS/);
   assert.match(page, /Publish a Rally/);
-  assert.match(page, /FOR PEOPLE SHOPPING/);
+  assert.match(page, /What’s on your list/);
   assert.match(page, /FREE · READY TO USE/);
   assert.doesNotMatch(page, /Get the Blueprint · \$18|test checkout/i);
-  assert.match(page, /The working app/);
-  assert.match(page, /Keep the outcome/);
+  assert.match(page, /Make a plan you can use and download/);
+  assert.doesNotMatch(page, /buyer-path/);
   assert.match(page, /bachelorette-pool\.jpg/);
-  assert.match(page, /lush-garden\.jpg/);
+  assert.match(await readFile(new URL('../app/originals.ts', import.meta.url), 'utf8'), /lush-garden\.jpg/);
   assert.doesNotMatch(page, /moat|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
-  assert.match(page, /SHOP THE MARKETPLACE/);
-  assert.match(page, /Small apps\. Real outcomes/);
-  assert.match(page, /Put it on the shelf/);
+  assert.match(page, /EXPLORE THE MARKETPLACE/);
+  assert.match(page, /Small apps\.<br\/><em>Real outcomes/);
+  assert.match(page, /Have something worth sharing/);
   assert.doesNotMatch(page, /starter-grid/);
   assert.match(page, /PEP RALLY FAQ/);
   assert.match(page, /href="#faq">FAQ/);
   assert.doesNotMatch(page + layout, /useful little app/i);
-  assert.match(page, /Try a complete Rally/);
-  assert.ok(page.indexOf('id="marketplace"') < page.indexOf('id="free"'));
+  assert.match(page, /Start with something free/);
+  assert.ok(page.indexOf('Search all Rallies') < page.indexOf('id="free"'));
   assert.ok(page.indexOf('id="marketplace"') < page.indexOf('id="creators"'));
   assert.match(builder, /MAKE A RALLY/);
   assert.match(builder, /Upload or link your mini-app/);
@@ -147,7 +147,7 @@ test("ships both executable Rally workspaces", async () => {
   ]);
 
   for (const feature of ["BUDGET COMFORT CHECK", "Hotels", "Airbnb", "VRBO", "ORGANIZER NOTES", "MONEY", "PLACES + RESERVATIONS", "SHOPPING", "PACKING + SAFETY"]) assert.match(bachelorette, new RegExp(feature.replace(/[+]/g, "\\+")));
-  for (const feature of ["Rows / in-ground", "Raised beds", "Pots / containers", "LIVE WEATHER", "GARDEN JOURNAL"]) assert.match(garden, new RegExp(feature.replace(/[\/]/g, "\\/")));
+  for (const feature of ["Rows / in-ground", "Raised beds", "Pots / containers", "LIVE WEATHER", "GardenJournal", "PlotEditor"]) assert.ok(garden.includes(feature));
   assert.match(weather, /api\.open-meteo\.com/);
   assert.match(weather, /geocoding-api\.open-meteo\.com/);
   assert.match(gardenHub, /gardenPlans/);
@@ -180,7 +180,7 @@ test("keeps the public connection page consumer-safe while preserving secure con
   assert.match(route, /Boolean\(env\.DB\)/);
   assert.match(route, /Boolean\(env\.RALLY_UPLOADS\)/);
   assert.match(builder, /Everything around the mini-app, together/);
-  assert.match(checkout, /isStripeTestMode/);
+  assert.match(checkout, /checkoutReadiness/);
   assert.doesNotMatch(checkout, /test_succeeded/);
   assert.match(stripe, /payment_status/);
   assert.match(stripe, /onConflictDoNothing/);
@@ -207,25 +207,25 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(page, /Search by problem or person/);
+  assert.match(page, /Search all Rallies/);
   assert.doesNotMatch(page, /WHAT A COMPLETE LISTING SHOWS/);
-  assert.match(page, /Support, privacy & refunds/);
+  assert.match(page, /href="\/policies"/);
   assert.doesNotMatch(page, /Try the outcome|No mystery|Human say/);
   assert.doesNotMatch(page, /WHAT COUNTS AS A RALLY/);
-  assert.match(page, /Keep the outcome/);
-  assert.match(page, /The working app/);
+  assert.match(page, /Make a plan you can use and download/);
+  assert.match(page, /Each listing explains what’s included/);
   assert.match(page, /Why do I sign in/);
   for (const idea of ["NCLEX Study Sprint", "Etsy Profit & Pricing Desk", "Flashcard Shop Studio", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
   assert.match(catalog, /official 2026 NCLEX-RN test plan/);
   assert.match(concept, /PurchaseButton/);
-  assert.match(concept, /Try the working preview/);
-  assert.match(concept, /Build this Rally instead/);
+  assert.match(concept, /Try it with your own details/);
+  assert.doesNotMatch(concept, /Build this Rally instead|concept-claim/);
   assert.doesNotMatch(concept, /Build this idea|Build the product you wish existed/);
   assert.match(product, /What you bring/);
   assert.match(product, /DATA \+ PERMISSIONS/);
   assert.match(product, /Pep Rally buyer promise/);
   assert.match(reviewPanel, /Reviews can only be left after someone saves and uses this Rally/);
-  assert.match(library, /Every Rally you save or buy lives here as a working workspace/);
+  assert.match(library, /Your saved workspaces live here/);
   assert.match(builder, /LISTING QUALITY CHECK/);
   assert.match(builder, /Starting with the/);
   assert.match(builder, /launch checks/);
@@ -253,7 +253,7 @@ test("turns marketplace previews into usable, purchase-gated Rally flows", async
     readFile(new URL("../app/api/rallies/route.ts", import.meta.url), "utf8"),
   ]);
 
-  assert.match(home, /PEP RALLY STARTERS · PREVIEW ONE/);
+  assert.match(home, /PREVIEWS TO EXPLORE/);
   assert.match(home, /href=\{`\/discover\/\$\{rally\.slug\}`\}/);
   assert.doesNotMatch(catalog, /status: "idea"/);
   assert.match(workspace, /Create my working result/);
@@ -265,7 +265,8 @@ test("turns marketplace previews into usable, purchase-gated Rally flows", async
   for (const slug of ["nclex-study-sprint", "etsy-profit-pricing-desk", "travel-proposal-studio", "farmers-market-morning-board", "iep-meeting-organizer", "roommate-move-out-splitter", "care-circle-coordinator", "home-project-bid-compare"]) assert.match(results, new RegExp(slug));
   assert.match(customization, /Prompt 1 — Change it for my exact situation/);
   assert.match(customization, /Prompt 4 — Test the customer outcome/);
-  assert.match(purchaseButton, /Get this Rally/);
+  assert.match(purchaseButton, /Try the free preview/);
+  assert.match(purchaseButton, /Paid access is not on sale yet/);
   assert.match(checkout, /conceptSlug/);
   assert.match(checkout, /catalog:/);
   assert.match(stripe, /rally\/market/);

@@ -1,0 +1,14 @@
+"use client";
+import {useState} from 'react';
+import {outcomeHtml,type OutcomeDocument} from './outcome-document';
+import {safeFileName} from './download-markdown';
+import {encodeOutcome} from './share-document';
+export default function OutcomePreview({document,label,privacy,initialOpen=false}:{document:OutcomeDocument;label:string;privacy:string;initialOpen?:boolean}){
+ const [open,setOpen]=useState(initialOpen);const [status,setStatus]=useState('');const [link,setLink]=useState('');
+ async function copyLink(){try{const value=location.origin+'/shared#'+encodeOutcome(document);setLink(value);try{await navigator.clipboard.writeText(value);setStatus('Link copied. Anyone with it can read this snapshot; it cannot be revoked.');}catch{setStatus('Copy the link below. Anyone with it can read this snapshot; it cannot be revoked.');}}catch(e){setStatus((e as Error).message);}}
+ const html=()=>outcomeHtml(document);
+ function download(){const url=URL.createObjectURL(new Blob([html()],{type:'text/html'}));const a=window.document.createElement('a');a.href=url;a.download=safeFileName(document.title)+'.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);setStatus('Downloaded a read-only page. Open it in a browser, or send the file to your group.');}
+ async function share(){const file=new File([html()],safeFileName(document.title)+'.html',{type:'text/html'});try{if(navigator.canShare?.({files:[file]})){await navigator.share({title:document.title,files:[file]});setStatus('Sharing finished.');}else{download();}}catch{setStatus('Sharing cancelled or unavailable. Download the page instead.');}}
+ function print(){const url=URL.createObjectURL(new Blob([html()],{type:'text/html'}));const win=window.open(url,'_blank');if(!win){setStatus('Allow the print window, or download the page and print it from your browser.');URL.revokeObjectURL(url);return;}win.onload=()=>win.print();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+ return <section className="rally-content outcome-preview"><div className="workspace-intro"><div><h2>{label}</h2><p>{privacy}</p></div><button className="primary" onClick={()=>setOpen(!open)}>{open?'Close preview':'Preview finished plan'}</button></div>{open&&<><p>This is a snapshot of your current edits. It won’t update after you send it. Only share details you are comfortable making visible to anyone with the file or link. Links cannot be revoked.</p><iframe title="Finished plan preview" sandbox="" srcDoc={html()} style={{width:'100%',height:550,border:'1px solid #25233d',borderRadius:16}}/><div className="rally-actions"><button onClick={copyLink}>Copy read-only link</button><button onClick={share}>Share plan file</button><button onClick={download}>Download read-only page</button><button onClick={print}>Print / save PDF</button></div>{link&&<label>Shared snapshot link<input readOnly value={link} onFocus={e=>e.target.select()}/></label>}</>}{status&&<p role="status">{status}</p>}</section>;
+}

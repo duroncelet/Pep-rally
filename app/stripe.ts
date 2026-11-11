@@ -1,10 +1,14 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, notInArray } from "drizzle-orm";
+import { paymentMatches, revokedPayment } from './commerce';
 import { getDb } from "../db";
 import { creatorApps, purchases, savedRallies } from "../db/schema";
 import { findConcept } from "./catalog";
 
 type StripeSession = {
   id: string;
+  livemode?:boolean;
+  currency?:string|null;
+  payment_intent?:string|{latest_charge?:string|StripeCharge|null}|null;
   url?: string | null;
   payment_status?: "paid" | "unpaid" | "no_payment_required";
   amount_total?: number | null;
@@ -12,17 +16,19 @@ type StripeSession = {
   customer_details?: { email?: string | null } | null;
   metadata?: Record<string, string> | null;
 };
+type StripeCharge={id:string;refunded?:boolean;disputed?:boolean;amount:number;currency:string;livemode:boolean;receipt_url?:string;metadata?:Record<string,string>};
 
 export function isStripeTestMode(secret: string) {
   return secret.startsWith("sk_test_");
 }
 
-async function stripeRequest(secret: string, path: string, init?: RequestInit) {
+async function stripeRequest<T=StripeSession>(secret: string, path: string, init?: RequestInit):Promise<T> {
   const response = await fetch(`https://api.stripe.com${path}`, {
     ...init,
+    signal:AbortSignal.timeout(15000),
     headers: { authorization: `Bearer ${secret}`, ...(init?.headers || {}) },
   });
-  const data = await response.json() as StripeSession & { error?: { message?: string } };
+  const data = await response.json() as T & { error?: { message?: string } };
   if (!response.ok) throw new Error(data.error?.message || "Stripe request failed");
   return data;
 }
@@ -42,14 +48,17 @@ export async function createCheckoutSession(secret: string, input: { purchaseId:
   params.set("metadata[purchase_id]", input.purchaseId);
   params.set("metadata[buyer_user_id]", input.buyerUserId);
   params.set("metadata[tool_slug]", input.toolSlug);
-  const session = await stripeRequest(secret, "/v1/checkout/sessions", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: params });
+  params.set('payment_intent_data[metadata][purchase_id]',input.purchaseId);
+  params.set('payment_intent_data[metadata][buyer_user_id]',input.buyerUserId);
+  params.set('payment_method_types[0]','card');
+  const session = await stripeRequest(secret, "/v1/checkout/sessions", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded",'Idempotency-Key':input.purchaseId }, body: params });
   if (!session.id || !session.url) throw new Error("Stripe did not return a hosted Checkout URL");
   return session;
 }
 
 export async function retrieveCheckoutSession(secret: string, sessionId: string) {
   if (!/^cs_(test_|live_)[A-Za-z0-9]+$/.test(sessionId)) throw new Error("Invalid Checkout Session ID");
-  return stripeRequest(secret, `/v1/checkout/sessions/${encodeURIComponent(sessionId)}`);
+  return stripeRequest(secret, `/v1/checkout/sessions/${encodeURIComponent(sessionId)}?expand[]=payment_intent.latest_charge`);
 }
 
 export async function fulfillCheckoutSession(sessionId: string, expectedUserId?: string) {
@@ -63,7 +72,14 @@ export async function fulfillCheckoutSession(sessionId: string, expectedUserId?:
   if (session.payment_status !== "paid") return { fulfilled: false, status: session.payment_status || "unpaid", session };
   const db = getDb();
   const [purchase] = await db.select().from(purchases).where(and(eq(purchases.id, purchaseId), eq(purchases.buyerUserId, buyerUserId))).limit(1);
-  if (!purchase || purchase.stripeSessionId !== session.id || purchase.amountCents !== session.amount_total) throw new Error("Checkout does not match the saved purchase");
+  if (!purchase || !paymentMatches(session,purchase,!isStripeTestMode(secret))) throw new Error("Checkout does not match the saved purchase");
+  const charge=typeof session.payment_intent==='object'&&session.payment_intent&&typeof session.payment_intent.latest_charge==='object'?session.payment_intent.latest_charge:null;
+  if(!charge)throw new Error('Payment details are not available yet.');
+  if(charge.refunded||charge.disputed){
+    await db.update(purchases).set({status:charge.refunded?'refunded':'disputed'}).where(eq(purchases.id,purchase.id));
+    return {fulfilled:false,status:charge.refunded?'refunded':'disputed',session};
+  }
+  if(revokedPayment(purchase.status))return {fulfilled:false,status:purchase.status,session};
   const now = new Date();
   let title = "My Bachelorette Blueprint";
   let summary = "Payment verified. Your executable Bachelorette planning workspace is ready.";
@@ -82,18 +98,32 @@ export async function fulfillCheckoutSession(sessionId: string, expectedUserId?:
     summary = concept.promise;
     accessUrl = `/rally/market/${concept.slug}`;
   }
+  const [granted]=await db.update(purchases).set({status:'paid_and_unlocked',fulfilledAt:purchase.fulfilledAt||now}).where(and(eq(purchases.id,purchase.id),notInArray(purchases.status,['refunded','disputed','access_revoked']))).returning();
+  if(!granted)return {fulfilled:false,status:'access_revoked',session};
   await db.insert(savedRallies).values({
     id: `purchase-${purchase.id}`,
     userId: buyerUserId,
     toolSlug: purchase.toolSlug,
     title,
-    inputs: JSON.stringify({ source: "stripe_test_checkout", purchaseId: purchase.id, accessUrl }),
+    inputs: JSON.stringify({ source: session.livemode ? "stripe_live_checkout" : "stripe_test_checkout", purchaseId: purchase.id, accessUrl }),
     summary,
     createdAt: now,
     updatedAt: now,
   }).onConflictDoNothing();
-  await db.update(purchases).set({ status: "paid_and_unlocked", fulfilledAt: purchase.fulfilledAt || now }).where(eq(purchases.id, purchase.id));
-  return { fulfilled: true, status: "paid", session, purchase, accessUrl, title };
+  return { fulfilled: true, status: "paid", session, purchase, accessUrl, title,receiptUrl:charge.receipt_url };
+}
+
+export async function reconcileCharge(chargeId:string){
+ if(!/^ch_[A-Za-z0-9]+$/.test(chargeId))throw new Error('Invalid charge');
+ const secret=process.env.STRIPE_SECRET_KEY;if(!secret)throw new Error('Stripe unavailable');
+ const charge=await stripeRequest<StripeCharge>(secret,'/v1/charges/'+encodeURIComponent(chargeId));
+ const id=charge.metadata?.purchase_id;if(!id)return;
+ const db=getDb();const [order]=await db.select().from(purchases).where(eq(purchases.id,id)).limit(1);
+ if(!order||charge.metadata?.buyer_user_id!==order.buyerUserId||charge.amount!==order.amountCents||charge.currency!=='usd'||charge.livemode===isStripeTestMode(secret))throw new Error('Charge mismatch');
+ if(charge.refunded||charge.disputed){
+  await db.update(purchases).set({status:charge.refunded?'refunded':'disputed'}).where(eq(purchases.id,id));
+  await db.delete(savedRallies).where(and(eq(savedRallies.id,'purchase-'+id),eq(savedRallies.userId,order.buyerUserId)));
+ }
 }
 
 export async function verifyStripeSignature(payload: string, signatureHeader: string, secret: string) {

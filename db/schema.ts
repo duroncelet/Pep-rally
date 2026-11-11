@@ -1,5 +1,12 @@
 import { index, sqliteTable, text, integer, uniqueIndex } from "drizzle-orm/sqlite-core";
 
+export const plannerRuns = sqliteTable('planner_runs', {
+  id: text('id').primaryKey(), ownerId: text('owner_id').notNull(),
+  requestId: text('request_id').notNull(), answers: text('answers').notNull(), artifact: text('artifact').notNull(),
+  revisionCount: integer('revision_count').notNull().default(0), version: integer('version').notNull().default(1),
+  createdAt: integer('created_at').notNull(), updatedAt: integer('updated_at').notNull(),
+}, table => [uniqueIndex('planner_runs_owner_request').on(table.ownerId,table.requestId), index('planner_runs_owner_updated').on(table.ownerId,table.updatedAt)]);
+
 export const userIdentities = sqliteTable("user_identities", {
   id: text("id").primaryKey(),
   clerkUserId: text("clerk_user_id").unique(),
