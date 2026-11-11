@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { RallyConcept } from "../../../catalog";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../../download-markdown";
 import { buildCustomizationKit } from "../../../customization-kit";
-import { createWorkingResult } from "../../../rally-results";
+import { answeredInputs, createWorkingResult } from "../../../rally-results";
 
 export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -31,7 +31,7 @@ export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   }
 
   function downloadOutcome() {
-    const markdown = `# ${result.headline}\n\n> ${result.summary}\n\n## What I brought\n\n${concept.inputs.map((item) => `- **${item}:** ${markdownCell(answers[item] || "Not answered")}`).join("\n")}\n\n${result.sections.map((section) => `## ${section.title}\n\n${section.intro ? `${section.intro}\n\n` : ""}${section.items.map((item) => `- ${markdownCell(item)}`).join("\n")}`).join("\n\n")}\n\n## Before using it\n\n${concept.guardrail}\n\n---\nCreated with Pep Rally · ${new Date().toLocaleDateString()}\n`;
+    const markdown = `# ${result.headline}\n\n> ${result.summary}\n\n## What I brought\n\n${answeredInputs(concept, answers).map(({ label, value }) => `- **${markdownCell(label)}:** ${markdownCell(value)}`).join("\n")}\n\n${result.sections.map((section) => `## ${section.title}\n\n${section.intro ? `${section.intro}\n\n` : ""}${section.items.map((item) => `- ${markdownCell(item)}`).join("\n")}`).join("\n\n")}\n\n## Before using it\n\n${concept.guardrail}\n\n---\nCreated with Pep Rally · ${new Date().toLocaleDateString()}\n`;
     downloadMarkdown(`${safeFileName(concept.title)}-outcome.md`, markdown);
   }
 
