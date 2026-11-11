@@ -41,7 +41,7 @@ If your tool cannot accept ZIP files, unzip the source and upload the project fo
 
 ## Context already entered
 
-${inputs.map((input) => `- **${input}:** ${markdownCell(currentAnswers[input] || "Not supplied yet")}`).join("\n")}
+${inputs.filter((input) => currentAnswers[input]?.trim()).map((input) => `- **${input}:** ${markdownCell(currentAnswers[input])}`).join("\n") || "No context entered yet. Fill in the inputs in the workspace before customizing."}
 
 ## Portable starter prompt
 
