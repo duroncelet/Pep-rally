@@ -216,7 +216,7 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
   assert.match(page, /Each listing explains what’s included/);
   assert.match(page, /Why do I sign in/);
   for (const idea of ["NCLEX Study Sprint", "Etsy Profit & Pricing Desk", "Flashcard Shop Studio", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
-  assert.match(catalog, /official 2026 NCLEX-RN test plan/);
+  assert.match(catalog, /not a verified exam question bank/);
   assert.match(concept, /PurchaseButton/);
   assert.match(concept, /Try it with your own details/);
   assert.doesNotMatch(concept, /Build this Rally instead|concept-claim/);
