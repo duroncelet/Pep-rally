@@ -214,9 +214,11 @@ export function farmersSections(input: FarmersMarketInput): ResultSection[] {
   for (const crop of computed.crops) {
     if (crop.preorderedQty === 0) continue;
     const revenue = crop.priceCents !== null ? ` (${formatCents(crop.preorderRevenueCents)} in preorders)` : "";
-    preorderItems.push(crop.covered
-      ? `${crop.crop}: ${crop.preorderedQty} ${crop.unit} preordered — covered by the ${crop.suggested} ${crop.unit} harvest.${revenue}`
-      : `${crop.crop}: ${crop.preorderedQty} ${crop.unit} preordered — short by ${crop.shortBy} ${crop.unit}. Pick more or confirm what you can fill.${revenue}`);
+    preorderItems.push(crop.suggested === null
+      ? `${crop.crop}: ${crop.preorderedQty} ${crop.unit} preordered — no harvest number yet — add last week's sold count to reconcile these preorders.${revenue}`
+      : crop.covered
+        ? `${crop.crop}: ${crop.preorderedQty} ${crop.unit} preordered — covered by the ${crop.suggested} ${crop.unit} harvest.${revenue}`
+        : `${crop.crop}: ${crop.preorderedQty} ${crop.unit} preordered — short by ${crop.shortBy} ${crop.unit}. Pick more or confirm what you can fill.${revenue}`);
   }
   const unknownPreorders = input.preorders.filter((order) => order.label.trim() && !computed.crops.some((crop) => crop.crop.toLowerCase() === order.crop.trim().toLowerCase()));
   for (const order of unknownPreorders) preorderItems.push(`Preorder “${order.label.trim()}” names “${order.crop.trim()}”, which has no harvest row — add the crop to reconcile it.`);

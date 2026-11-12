@@ -103,6 +103,22 @@ test("sections carry harvest, preorders, pack list, stand plan, and timeline", (
   assert.match(text, /Still to pack: Cash bag, Sign, Canopy, Charger/);
 });
 
+test("a preorder with no last-week tally is not reconciled — never 'short by 0'", () => {
+  const computed = computeFarmersBoard(input({
+    crops: [{ crop: "Quokka greens", unit: "bunches", broughtLastWeek: null, soldLastWeek: null, extraBuffer: 0, priceCents: 400 }],
+    preorders: [{ label: "Maya", crop: "Quokka greens", qty: 5 }],
+  }));
+  assert.equal(computed.crops[0].suggested, null);
+  assert.equal(computed.crops[0].covered, null);
+  const sections = farmersSections(input({
+    crops: [{ crop: "Quokka greens", unit: "bunches", broughtLastWeek: null, soldLastWeek: null, extraBuffer: 0, priceCents: 400 }],
+    preorders: [{ label: "Maya", crop: "Quokka greens", qty: 5 }],
+  }));
+  const text = JSON.stringify(sections);
+  assert.match(text, /Quokka greens: 5 bunches preordered — no harvest number yet — add last week's sold count to reconcile these preorders/);
+  assert.doesNotMatch(text, /short by 0/);
+});
+
 test("a preorder naming a crop with no harvest row is flagged, not dropped", () => {
   const sections = farmersSections(input({
     crops: [{ crop: "Kale", unit: "bunches", broughtLastWeek: 60, soldLastWeek: 40, extraBuffer: 0, priceCents: null }],
