@@ -46,7 +46,8 @@ test('the email draft addresses the packet to one recipient, with the share link
   assert.deepEqual([...url.searchParams.keys()], ['subject', 'body']);
   assert.equal(url.searchParams.get('subject'), "Your Ari's Bachelorette packet");
   const body = url.searchParams.get('body');
-  assert.ok(body.includes("I'm sharing the packet for Ari's Bachelorette. The PDF is attached."));
+  assert.ok(body.includes("I'm sharing the packet for Ari's Bachelorette. Download the PDF, then attach it to this email."));
+  assert.ok(!body.includes("is attached"), "the draft must not claim the PDF is attached — the buyer attaches it manually");
   assert.ok(body.includes('https://peprally.fun/s/abcdefgh2345'));
   const noLink = packetEmailDraft({ to: 'dana@example.com', title: "Ari's Bachelorette" });
   assert.ok(!new URL(noLink.mailto).searchParams.get('body').includes('read it online'));

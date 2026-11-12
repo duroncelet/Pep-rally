@@ -15,7 +15,7 @@ export function packetEmailDraft(input: { to: string; title: string; shareUrl?: 
   if (!title || title.length > 160) throw new Error("Give the outcome a title under 160 characters.");
   const fileName = `${safeFileName(title)}.pdf`;
   const body = [
-    `Hi — I'm sharing the packet for ${title}. The PDF is attached.`,
+    `Hi — I'm sharing the packet for ${title}. Download the PDF, then attach it to this email.`,
     ...(input.shareUrl ? [``, `You can also read it online: ${input.shareUrl}`] : []),
     ``,
     `Made with Pep Rally.`,
