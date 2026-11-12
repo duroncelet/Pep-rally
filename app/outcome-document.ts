@@ -1,5 +1,28 @@
 export type OutcomeSection = {heading:string;paragraphs?:string[];rows?:string[][];columns?:string[];grid?:{columns:number;cells:string[]};};
 export type OutcomeDocument={title:string;subtitle:string;sections:OutcomeSection[]};
+
+// Bounds shared by persistence (Part 1B, B1) and the PDF packet (PR #12):
+// a saved outcome must always be renderable as a packet, so the limits
+// match validatePdfDocument in app/outcome-pdf.ts. If either changes, change
+// both, or consolidate them into this one.
+export function validateOutcomeDocument(value: unknown): value is OutcomeDocument {
+  if (!value || typeof value !== 'object') return false;
+  const doc = value as Partial<OutcomeDocument>;
+  if (typeof doc.title !== 'string' || !doc.title.trim() || doc.title.length > 160 || typeof doc.subtitle !== 'string' || doc.subtitle.length > 500 || !Array.isArray(doc.sections) || doc.sections.length > 40) return false;
+  let chars = doc.title.length + doc.subtitle.length;
+  for (const section of doc.sections as OutcomeSection[]) {
+    if (!section || typeof section.heading !== 'string' || section.heading.length > 160) return false;
+    if (section.paragraphs !== undefined && !Array.isArray(section.paragraphs)) return false;
+    if (section.columns !== undefined && !Array.isArray(section.columns)) return false;
+    if (section.rows !== undefined && (!Array.isArray(section.rows) || section.rows.some(row => !Array.isArray(row)))) return false;
+    if (section.grid !== undefined && (!section.grid || !Array.isArray(section.grid.cells) || section.grid.cells.some(cell => typeof cell !== 'string' || cell.length > 80))) return false;
+    const strings = [section.heading, ...(section.paragraphs || []), ...(section.columns || []), ...(section.rows || []).flat(), ...(section.grid?.cells || [])];
+    if (strings.some(item => typeof item !== 'string')) return false;
+    chars += strings.reduce((sum, item) => sum + item.length, 0);
+    if ((section.paragraphs?.length || 0) > 200 || (section.rows?.length || 0) > 200 || (section.grid?.cells.length || 0) > 300 || (section.grid && (!Number.isInteger(section.grid.columns) || section.grid.columns < 1 || section.grid.columns > 12))) return false;
+  }
+  return chars <= 40000;
+}
 export const escapeHtml=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 export function outcomeHtml(doc:OutcomeDocument){
  const e=escapeHtml;
