@@ -4,8 +4,8 @@ import test from "node:test";
 
 test("ships the homepage waitlist: band, public POST route, D1 storage", async () => {
   const migrationFiles = (await readdir(new URL("../drizzle", import.meta.url)))
-    .filter((name) => name.startsWith("0013_") && name.endsWith(".sql"));
-  assert.equal(migrationFiles.length, 1, `expected one 0013 migration, found ${migrationFiles.join(", ")}`);
+    .filter((name) => name.startsWith("0014_") && name.endsWith(".sql"));
+  assert.equal(migrationFiles.length, 1, `expected one 0014 migration, found ${migrationFiles.join(", ")}`);
   const [schema, migration, route, home, css] = await Promise.all([
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL(`../drizzle/${migrationFiles[0]}`, import.meta.url), "utf8"),
