@@ -5,6 +5,7 @@ import { downloadMarkdown, markdownCell, safeFileName } from "../../download-mar
 import {readBrowserDraft,useBrowserDraft} from "../../browser-draft";
 import OutcomePreview from "../../OutcomePreview";
 import type {OutcomeDocument} from "../../outcome-document";
+import { downloadOutcomePdf } from "../../download-pdf";
 import { gardenAssignments } from "./assignments";
 import { gardenWeatherActions, weatherRequestGate } from "./weather";
 import { buildCustomizationKit } from "../../customization-kit";
@@ -139,6 +140,16 @@ export default function GardenRally() {
     ...plots.map(p=>({heading:p.name,paragraphs:[`${p.kind} · ${p.length} × ${p.width} ft. Crop groups, not plant counts. Check variety spacing before planting.`],grid:{columns:gridSize(p).columns,cells:p.zones}})),
     {heading:"My planting calendar",paragraphs:[`Zone: ${growingProfile.zone||"not confirmed"}. Last frost: ${growingProfile.lastFrost||"not confirmed"}. First frost: ${growingProfile.firstFrost||"not confirmed"}.`, `Source: ${growingProfile.source||"not recorded"}. These are gardener-recorded dates, not guarantees or an automatic local lookup.`,...Object.entries(timings).map(([crop,t])=>`${crop}: outdoor target ${t.outdoor||"not set"}; planted ${t.planted||"not recorded"}; packet harvest range ${t.minDays||"?"}–${t.maxDays||"?"} days.`)]},
   ]};
+  const gardenPacket:OutcomeDocument={...gardenDocument,sections:[
+    {heading:"Season plan",paragraphs:[`Location: ${location}. Growing setup: ${space}. Plot footprint: ${totalArea} sq ft.`, `Sun: ${sun}. Watering: ${watering}. Goal: ${goal}.`, `Selected crops: ${crops.join(', ') || 'None yet'}. Not placed: ${allocation.unassigned.join(', ') || 'None'}.`, "Crop groups are not plant counts. Confirm variety spacing, soil safety, and planting dates with a local extension or nursery."]},
+    ...gardenDocument.sections,
+    {heading:"Care board",paragraphs:tasks.length?tasks.map(t=>`${t.done?'Done':'To do'}: ${t.text} - ${t.timing}`):["No tasks yet."]},
+    {heading:"Forecast note",paragraphs:weather?[`Forecast for ${weather.place.name}${weather.place.region?', '+weather.place.region:''}, loaded ${weather.fetchedAt || 'during this session'}. Source: ${weather.source}.`,"Forecasts change; refresh in the live garden before making a weather-dependent decision."]:["No current forecast was loaded. Open the Weather & care tab to check it before planting."]},
+  ]};
+  async function downloadPacket(){
+    if(plots.some(p=>!validPlot(p))){setError("Check your plot names and dimensions before downloading.");return;}
+    try{await downloadOutcomePdf(gardenPacket);}catch(e){setError((e as Error).message);}
+  }
   async function save() {
     if(plots.some(p=>!validPlot(p))) { setError("Check plot names and dimensions (greater than 0 and up to 100 ft)."); return; }
     setError("");
@@ -210,7 +221,7 @@ export default function GardenRally() {
     </section>}
 
     {tab === "plan" && <section className="rally-content">
-      <div className="workspace-intro"><div><small>YOUR WORKING PLAN</small><h2>Your garden, at a glance.</h2><p>{location} · {plots.length} plots · {sun}</p></div><button className="primary" onClick={downloadOutcome}>Download garden plan</button></div>
+      <div className="workspace-intro"><div><small>YOUR WORKING PLAN</small><h2>Your garden, at a glance.</h2><p>{location} · {plots.length} plots · {sun}</p></div><div className="rally-actions"><button className="primary" onClick={downloadPacket}>Download PDF packet</button><button onClick={downloadOutcome}>Download Markdown</button></div></div>
       {allocation.unassigned.length > 0 && <p role="status" className="trip-notice">Not placed yet: {allocation.unassigned.join(", ")}. Swap an assignment below or add another growing space. We haven’t assumed these crops fit.</p>}
       {sun === "Under 4 hours" && <p className="confidence-note">Limited direct sun: check each selected variety’s light requirements before planting. Your choices have not been silently replaced.</p>}
       <p className="confidence-note">This planner turns your inputs and forecast into a workable starting point. Confirm planting dates, varieties, soil safety, and pest guidance with a trusted local extension or nursery.</p>

@@ -92,7 +92,8 @@ test("ships a usable sign-in product and downloadable outcomes", async () => {
   assert.match(home, /Why do I sign in/);
   assert.match(demo, /redirect\("\/"\)/);
   for (const source of [bachelorette, garden, workspace]) assert.match(source, /Customize this Rally \.md|Download customization prompts \.md/);
-  for (const source of [bachelorette, garden, workspace]) assert.match(source, /Download my (plan|outcome) \.md|Download garden plan|Download weekend plan/);
+  for (const source of [bachelorette, garden, workspace]) assert.match(source, /Download my (plan|outcome) \.md|Download Markdown/);
+  for (const source of [bachelorette, garden]) assert.match(source, /Download PDF packet/);
   assert.match(bachelorette, /Money snapshot/);
   assert.match(garden, /weather-aware actions/);
   assert.match(bachelorette, /bachelorette-pool\.jpg/);
