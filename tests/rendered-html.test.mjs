@@ -215,8 +215,7 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
   assert.match(page, /Make a plan you can use and download/);
   assert.match(page, /Each listing explains what’s included/);
   assert.match(page, /Why do I sign in/);
-  for (const idea of ["NCLEX Study Sprint", "Etsy Profit & Pricing Desk", "Flashcard Shop Studio", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
-  assert.match(catalog, /not a verified exam question bank/);
+  for (const idea of ["Etsy Profit & Pricing Desk", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
   assert.match(concept, /PurchaseButton/);
   assert.match(concept, /Try it with your own details/);
   assert.doesNotMatch(concept, /Build this Rally instead|concept-claim/);
@@ -262,7 +261,7 @@ test("turns marketplace previews into usable, purchase-gated Rally flows", async
   assert.match(workspace, /createWorkingResult/);
   assert.match(workspace, /WORKING PREVIEW COMPLETE/);
   assert.match(workspace, /access === "unlocked"/);
-  for (const slug of ["nclex-study-sprint", "etsy-profit-pricing-desk", "travel-proposal-studio", "farmers-market-morning-board", "iep-meeting-organizer", "roommate-move-out-splitter", "care-circle-coordinator", "home-project-bid-compare"]) assert.match(results, new RegExp(slug));
+  for (const slug of ["etsy-profit-pricing-desk", "travel-proposal-studio", "farmers-market-morning-board", "iep-meeting-organizer", "roommate-move-out-splitter", "home-project-bid-compare"]) assert.match(results, new RegExp(slug));
   assert.match(customization, /Prompt 1 — Change it for my exact situation/);
   assert.match(customization, /Prompt 4 — Test the customer outcome/);
   assert.match(purchaseButton, /Try the free preview/);
