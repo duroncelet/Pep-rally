@@ -6,7 +6,7 @@ import { downloadMarkdown, markdownCell, safeFileName } from "../../../download-
 import { downloadOutcomePdf } from "../../../download-pdf";
 import { downloadXlsx } from "../../../download-xlsx";
 import { bidWorksheetXlsx } from "../../../bid-worksheet";
-import { marketOutcomeDocument, PDF_FIRST_SLUGS } from "../../../market-outcome-pdf";
+import { marketOutcomeDocument, PDF_FIRST_SLUGS, SHAREABLE_MARKET_SLUGS } from "../../../market-outcome-pdf";
 import { buildCustomizationKit } from "../../../customization-kit";
 import IepOrganizerWorkspace from "./IepOrganizerWorkspace";
 import EtsyPricingWorkspace from "./EtsyPricingWorkspace";
@@ -15,6 +15,7 @@ import { createWorkingResult } from "../../../rally-results";
 import BidCompareWorkspace from "./BidCompareWorkspace";
 import RoommateMoveOutWorkspace from "./RoommateMoveOutWorkspace";
 import ClinicalPrepWorkspace from "./ClinicalPrepWorkspace";
+import ShareOutcome from "../../../ShareOutcome";
 
 export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   // Part 4: Rallies with real computation get a dedicated structured
@@ -72,9 +73,15 @@ export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
     downloadXlsx(`${safeFileName(concept.title)}-bid-worksheet.xlsx`, bidWorksheetXlsx(answers, concept.inputs));
   }
 
+  const shareLabel = concept.slug === "travel-proposal-studio" ? "Proposal link" : "Shared decision page";
+  const shareHint = concept.slug === "travel-proposal-studio"
+    ? "One link for your client: three directions, tradeoffs, and your shortlist. Name the page for your client — the title is the proposal's heading."
+    : "One link for the household decision: the normalized comparison, must-haves, and questions. Share it for the 2–6 week window while you decide.";
+
   return <main className={`market-workspace concept-${concept.accent}`}>
     <nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><a href={`/discover/${concept.slug}`}>Full listing</a><a href="/library">My Rallies</a></div></nav>
     <header><small>WORKING RALLY · {concept.category.toUpperCase()} · {access === "unlocked" ? "PURCHASED" : "PREVIEW"}</small><h1>{concept.title}</h1><p>{concept.promise}</p>{access === "unlocked" ? <button className="customization-download" onClick={downloadCustomization}>Download customization prompts .md</button> : <a className="customization-download" href={`/discover/${concept.slug}`}>See the preview details →</a>}</header>
     <section className="market-workspace-grid"><form onSubmit={(event) => { event.preventDefault(); setCreated(true); }}><small>BRING YOUR REAL CONTEXT</small><h2>Make the first result yours.</h2>{concept.inputs.map((item) => <label key={item}>{item}<textarea value={answers[item] ?? ""} onChange={(event) => { setAnswers({ ...answers, [item]: event.target.value }); setCreated(false); }} placeholder="Add the detail you know…"/></label>)}<button className="primary" disabled={!filled.length}>Create my working result →</button></form><aside className={created ? "created" : ""}><small>YOUR OUTCOME</small><h2>{created ? result.headline : "Your finished result appears here."}</h2>{created ? <><p className="result-summary">{result.summary}</p>{result.sections.map((section, index) => <article key={section.title}><b>{String(index + 1).padStart(2, "0")} · {section.title}</b>{section.intro && <p>{section.intro}</p>}<ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul></article>)}<div className="workspace-review"><b>Before you use it</b><p>{concept.guardrail}</p></div>{access === "unlocked" ? <><div className="rally-actions"><button onClick={downloadOutcome}>Download my outcome .md</button>{(PDF_FIRST_SLUGS as readonly string[]).includes(concept.slug) && <button onClick={downloadPacket}>Download PDF packet</button>}{concept.slug === "home-project-bid-compare" && <button onClick={downloadWorksheet}>Download bid worksheet .xlsx</button>}<button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={save}>Save to My Rallies</button></div>{saveStatus && <small>{saveStatus}</small>}</> : <div className="preview-lock"><small>WORKING PREVIEW COMPLETE</small><b>Paid access is not on sale yet.</b><p>This is a preview. For a complete plan you can download today, try one of the free Rallies.</p><a className="primary" href={`/discover/${concept.slug}`}>See the full listing →</a></div>}</> : <><p>Answer at least one question. The preview will create a representative result. Paid saving and downloads are not available yet.</p><a className="workspace-listing-link" href={`/discover/${concept.slug}`}>See the full listing →</a></>}</aside></section>
+    {created && access === "unlocked" && SHAREABLE_MARKET_SLUGS.has(concept.slug) && <ShareOutcome rallySlug={concept.slug} document={marketOutcomeDocument(concept, result)} label={shareLabel} hint={shareHint} />}
   </main>;
 }

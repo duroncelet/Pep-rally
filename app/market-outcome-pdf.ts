@@ -64,3 +64,14 @@ export function marketOutcomeDocument(concept: RallyConcept, result: WorkingResu
     ],
   };
 }
+
+// Mini-site-first catalog Rallies: the outcome is shared with a client or a
+// partner over days and weeks, so the workspace offers a shareable link.
+// (The free originals share from their own workspaces; the PDF-first
+// Rallies lead with the packet instead — see Part 1B A6.)
+// Moved here from the B4 twin module (market-outcome-document.ts) when the
+// two consolidated: one marketOutcomeDocument, one home for the slug sets.
+export const SHAREABLE_MARKET_SLUGS: ReadonlySet<string> = new Set([
+  "travel-proposal-studio",
+  "home-project-bid-compare",
+]);
