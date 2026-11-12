@@ -4338,3 +4338,15 @@ footer > span {
 .order-rows article label:first-child { flex:1 1 220px; display:flex; gap:8px; align-items:center; }
 .order-rows article>span { flex:2 1 260px; font-size:.9rem; color:#4d5a5b; }
 .order-rows input[type="number"] { width:64px; padding:8px; border:1px solid #657273; border-radius:8px; font:inherit; }
+/* Bachelorette prescriptive planner — deposits, date polling, rooms (Part 3). */
+.deposit-card, .poll-option, .room-card { border:1.5px solid #23363b; border-radius:14px; padding:16px; margin:14px 0; background:#fffaf1; }
+.deposit-head, .poll-option>div:first-child, .room-card>div:first-child { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+.deposit-head b, .poll-option b, .room-card b { font-size:1.05rem; }
+.deposit-head em { margin-left:auto; font-style:normal; font-weight:700; }
+.deposit-payers, .poll-votes, .room-occupants { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; }
+.deposit-payers label, .poll-votes label, .room-occupants label { display:flex; gap:6px; align-items:center; }
+.chase-view { margin-top:12px; }
+.chase-view summary { cursor:pointer; font-weight:700; }
+.chase-view ul { list-style:none; padding:0; }
+.chase-view li { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid #eee3d3; }
+.poll-option .primary, .room-plan>button, .date-poll>button { margin-top:12px; }
