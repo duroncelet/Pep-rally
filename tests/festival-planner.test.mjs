@@ -22,7 +22,7 @@ test('the Festival Planner listing is generic and promises the wishlist', () => 
   const concept = findConcept('festival-planner');
   assert.ok(concept);
   assert.equal(concept.status, 'working');
-  assert.deepEqual(concept.outcome, ['Artist wishlist by day', 'Outfit plan per day', 'Packing list', 'Group cost split']);
+  assert.deepEqual(concept.outcome, ['Artist wishlist by day', 'Outfit plan per day', 'Packing list', 'Group cost split', 'Your own festival page + a PDF packet to keep']);
   // No trademark anywhere in the listing.
   const text = JSON.stringify(concept).toLowerCase();
   assert.ok(!text.includes('coachella'), 'listing leans on the Coachella trademark');
