@@ -20,8 +20,10 @@ const bidAnswers = {
   'Questions for each contractor': 'What is excluded?; What is the payment schedule?',
 };
 
-test('only Travel Proposal and Bid Compare offer a shareable link from the market workspace', () => {
-  assert.deepEqual([...SHAREABLE_MARKET_SLUGS].sort(), ['home-project-bid-compare', 'travel-proposal-studio']);
+test('Travel Proposal, Bid Compare, and Festival Planner offer a shareable link from the market workspace', () => {
+  // Festival Planner joined the set-based wiring when #31 merged: its standalone
+  // share block was absorbed into SHAREABLE_MARKET_SLUGS (see the #31 merge).
+  assert.deepEqual([...SHAREABLE_MARKET_SLUGS].sort(), ['festival-planner', 'home-project-bid-compare', 'travel-proposal-studio']);
   // The PDF-first Rallies lead with the packet, not a shareable link.
   for (const slug of ['iep-meeting-organizer', 'roommate-move-out-splitter', 'etsy-profit-pricing-desk', 'clinical-rotation-pocket-prep', 'farmers-market-morning-board']) {
     assert.equal(SHAREABLE_MARKET_SLUGS.has(slug), false);

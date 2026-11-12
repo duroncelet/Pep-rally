@@ -12,6 +12,6 @@ test('delisted Rallies no longer resolve from the catalog',()=>{
  for (const slug of ['nclex-study-sprint','flashcard-shop-studio','care-circle-coordinator']) {
   assert.equal(findConcept(slug),undefined,`${slug} should be delisted`);
  }
- assert.equal(rallyConcepts.length,7);
+ assert.equal(rallyConcepts.length,8); // 7 after the Nov 11 delisting + Festival Planner (#31)
  assert.doesNotMatch(rallyConcepts.map((item)=>item.title).join(' '),/NCLEX|Flashcard Shop|Care Circle/);
 });
