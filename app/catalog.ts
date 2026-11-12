@@ -168,6 +168,21 @@ export const rallyConcepts: RallyConcept[] = [
     monogram: "HB",
     priceCents: 1800,
   },
+  {
+    slug: "festival-planner",
+    title: "Festival Planner",
+    category: "Plan",
+    forWhom: "Festival groups planning the weekend together",
+    promise: "Pick your artists and days, plan outfits, pack once, and split the group costs — one page for the whole crew.",
+    inputs: ["Festival, artists, and days", "Outfit ideas by day", "Group members and shared costs"],
+    outcome: ["Artist wishlist by day", "Outfit plan per day", "Packing list", "Group cost split"],
+    guardrail: "Lineups and set times change; the festival's official schedule is the source of truth. No schedule or conflict flags until set times are published.",
+    maker: "A festival regular",
+    status: "working",
+    accent: "yellow",
+    monogram: "FP",
+    priceCents: 1200,
+  },
 ];
 
 export const findConcept = (slug: string) => rallyConcepts.find((item) => item.slug === slug);

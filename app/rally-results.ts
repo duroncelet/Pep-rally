@@ -87,6 +87,13 @@ export function createWorkingResult(concept: RallyConcept, answers: Record<strin
         { title: "Assignments", items: pieces(second).map((person) => `Confirm date, task, and backup with: ${person}`).concat(["Leave unfilled needs visible; do not assume availability."]) },
         { title: "Communication plan", items: [third ? `Use these preferences: ${third}.` : "Add your communication preferences above to set how updates go out.", "Prepare one concise update for review.", "Keep private health details out unless explicitly needed and safely handled.", "Confirm who may receive updates."] },
       ]);
+    case "festival-planner":
+      return finish("Your festival weekend, in one link", first ? `A wishlist and group plan for ${sentence(first)}.` : "A wishlist and group plan for your festival weekend. Add your festival, artists, and days to make it yours.", [
+        { title: "Artist wishlist by day", items: pieces(first).map((item) => `Wishlist: ${item}`).concat(["Set times are not published yet — check the official schedule before finalizing day plans."]) },
+        { title: "Outfit plan per day", items: pieces(second).map((item) => `Outfit: ${item}`).concat(["Check the forecast the week of the festival and pack a layer for after dark."]) },
+        { title: "Group cost split", items: pieces(third).map((item) => `Split: ${item}`).concat(["Agree the split before anyone books.", "Record who paid what as you go."]) },
+        { title: "Packing list", intro: "A starting checklist — add the items only you know you need.", items: ["Water bottle and snacks", "Sunscreen and a hat", "Portable charger", "Ear protection", "A layer for after dark", "Tickets, ID, and payment — plus an offline copy"] },
+      ]);
     case "home-project-bid-compare":
       return finish("Your normalized home-project bid comparison", "A common frame for estimates that use different language.", [
         { title: "Scope comparison", items: pieces(first).map((bid) => `Normalize labor, materials, allowances, exclusions, warranty, and timing for: ${bid}`) },
