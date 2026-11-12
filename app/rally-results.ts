@@ -9,7 +9,7 @@ function answer(concept: RallyConcept, answers: Record<string, string>, index: n
   return answers[concept.inputs[index]]?.trim() ?? "";
 }
 
-function pieces(value: string) {
+export function pieces(value: string) {
   return value.split(/\n|,|;/).map((item) => item.trim().replace(/^(and|or)\s+/i, "").replace(/[.]+$/, "")).filter(Boolean).slice(0, 8);
 }
 
