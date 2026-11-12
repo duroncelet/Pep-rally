@@ -14,6 +14,10 @@ export const PDF_FIRST_SLUGS = [
   "home-project-bid-compare",
 ] as const;
 
+// Festival Planner is mini-site-first, but ships a packet like Bachelorette
+// (Part 1B, C1) — so it gets the PDF button without joining PDF_FIRST_SLUGS.
+export const PACKET_SLUGS = [...PDF_FIRST_SLUGS, "festival-planner"] as const;
+
 // PDF-only structural extras, keyed by Rally. These are blank scaffolding the
 // buyer completes (signature lines, a letter draft with bracketed blanks) —
 // never invented facts — and they serve the spec's named contents: the IEP
@@ -74,4 +78,5 @@ export function marketOutcomeDocument(concept: RallyConcept, result: WorkingResu
 export const SHAREABLE_MARKET_SLUGS: ReadonlySet<string> = new Set([
   "travel-proposal-studio",
   "home-project-bid-compare",
+  "festival-planner",
 ]);

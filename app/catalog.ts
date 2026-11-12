@@ -12,9 +12,10 @@ export type RallyConcept = {
   href?: string;
   accent: "coral" | "green" | "blue" | "yellow";
   monogram: string;
-  // Planned price in cents. This is the single place a Rally's price is set;
-  // change this one number when the price decision lands.
-  priceCents: number;
+  // Omitted while Kelly rules the price point (bundle §6: "Do not pick a
+  // price"). A Rally with no priceCents renders "Price to be decided" and
+  // cannot open a checkout; setting the price is a single-field change.
+  priceCents?: number;
   sourceNote?: string;
 };
 
@@ -123,6 +124,20 @@ export const rallyConcepts: RallyConcept[] = [
     accent: "blue",
     monogram: "HB",
     priceCents: 1800,
+  },
+  {
+    slug: "festival-planner",
+    title: "Festival Planner",
+    category: "Plan",
+    forWhom: "Festival groups planning the weekend together",
+    promise: "Pick your artists and days, plan outfits, pack once, and split the group costs — one page for the whole crew.",
+    inputs: ["Festival, artists, and days", "Outfit ideas by day", "Group members and shared costs"],
+    outcome: ["Artist wishlist by day", "Outfit plan per day", "Packing list", "Group cost split"],
+    guardrail: "Lineups and set times change; the festival's official schedule is the source of truth. No schedule or conflict flags until set times are published.",
+    maker: "A festival regular",
+    status: "working",
+    accent: "yellow",
+    monogram: "FP",
   },
 ];
 

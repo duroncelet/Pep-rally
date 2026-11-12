@@ -15,11 +15,110 @@ export function pieces(value: string) {
 
 function sentence(value: string) { return value.trim().replace(/[.!?]+$/, ""); }
 
+// Local cents formatter mirroring app/format-price.ts: this module is
+// imported directly by plain node tests, which cannot resolve the
+// extensionless import the app uses.
+function usd(cents: number) { return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" }); }
+
 // A section with no usable items is dropped, so a blank input leaves no
 // empty heading behind. Sections that keep generic structure use a neutral
 // prompt to fill in the missing input instead of inventing an answer.
 function finish(headline: string, summary: string, sections: ResultSection[]): WorkingResult {
   return { headline, summary, sections: sections.filter((section) => section.items.length > 0) };
+}
+
+// Group cost split for the Festival Planner, following the Bachelorette
+// splitter's approach (app/rally/bachelorette/destinations.ts): integer
+// cents, equal shares with remainder cents to the first people, and a greedy
+// debtor-to-creditor settle-up. Planned costs and paid money stay separate:
+// the plan says what each person owes toward the total; the settle-up only
+// reconciles money already paid, so its lines always sum to zero.
+type FestivalCost = { raw: string; cents: number; each: boolean };
+type FestivalSplit = { people: string[]; costs: FestivalCost[]; paid: { name: string; cents: number }[] };
+
+const FESTIVAL_AMOUNT = /\$([\d,]+(?:\.\d{1,2})?)/;
+const FESTIVAL_PAID = /^(.+?)\s+paid\s+\$([\d,]+(?:\.\d{1,2})?)$/i;
+const FESTIVAL_PAID_BY = /^(.*?)\s*\$([\d,]+(?:\.\d{1,2})?)\s+paid by\s+(.+)$/i;
+
+function toCents(raw: string) { return Math.round(parseFloat(raw.replace(/,/g, "")) * 100); }
+
+function parseFestivalSplit(third: string): FestivalSplit {
+  const people: string[] = [];
+  const costs: FestivalCost[] = [];
+  const paid: { name: string; cents: number }[] = [];
+  const addPerson = (name: string) => { if (!people.some((person) => person.toLowerCase() === name.toLowerCase())) people.push(name); };
+  for (const piece of pieces(third)) {
+    const paidMatch = piece.match(FESTIVAL_PAID);
+    if (paidMatch) {
+      const name = paidMatch[1].trim();
+      paid.push({ name, cents: toCents(paidMatch[2]) });
+      addPerson(name);
+      continue;
+    }
+    const paidByMatch = piece.match(FESTIVAL_PAID_BY);
+    if (paidByMatch) {
+      const name = paidByMatch[3].trim();
+      const cents = toCents(paidByMatch[2]);
+      costs.push({ raw: piece, cents, each: false });
+      paid.push({ name, cents });
+      addPerson(name);
+      continue;
+    }
+    const amountMatch = piece.match(FESTIVAL_AMOUNT);
+    if (amountMatch) {
+      costs.push({ raw: piece, cents: toCents(amountMatch[1]), each: /\beach\b/i.test(piece) });
+      continue;
+    }
+    addPerson(piece);
+  }
+  return { people, costs, paid };
+}
+
+function equalShares(cents: number, count: number) {
+  const base = Math.floor(cents / count);
+  return Array.from({ length: count }, (_, index) => base + (index < cents % count ? 1 : 0));
+}
+
+function festivalSplitItems(third: string): string[] {
+  const { people, costs, paid } = parseFestivalSplit(third);
+  if (!people.length && !costs.length) return ["Agree the split before anyone books.", "Record who paid what as you go."];
+  const items: string[] = [];
+  const sharedCents = costs.filter((cost) => !cost.each).reduce((sum, cost) => sum + cost.cents, 0);
+  const eachCents = costs.filter((cost) => cost.each).reduce((sum, cost) => sum + cost.cents, 0);
+  // Cost lines keep the buyer's own wording so every number stays traceable.
+  for (const cost of costs) items.push(cost.each ? `${cost.raw} · ${usd(cost.cents)} per person` : people.length > 1 ? `${cost.raw} · shared by ${people.length}` : `${cost.raw} · shared cost`);
+  if (people.length && costs.length) {
+    const totalCents = sharedCents + eachCents * people.length;
+    const shares = equalShares(sharedCents, people.length).map((share) => share + eachCents);
+    items.push(`Group total: ${usd(totalCents)} across ${people.length} ${people.length === 1 ? "person" : "people"}.`);
+    people.forEach((person, index) => items.push(`${person}'s share: ${usd(shares[index])}.`));
+    const paidTotal = paid.reduce((sum, record) => sum + record.cents, 0);
+    if (paidTotal > 0) {
+      const paidShares = equalShares(paidTotal, people.length);
+      const paidByPerson = new Map<string, number>();
+      for (const record of paid) paidByPerson.set(record.name.toLowerCase(), (paidByPerson.get(record.name.toLowerCase()) ?? 0) + record.cents);
+      const balances = people.map((person, index) => ({ person, cents: (paidByPerson.get(person.toLowerCase()) ?? 0) - paidShares[index] }));
+      const debtors = balances.filter((balance) => balance.cents < 0).map((balance) => ({ person: balance.person, cents: -balance.cents }));
+      const creditors = balances.filter((balance) => balance.cents > 0).map((balance) => ({ person: balance.person, cents: balance.cents }));
+      const settlements: { from: string; to: string; cents: number }[] = [];
+      for (const debtor of debtors) for (const creditor of creditors) {
+        const cents = Math.min(debtor.cents, creditor.cents);
+        if (cents) settlements.push({ from: debtor.person, to: creditor.person, cents });
+        debtor.cents -= cents; creditor.cents -= cents;
+      }
+      if (settlements.length) settlements.forEach((settlement) => items.push(`${settlement.from} pays ${settlement.to} ${usd(settlement.cents)}.`));
+      else items.push(`Paid so far (${usd(paidTotal)}) balances out — nobody owes anyone yet.`);
+      items.push("Calculated suggestions only — confirm each payment with the group before settling.");
+    } else {
+      items.push("No payments recorded yet — add who paid what (e.g. “Maya paid $900”) to see who owes whom.");
+    }
+  } else if (costs.length) {
+    items.push("Add the group members to split these costs.");
+  } else {
+    items.push(`${people.join(", ")} ${people.length === 1 ? "is" : "are"} splitting — add shared costs with amounts (e.g. “house $900”) to see each share.`);
+  }
+  items.push("Agree the split before anyone books.");
+  return items;
 }
 
 export function createWorkingResult(concept: RallyConcept, answers: Record<string, string>): WorkingResult {
@@ -86,6 +185,13 @@ export function createWorkingResult(concept: RallyConcept, answers: Record<strin
         { title: "Welcome help", items: pieces(first).map((need) => `Open need: ${need}`) },
         { title: "Assignments", items: pieces(second).map((person) => `Confirm date, task, and backup with: ${person}`).concat(["Leave unfilled needs visible; do not assume availability."]) },
         { title: "Communication plan", items: [third ? `Use these preferences: ${third}.` : "Add your communication preferences above to set how updates go out.", "Prepare one concise update for review.", "Keep private health details out unless explicitly needed and safely handled.", "Confirm who may receive updates."] },
+      ]);
+    case "festival-planner":
+      return finish("Your festival weekend, in one link", first ? `A wishlist and group plan for ${sentence(first)}.` : "A wishlist and group plan for your festival weekend. Add your festival, artists, and days to make it yours.", [
+        { title: "Artist wishlist by day", items: pieces(first).map((item) => `Wishlist: ${item}`).concat(["Set times are not published yet — check the official schedule before finalizing day plans."]) },
+        { title: "Outfit plan per day", items: pieces(second).map((item) => `Outfit: ${item}`).concat(["Check the forecast the week of the festival and pack a layer for after dark."]) },
+        { title: "Group cost split", items: festivalSplitItems(third) },
+        { title: "Packing list", intro: "A starting checklist — add the items only you know you need.", items: ["Water bottle and snacks", "Sunscreen and a hat", "Portable charger", "Ear protection", "A layer for after dark", "Tickets, ID, and payment — plus an offline copy"] },
       ]);
     case "home-project-bid-compare":
       return finish("Your normalized home-project bid comparison", "A common frame for estimates that use different language.", [
