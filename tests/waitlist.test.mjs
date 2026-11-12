@@ -48,11 +48,11 @@ test("ships the homepage waitlist: band, public POST route, D1 storage", async (
   assert.ok(home.indexOf('className="waitlist-band"') > home.indexOf('id="more-rallies"'));
   assert.ok(home.indexOf('className="waitlist-band"') < home.indexOf('id="faq"'));
   assert.match(home, /Paid Rallies aren’t on sale yet\./);
-  assert.match(home, /Leave your email and we’ll tell you when they open\./);
+  assert.match(home, /Leave your email for first access when they open, plus launch updates\./);
   assert.match(home, /fetch\("\/api\/waitlist", \{ method: "POST"/);
   assert.match(home, /source: "homepage"/);
   assert.match(home, /type="email" required/);
-  assert.match(home, /You're on the list\. We'll email you when paid Rallies open\./);
+  assert.match(home, /You're on the list\. You'll get first access when paid Rallies open, plus launch updates\./);
   assert.match(home, /You're already on the list\./);
   assert.match(home, /Something went wrong — try again in a minute\./);
   assert.doesNotMatch(home, /waitlist-band.*waitlist-band/s);
