@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { findConcept, rallyConcepts } from "../../catalog";
 import PurchaseButton from "./PurchaseButton";
+import { formatPrice } from "../../format-price";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -19,7 +20,7 @@ export default async function RallyListingPage({ params }: PageProps) {
   return <main className={`concept-page concept-${rally.accent}`}>
     <nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><a href="/#marketplace">Shop Rallies</a><a href="/library">My Rallies</a></div></nav>
     <header className="concept-hero">
-      <div><span className="concept-category">{rally.category} · CONCEPT PREVIEW</span><h1>{rally.title}</h1><p>{rally.promise}</p><div className="concept-price"><b>${(rally.priceCents / 100).toFixed(0)}</b><span>Planned price · preview available now</span></div><div className="concept-actions"><PurchaseButton slug={rally.slug} priceCents={rally.priceCents}/></div></div>
+      <div><span className="concept-category">{rally.category} · CONCEPT PREVIEW</span><h1>{rally.title}</h1><p>{rally.promise}</p><div className="concept-price"><b>{formatPrice(rally.priceCents)}</b><span>Planned price · preview available now</span></div><div className="concept-actions"><PurchaseButton slug={rally.slug} priceCents={rally.priceCents}/></div></div>
       <aside><span>{rally.monogram}</span><small>THE OUTCOME</small><b>{rally.outcome[0]}</b><p>Try it with your own details. Paid access is not available yet.</p></aside>
     </header>
 
