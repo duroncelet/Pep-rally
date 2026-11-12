@@ -3577,6 +3577,31 @@ footer > span {
 .workspace-review { padding: 14px; border-radius: 9px; background: var(--yellow); }
 .workspace-review b { font-family: "Fraunces"; font-size: 19px; }
 .workspace-review p { margin: 5px 0 0; font-size: 10px; line-height: 1.5; }
+/* Computed workspaces (Part 4) — structured inputs and computed tables for
+   Rallies that calculate from buyer-entered numbers instead of echoing text. */
+.compute-note { margin: -4px 0 4px; color: #5b5650; font-size: 11px; line-height: 1.6; }
+.field-note { color: #a73e36; font-size: 10px; font-weight: 700; line-height: 1.4; }
+.bid-card { padding: 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: #f7f2e7; display: grid; gap: 10px; }
+.bid-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.bid-card-head h3 { margin: 0; font-family: "Fraunces"; font-size: 22px; }
+.bid-card-head button { border: 0; background: none; color: #a73e36; font: inherit; font-size: 9px; font-weight: 900; text-decoration: underline; }
+.bid-card input { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 11px; }
+.bid-subhead { margin-top: 4px; display: grid; gap: 2px; }
+.bid-subhead b { font-size: 11px; }
+.bid-subhead span { color: #666; font-size: 10px; line-height: 1.45; }
+.bid-row { display: grid; grid-template-columns: 1fr 110px 28px; gap: 8px; align-items: center; }
+.bid-row.three { grid-template-columns: 1fr 96px 96px 28px; }
+.bid-row.two { grid-template-columns: 1fr 1fr; }
+.bid-row button { border: 0; border-radius: 999px; padding: 6px; background: white; font: inherit; font-size: 12px; font-weight: 900; }
+.row-add { width: fit-content; padding: 8px 12px; border: 1.5px dashed var(--ink); border-radius: 999px; background: white; font: inherit; font-size: 9px; font-weight: 900; }
+.reveal-box { padding: 16px; border: 2px solid var(--ink); border-radius: 10px; background: var(--yellow); }
+.reveal-box b { display: block; font-family: "Fraunces"; font-size: 22px; line-height: 1.15; }
+.reveal-box p { margin: 8px 0 0; color: #514d47; font-size: 11px; line-height: 1.55; }
+.bid-compare-table { border: 1.5px solid var(--ink); border-radius: 9px; overflow: hidden; background: white; }
+.bid-compare-row { display: grid; grid-template-columns: 1.1fr repeat(4, 1fr); gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 10px; align-items: center; }
+.bid-compare-row:last-child { border-bottom: 0; }
+.bid-compare-row.labels { background: var(--ink); color: white; font-size: 9px; font-weight: 800; }
+.bid-compare-row.cheapest { background: #e8f5dc; font-weight: 800; }
 .no-ideas { padding: 28px; border: 2px dashed var(--ink); border-radius: 12px; background: white; text-align: center; }
 .no-ideas b { font-family: "Fraunces"; font-size: 25px; }
 .no-ideas a { color: inherit; font-weight: 900; }
