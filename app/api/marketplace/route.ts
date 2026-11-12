@@ -1,7 +1,7 @@
-import { and, avg, count, desc, eq } from "drizzle-orm";
+import { avg, count, desc, eq } from "drizzle-orm";
 import { getChatGPTUser, chatGPTSignInPath } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
-import { creatorApps, rallyReviews, savedRallies } from "../../../db/schema";
+import { creatorApps, rallyReviews, gardenPlans, partyPlans } from "../../../db/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -9,10 +9,9 @@ const validSlugs = new Set(["bachelorette-blueprint", "garden-planner"]);
 
 export async function GET() {
   const db = getDb();
-  const runRows = await db
-    .select({ toolSlug: savedRallies.toolSlug, runs: count() })
-    .from(savedRallies)
-    .groupBy(savedRallies.toolSlug);
+  const [gardenCount,partyCount] = await Promise.all([
+    db.select({ total:count() }).from(gardenPlans), db.select({ total:count() }).from(partyPlans),
+  ]);
   const ratingRows = await db
     .select({ toolSlug: rallyReviews.toolSlug, reviewCount: count(), averageRating: avg(rallyReviews.rating) })
     .from(rallyReviews)
@@ -38,7 +37,7 @@ export async function GET() {
   }).from(creatorApps).where(eq(creatorApps.stage, "published")).orderBy(desc(creatorApps.updatedAt)).limit(24);
 
   const stats = Object.fromEntries([...validSlugs].map((toolSlug) => {
-    const runs = runRows.find((row) => row.toolSlug === toolSlug)?.runs ?? 0;
+    const runs = toolSlug === 'garden-planner' ? gardenCount[0].total : partyCount[0].total;
     const ratings = ratingRows.find((row) => row.toolSlug === toolSlug);
     return [toolSlug, {
       runs,
@@ -59,21 +58,22 @@ export async function POST(request: Request) {
   const toolSlug = body.toolSlug ?? "";
   const review = body.review?.trim() ?? "";
   const rating = Math.round(Number(body.rating));
-  if (!validSlugs.has(toolSlug) || rating < 1 || rating > 5 || review.length < 12 || review.length > 500) {
+  if (!validSlugs.has(toolSlug) || !Number.isFinite(rating) || rating < 1 || rating > 5 || review.length < 12 || review.length > 500) {
     return Response.json({ error: "Add a 1–5 star rating and a review between 12 and 500 characters." }, { status: 400 });
   }
-  const used = await getDb().select({ id: savedRallies.id }).from(savedRallies)
-    .where(and(eq(savedRallies.userId, user.userId), eq(savedRallies.toolSlug, toolSlug))).limit(1);
+  const used = toolSlug === 'garden-planner'
+    ? await getDb().select({id:gardenPlans.id}).from(gardenPlans).where(eq(gardenPlans.ownerUserId,user.userId)).limit(1)
+    : await getDb().select({id:partyPlans.id}).from(partyPlans).where(eq(partyPlans.ownerUserId,user.userId)).limit(1);
   if (!used.length) return Response.json({ error: "Use or save this Rally before reviewing it." }, { status: 403 });
 
   const now = new Date();
   await getDb().insert(rallyReviews).values({
     id: crypto.randomUUID(), toolSlug, reviewerUserId: user.userId,
-    reviewerName: user.displayName || "Verified user", rating, body: review,
+    reviewerName: user.fullName || "Rally user", rating, body: review,
     createdAt: now, updatedAt: now,
   }).onConflictDoUpdate({
     target: [rallyReviews.toolSlug, rallyReviews.reviewerUserId],
-    set: { reviewerName: user.displayName || "Verified user", rating, body: review, updatedAt: now },
+    set: { reviewerName: user.fullName || "Rally user", rating, body: review, updatedAt: now },
   });
   return Response.json({ ok: true });
 }

@@ -1,28 +1,15 @@
 "use client";
-
-import { useState } from "react";
-
-export default function PurchaseButton({ slug, priceCents }: { slug: string; priceCents: number }) {
-  const [status, setStatus] = useState("");
-
-  async function purchase() {
-    setStatus("Opening secure checkout…");
-    const response = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ conceptSlug: slug }),
-    });
-    const data = await response.json();
-    if (response.status === 401 && data.signIn) {
-      window.location.href = data.signIn;
-      return;
-    }
-    if (response.ok && data.url) {
-      window.location.href = data.url;
-      return;
-    }
-    setStatus(data.needsCredential ? "Paid checkout is opening soon. You can try the working preview today." : data.error ?? "Checkout could not be opened.");
-  }
-
-  return <div className="concept-buy"><button className="primary" onClick={purchase}>Get this Rally · ${(priceCents / 100).toFixed(0)}</button>{status && <small>{status}</small>}</div>;
+import {useEffect,useState,useRef} from 'react';
+export default function PurchaseButton({slug,priceCents}:{slug:string;priceCents:number}){
+ const [ready,setReady]=useState({enabled:false,mode:'off'});const [busy,setBusy]=useState(false);const [status,setStatus]=useState('');const requestId=useRef('');
+ useEffect(()=>{fetch('/api/checkout/status?slug='+encodeURIComponent(slug)).then(r=>r.ok?r.json():null).then(d=>{if(d)setReady(d);}).catch(()=>{});},[slug]);
+ async function buy(){if(busy)return;setBusy(true);setStatus('Opening secure checkout…');try{
+  if(!requestId.current)requestId.current=crypto.randomUUID();
+  const r=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json','Idempotency-Key':requestId.current},body:JSON.stringify({conceptSlug:slug})});const d=await r.json();
+  if(r.status===401&&d.signIn){location.href=d.signIn;return;}
+  if(r.ok&&d.url){location.href=d.url;return;}
+  if(r.status===409)requestId.current='';
+  setStatus(d.error||'Checkout could not open. Please retry.');
+ }catch{setStatus('Connection interrupted. Retry to resume this checkout.');}finally{setBusy(false);}}
+ return <div className="concept-buy"><a className="primary" href={`/rally/market/${slug}`}>Try the free preview →</a>{ready.enabled?<><button disabled={busy} onClick={buy}>{busy?'Opening…':`${ready.mode==='test'?'Test checkout':'Buy this Rally'} · ${(priceCents/100).toLocaleString('en-US',{style:'currency',currency:'USD'})}`}</button><small>{ready.mode==='test'?'Sandbox only. No real money moves.':'One-time payment. Access and downloads for this Rally.'}</small></>:<small>Paid access is not on sale yet. Planned price: ${(priceCents/100).toLocaleString("en-US",{style:"currency",currency:"USD"})}.</small>}{status&&<p role="status">{status}</p>}<a href="/policies">Policies</a> · <a href="/support">Support</a></div>;
 }

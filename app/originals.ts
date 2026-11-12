@@ -9,7 +9,7 @@ export const originals = [
     blurb: "Bring the guest list, weekend itinerary, lodging options and split bills together in one editable plan.",
     included: ["Lodging budget + stay shortlist", "Guest list + RSVPs", "Budget + payment requests", "Itinerary + booking links", "Organizer notes + packing list", "Downloadable plan + customization prompts"],
     inputs: ["Destination and dates", "Guest list", "Lodging comfort amounts you collect", "Bride’s vibe and must-haves"],
-    outputs: ["A realistic shared budget", "A stay shortlist", "A day-by-day itinerary", "A saved plan plus customization prompts"],
+    outputs: ["A realistic shared budget", "A shortlist you fill with real stay options", "A day-by-day itinerary", "A shareable plan, printable page and customization prompts"],
     permissions: ["Your saved party plan", "Links you choose to open", "No bank or payment credentials stored by the Rally"],
     color: "coral",
     version: "Launch edition · updated September 2026",
