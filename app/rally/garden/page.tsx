@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../download-markdown";
 import {readBrowserDraft,useBrowserDraft} from "../../browser-draft";
 import OutcomePreview from "../../OutcomePreview";
+import ShareOutcome from "../../ShareOutcome";
 import type {OutcomeDocument} from "../../outcome-document";
 import { downloadOutcomePdf } from "../../download-pdf";
 import { gardenAssignments } from "./assignments";
@@ -146,6 +147,15 @@ export default function GardenRally() {
     {heading:"Care board",paragraphs:tasks.length?tasks.map(t=>`${t.done?'Done':'To do'}: ${t.text} - ${t.timing}`):["No tasks yet."]},
     {heading:"Forecast note",paragraphs:weather?[`Forecast for ${weather.place.name}${weather.place.region?', '+weather.place.region:''}, loaded ${weather.fetchedAt || 'during this session'}. Source: ${weather.source}.`,"Forecasts change; refresh in the live garden before making a weather-dependent decision."]:["No current forecast was loaded. Open the Weather & care tab to check it before planting."]},
   ]};
+  // The living season dashboard (Part 1B, B3): the shared page adds the full
+  // care board and the forecast note to the live plan. Kept separate from
+  // gardenDocument so the PDF packet (PR #12) does not duplicate these
+  // sections when it spreads gardenDocument. The private journal stays out.
+  const gardenDashboard:OutcomeDocument={...gardenDocument,sections:[
+    ...gardenDocument.sections,
+    {heading:"Care board",paragraphs:tasks.length?tasks.map(t=>`${t.done?'Done':'To do'}: ${t.text} - ${t.timing}`):["No tasks yet."]},
+    {heading:"Forecast note",paragraphs:weather?[`Forecast for ${weather.place.name}${weather.place.region?', '+weather.place.region:''}, loaded ${weather.fetchedAt || 'during this session'}. Source: ${weather.source}.`,"Forecasts change; refresh in the live garden before making a weather-dependent decision."]:["No current forecast was loaded. Open the Weather & care tab to check it before planting."]},
+  ]};
   async function downloadPacket(){
     if(plots.some(p=>!validPlot(p))){setError("Check your plot names and dimensions before downloading.");return;}
     try{await downloadOutcomePdf(gardenPacket);}catch(e){setError((e as Error).message);}
@@ -228,6 +238,7 @@ export default function GardenRally() {
     </section>}
 
     {tab === "plan" && <OutcomePreview document={gardenDocument} label="Keep your garden plan" privacy="A printable map, planting dates and care list. Your private journal is left out."/>}
+    {tab === "plan" && <ShareOutcome rallySlug="garden-planner" document={gardenDashboard} label="Garden page link" hint="One link for the season: layout, planting calendar, care tasks, and forecast. Update the same link as the garden changes. Your journal stays private."/>}
     {tab === "plan" && <PlotEditor plots={plots} crops={crops} onChange={setPlots}/>}
     {tab === 'calendar' && <PlantingCalendar profile={growingProfile} onProfile={setGrowingProfile} timings={timings} onTimings={setTimings} crops={crops} onAdd={crop=>setCrops(current=>current.includes(crop)?current:[...current,crop])} location={location} sun={sun} onLog={(date,note)=>setJournal(current=>current.some(e=>e.date===date&&e.note===note)?current:[{id:crypto.randomUUID(),date,note,kind:'Planted'},...current])} onTask={(date,text)=>setTasks(current=>current.some(t=>t.text===text&&t.timing===date)?current:[...current,{id:crypto.randomUUID(),text,timing:date,done:false}])}/>}
 
