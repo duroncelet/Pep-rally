@@ -4037,5 +4037,36 @@ footer > span {
 .bill-row { display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid #ccd0c7; padding:14px 0; }
 .trip-notice { padding:16px; background:#e5efdf; border-radius:12px; }
 .inquiry-copy { white-space:pre-wrap; }
+/* Clinical Rotation Pocket Prep (Part 4) — rotation-date inputs, the
+   skills meter, tonight's de-identified prep, and the pack list. */
+.clin-note { margin: -4px 0 4px; color: #5b5650; font-size: 11px; line-height: 1.6; }
+.clin-top-field input { width: 100%; min-width: 0; padding: 11px; border: 1px solid var(--ink); border-radius: 8px; background: #f7f2e7; font: inherit; font-size: 11px; }
+.clin-card { padding: 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: #f7f2e7; display: grid; gap: 10px; }
+.clin-card input, .clin-card select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 11px; }
+.clin-card input[type="checkbox"] { width: auto; }
+.clin-subhead { display: grid; gap: 2px; }
+.clin-subhead b { font-size: 11px; }
+.clin-subhead span { color: #666; font-size: 10px; line-height: 1.45; }
+.clin-row { display: grid; grid-template-columns: 1fr 1fr 28px; gap: 8px; align-items: center; }
+.clin-row.three { grid-template-columns: 1fr 90px 70px 28px; }
+.clin-row.single { grid-template-columns: 1fr 28px; }
+.clin-row.two { grid-template-columns: 1fr 1fr; }
+.clin-row button { border: 0; border-radius: 999px; padding: 6px; background: white; font: inherit; font-size: 12px; font-weight: 900; }
+.clin-check { display: flex !important; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.clin-weekdays, .clin-pack { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.clin-weekdays label, .clin-pack label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; }
+.clin-slot { padding: 12px; border: 1px solid var(--ink); border-radius: 8px; background: white; display: grid; gap: 8px; }
+.clin-slot > b { font-family: "Fraunces"; font-size: 16px; }
+.clin-focus { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.clin-focus label { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; }
+.clin-add { width: fit-content; padding: 8px 12px; border: 1.5px dashed var(--ink); border-radius: 999px; background: white; font: inherit; font-size: 9px; font-weight: 900; }
+.clin-next { padding: 16px; border: 2px solid var(--ink); border-radius: 10px; background: var(--yellow); }
+.clin-next b { display: block; font-family: "Fraunces"; font-size: 20px; line-height: 1.15; }
+.clin-next p { margin: 6px 0 0; color: #514d47; font-size: 11px; line-height: 1.5; }
+.clin-meter { padding: 14px; border: 1.5px solid var(--ink); border-radius: 10px; background: white; display: grid; gap: 8px; }
+.clin-meter b { font-size: 12px; }
+.clin-meter p { margin: 0; color: #666; font-size: 10px; line-height: 1.5; }
+.clin-meter-bar { height: 12px; border: 1.5px solid var(--ink); border-radius: 999px; overflow: hidden; background: #f7f2e7; }
+.clin-meter-bar span { display: block; height: 100%; background: #38805c; }
 @media(max-width:650px) { .trip-grid { grid-template-columns:1fr; } .trip-card, .destination-feature, .trip-grid>article { padding:16px; } .trip-fields { flex-direction:column; } .trip-fields label { flex-basis:auto; } .bill-row { align-items:flex-start; } }
 @media(max-width:650px) { .trip-city-form { align-items:stretch; flex-direction:column; } }
