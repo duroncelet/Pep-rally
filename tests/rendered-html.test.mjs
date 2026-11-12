@@ -23,7 +23,14 @@ test("ships a clear build-and-marketplace homepage", async () => {
   assert.doesNotMatch(page, /moat|royalty|marketplace fee|funded roadmap|launchpad|pilot cohort/i);
   assert.match(page, /EXPLORE THE MARKETPLACE/);
   assert.match(page, /Small apps\.<br\/><em>Real outcomes/);
-  assert.match(page, /Have something worth sharing/);
+  assert.match(page, /Do you have something you want to sell/);
+  assert.match(page, /href="\/sign-up">Sign up/);
+  assert.match(page, /href="#creators">Sell your Rally/);
+  assert.match(page, /href="#marketplace">Shop Rallies/);
+  assert.match(page, /className="secondary" href="#creators">Sell your Rally/);
+  assert.doesNotMatch(page, /For creators/);
+  assert.doesNotMatch(page, /two-sided marketplace/);
+  assert.ok(page.indexOf('id="creators"') < page.indexOf('id="more-rallies"'));
   assert.doesNotMatch(page, /starter-grid/);
   assert.match(page, /PEP RALLY FAQ/);
   assert.match(page, /href="#faq">FAQ/);

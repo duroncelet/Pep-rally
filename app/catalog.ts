@@ -12,6 +12,8 @@ export type RallyConcept = {
   href?: string;
   accent: "coral" | "green" | "blue" | "yellow";
   monogram: string;
+  // Planned price in cents. This is the single place a Rally's price is set;
+  // change this one number when the price decision lands.
   priceCents: number;
   sourceNote?: string;
 };

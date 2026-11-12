@@ -2523,6 +2523,18 @@ nav {
   font-size: 14px;
   font-weight: 600;
 }
+.store-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.nav-signup {
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
 .nav-button,
 .primary,
 .dark {
@@ -2537,6 +2549,21 @@ nav {
 .nav-button:active,
 .primary:active,
 .dark:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 2px 0 var(--ink);
+}
+/* Secondary button: same pill family as .primary, one clear step down.
+   2px border + 12px vertical padding keeps the same outer height. */
+.secondary {
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 12px 21px;
+  font-weight: 700;
+  background: white;
+  color: var(--ink);
+  box-shadow: 3px 4px 0 var(--ink);
+}
+.secondary:active {
   transform: translate(2px, 2px);
   box-shadow: 1px 2px 0 var(--ink);
 }
