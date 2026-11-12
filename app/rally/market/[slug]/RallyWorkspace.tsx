@@ -8,6 +8,7 @@ import { downloadXlsx } from "../../../download-xlsx";
 import { bidWorksheetXlsx } from "../../../bid-worksheet";
 import { marketOutcomeDocument, PDF_FIRST_SLUGS } from "../../../market-outcome-pdf";
 import { buildCustomizationKit } from "../../../customization-kit";
+import IepOrganizerWorkspace from "./IepOrganizerWorkspace";
 import { createWorkingResult } from "../../../rally-results";
 import BidCompareWorkspace from "./BidCompareWorkspace";
 
@@ -16,6 +17,7 @@ export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   // workspace instead of the generic three-textarea form. Each computed
   // Rally adds one branch here; keep both sides when resolving conflicts.
   if (concept.slug === "home-project-bid-compare") return <BidCompareWorkspace concept={concept} />;
+  if (concept.slug === "iep-meeting-organizer") return <IepOrganizerWorkspace concept={concept} />;
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [created, setCreated] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");

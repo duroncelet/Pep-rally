@@ -3683,6 +3683,30 @@ footer > span {
 .no-ideas { padding: 28px; border: 2px dashed var(--ink); border-radius: 12px; background: white; text-align: center; }
 .no-ideas b { font-family: "Fraunces"; font-size: 25px; }
 .no-ideas a { color: inherit; font-weight: 900; }
+/* IEP Meeting Organizer (Part 4) — structured agenda inputs, the one-page
+   Parent Agenda sheet, and the follow-up letter draft. */
+.iep-note { margin: -4px 0 4px; color: #5b5650; font-size: 11px; line-height: 1.6; }
+.iep-card { padding: 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: #f7f2e7; display: grid; gap: 10px; }
+.iep-card input, .iep-row.two input { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 11px; }
+.iep-subhead { display: grid; gap: 2px; }
+.iep-subhead b { font-size: 11px; }
+.iep-subhead span { color: #666; font-size: 10px; line-height: 1.45; }
+.iep-row { display: grid; grid-template-columns: 1fr 1fr 28px; gap: 8px; align-items: center; }
+.iep-row.three { grid-template-columns: 130px 1fr 1fr 28px; }
+.iep-row.single { grid-template-columns: 1fr 28px; }
+.iep-row.two { grid-template-columns: 1fr 1fr; }
+.iep-row button { border: 0; border-radius: 999px; padding: 6px; background: white; font: inherit; font-size: 12px; font-weight: 900; }
+.iep-add { width: fit-content; padding: 8px 12px; border: 1.5px dashed var(--ink); border-radius: 999px; background: white; font: inherit; font-size: 9px; font-weight: 900; }
+.iep-page { padding: 18px; border: 2px solid var(--ink); border-radius: 10px; background: white; display: grid; gap: 12px; }
+.iep-page > b { font-family: "Fraunces"; font-size: 22px; line-height: 1.15; }
+.iep-page > p { margin: 0; color: #666; font-size: 10px; line-height: 1.5; }
+.iep-page article b { font-family: "Fraunces"; font-size: 16px; }
+.iep-page article ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+.iep-page article li { color: #514d47; font-size: 10px; line-height: 1.5; }
+.iep-letter { padding: 18px; border: 1.5px solid var(--ink); border-radius: 10px; background: white; display: grid; gap: 8px; }
+.iep-letter > b { font-family: "Fraunces"; font-size: 20px; }
+.iep-letter > p { margin: 0; color: #666; font-size: 10px; line-height: 1.5; }
+.iep-letter pre { margin: 0; white-space: pre-wrap; font: inherit; font-size: 10px; line-height: 1.6; color: #514d47; }
 .ready-divider { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 58px 0 20px; padding-top: 23px; border-top: 1.5px solid var(--ink); }
 .ready-divider span { color: var(--coral); font-size: 10px; font-weight: 900; letter-spacing: 1.4px; }
 .ready-divider p { margin: 0; color: #666; font-size: 11px; }
