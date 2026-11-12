@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { RallyConcept } from "../../../catalog";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../../download-markdown";
+import { downloadOutcomePdf } from "../../../download-pdf";
+import { downloadXlsx } from "../../../download-xlsx";
+import { bidCompareWorksheetXlsx } from "../../../bid-worksheet";
+import { marketOutcomeDocument } from "../../../market-outcome-pdf";
 import { buildCustomizationKit } from "../../../customization-kit";
 import { parseMoneyToCents, formatCents, computeBidComparison, bidCompareSections, bidCompareHeadline, MAX_BIDS, type BidInput } from "../../../bid-compare";
 
@@ -86,6 +90,19 @@ export default function BidCompareWorkspace({ concept }: { concept: RallyConcept
     downloadMarkdown(`${safeFileName(concept.title)}-outcome.md`, markdown);
   }
 
+  // Part 1B, step A6: this Rally is PDF-first — the designed packet is the
+  // comparison the buyer keeps and shares — and the normalized Excel
+  // worksheet is a named deliverable. Both render the same computed
+  // sections and true costs shown on screen, via the shared A6 builders.
+  async function downloadPacket() {
+    try { await downloadOutcomePdf(marketOutcomeDocument(concept, { headline, summary, sections })); }
+    catch (error) { setSaveStatus((error as Error).message); }
+  }
+
+  function downloadWorksheet() {
+    downloadXlsx(`${safeFileName(concept.title)}-bid-worksheet.xlsx`, bidCompareWorksheetXlsx(bidInputs, mustHaves, questions));
+  }
+
   function downloadCustomization() {
     const markdown = buildCustomizationKit({ title: concept.title, promise: concept.promise, audience: concept.forWhom, inputs: concept.inputs, outputs: concept.outcome, guardrail: concept.guardrail, currentAnswers: { "Bids compared": `${comparison.priced.length} priced`, "Must-haves and budget": mustHaves, "Questions for each contractor": questions } });
     downloadMarkdown(`${safeFileName(concept.title)}-customization-kit.md`, markdown);
@@ -120,6 +137,6 @@ export default function BidCompareWorkspace({ concept }: { concept: RallyConcept
         {sections.map((section, index) => <article key={section.title}><b>{String(index + 1).padStart(2, "0")} · {section.title}</b>{section.intro && <p>{section.intro}</p>}<ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul></article>)}
         {comparison.priced.length === 0 && <p>Add a quoted total for at least one bid to see its true cost.</p>}
         <div className="workspace-review"><b>Before you use it</b><p>{concept.guardrail}</p></div>
-        {access === "unlocked" ? <><div className="rally-actions"><button onClick={downloadOutcome}>Download my outcome .md</button><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={save}>Save to My Rallies</button></div>{saveStatus && <small>{saveStatus}</small>}</> : <div className="preview-lock"><small>WORKING PREVIEW COMPLETE</small><b>Paid access is not on sale yet.</b><p>This is a preview. For a complete plan you can download today, try one of the free Rallies.</p><a className="primary" href={`/discover/${concept.slug}`}>See the full listing →</a></div>}</> : <><p>Enter at least one bid with a quoted total. The comparison reprices allowances and adds exclusions back, so you see the real price — not the quoted one. Paid saving and downloads are not available yet.</p><a className="workspace-listing-link" href={`/discover/${concept.slug}`}>See the full listing →</a></>}</aside></section>
+        {access === "unlocked" ? <><div className="rally-actions"><button onClick={downloadOutcome}>Download my outcome .md</button><button onClick={downloadPacket}>Download PDF packet</button><button onClick={downloadWorksheet}>Download bid worksheet .xlsx</button><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={save}>Save to My Rallies</button></div>{saveStatus && <small>{saveStatus}</small>}</> : <div className="preview-lock"><small>WORKING PREVIEW COMPLETE</small><b>Paid access is not on sale yet.</b><p>This is a preview. For a complete plan you can download today, try one of the free Rallies.</p><a className="primary" href={`/discover/${concept.slug}`}>See the full listing →</a></div>}</> : <><p>Enter at least one bid with a quoted total. The comparison reprices allowances and adds exclusions back, so you see the real price — not the quoted one. Paid saving and downloads are not available yet.</p><a className="workspace-listing-link" href={`/discover/${concept.slug}`}>See the full listing →</a></>}</aside></section>
   </main>;
 }
