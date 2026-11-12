@@ -10,6 +10,7 @@ import { marketOutcomeDocument, PDF_FIRST_SLUGS } from "../../../market-outcome-
 import { buildCustomizationKit } from "../../../customization-kit";
 import IepOrganizerWorkspace from "./IepOrganizerWorkspace";
 import EtsyPricingWorkspace from "./EtsyPricingWorkspace";
+import FarmersMarketWorkspace from "./FarmersMarketWorkspace";
 import { createWorkingResult } from "../../../rally-results";
 import BidCompareWorkspace from "./BidCompareWorkspace";
 import RoommateMoveOutWorkspace from "./RoommateMoveOutWorkspace";
@@ -24,6 +25,7 @@ export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   if (concept.slug === "roommate-move-out-splitter") return <RoommateMoveOutWorkspace concept={concept} />;
   if (concept.slug === "etsy-profit-pricing-desk") return <EtsyPricingWorkspace concept={concept} />;
   if (concept.slug === "clinical-rotation-pocket-prep") return <ClinicalPrepWorkspace concept={concept} />;
+  if (concept.slug === "farmers-market-morning-board") return <FarmersMarketWorkspace concept={concept} />;
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [created, setCreated] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
