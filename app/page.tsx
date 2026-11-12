@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { rallyConcepts } from "./catalog";
 import { originals } from "./originals";
 import { matchesRally } from "./market-search";
@@ -14,6 +14,10 @@ export default function Home() {
   const [stats, setStats] = useState<Record<string, Stat>>({});
   const [listings, setListings] = useState<CommunityListing[]>([]);
   const [marketStatus, setMarketStatus] = useState("");
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistBusy, setWaitlistBusy] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState("");
+  const [waitlistError, setWaitlistError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const categories = useMemo(() => ["All", ...new Set([...rallyConcepts.map((item) => item.category), "Garden", "Community"])], []);
@@ -25,6 +29,25 @@ export default function Home() {
     fetch("/api/marketplace").then((response) => response.ok ? response.json() : null).then((data) => { if (data) { setStats(data.stats ?? {}); setListings(data.listings ?? []); } else setMarketStatus("Community listings and reviews could not load. The free apps are still available."); }).catch(()=>setMarketStatus("Community listings and reviews could not load. Refresh to retry."));
   }, []);
 
+  async function joinWaitlist(event: FormEvent) {
+    event.preventDefault();
+    if (waitlistBusy) return;
+    setWaitlistBusy(true);
+    setWaitlistError("");
+    try {
+      const response = await fetch("/api/waitlist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: waitlistEmail, source: "homepage" }) });
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      if (response.status === 201) setWaitlistDone("You're on the list. We'll email you when paid Rallies open.");
+      else if (response.status === 409) setWaitlistDone("You're already on the list.");
+      else if (response.status === 422) setWaitlistError("Enter a valid email address.");
+      else setWaitlistError(data.error || "Something went wrong — try again in a minute.");
+    } catch {
+      setWaitlistError("Something went wrong — try again in a minute.");
+    } finally {
+      setWaitlistBusy(false);
+    }
+  }
+
   return <main className="consumer-home">
     <nav className="store-nav"><a href="#top" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div className="nav-links"><a href="#marketplace">Shop</a><a href="#free">Try free</a><a href="#creators">For creators</a><a href="#faq">FAQ</a></div><a className="nav-button center-link" href="/library">My Rallies</a></nav>
 
@@ -34,7 +57,7 @@ export default function Home() {
 
     <section className="storefront" id="marketplace"><div className="discovery-tools"><label><span>Search all Rallies</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Try garden, bachelorette, nursing, pricing…"/></label><div>{categories.map((item) => <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}>{item}</button>)}</div></div><div id="free"/><header><small>FREE · READY TO USE</small><h2>Start with something free.</h2><p>Make a plan you can use and download. No account needed.</p></header><div className="product-grid">{visibleOriginals.map((product) => { const stat = stats[product.slug]; return <article className={`product-card ${product.color}`} key={product.slug}><div className="product-photo"><img src={product.image} alt=""/><span>{product.price}</span></div><div className="product-copy"><small>{product.eyebrow}</small><h3>{product.title}</h3><p>{product.blurb}</p>{stat && <div className="product-stats"><span>{stat.runs} saved plan{stat.runs === 1 ? "" : "s"}</span><span>{stat.averageRating ? `★ ${stat.averageRating.toFixed(1)} from ${stat.reviewCount}` : "New · no reviews yet"}</span></div>}<a className="primary full center-link" href={product.appHref}>Open free Rally →</a><a href={`/shop/${product.slug}`}>What’s included + reviews</a></div></article>; })}</div></section>
 
-    <section className="community-marketplace" id="more-rallies"><header><div><small>EXPLORE THE MARKETPLACE</small><h2>What’s on your list?</h2><p>Free Rallies are ready to use. Paid access is not on sale yet; explore the other previews below.</p></div></header>{visibleListings.length > 0 && <><div className="ready-divider"><span>FROM PEP RALLY CREATORS</span><p>Explore apps shared by the community.</p></div><div className="community-grid">{visibleListings.map((listing, index) => <article key={listing.id} className={`community-card tone-${index % 4}`}><div className="community-card-top"><span>Made by {listing.creatorName}</span><b>{listing.accessModel === "free" ? "Free" : formatPrice(listing.priceCents)}</b></div><div className="community-icon">{listing.name.slice(0, 1).toUpperCase()}</div><h3>{listing.name}</h3><p>{listing.outcome}</p><small>{listing.proof}</small>{listing.accessModel === "free" && listing.sourceUrl ? <a className="primary center-link" href={listing.sourceUrl} target="_blank" rel="noreferrer">Open free Rally →</a> : <span>Paid access coming later</span>}<p>Hosted and supported by the creator.</p><a href={`/support?rally=${encodeURIComponent(listing.name)}`}>Report a problem</a></article>)}</div></>}<div className="ready-divider"><span>PREVIEWS TO EXPLORE</span><p>Try a preview. Each listing explains what’s included.</p></div><div className="idea-grid">{visibleRallies.map((rally) => <a href={`/discover/${rally.slug}`} className={`idea-card idea-${rally.accent}`} key={rally.slug}><div><span>{rally.monogram}</span><small>{rally.category} · Concept preview</small></div><h3>{rally.title}</h3><p>{rally.promise}</p><b>View Rally →</b></a>)}</div>{!visibleRallies.length && !visibleOriginals.length && !visibleListings.length && <div className="no-ideas"><b>No exact match yet.</b><p>Try a different search or category.</p><button onClick={()=>{setSearch("");setCategory("All");}}>Show all Rallies</button></div>}{marketStatus && <p className="market-status">{marketStatus}</p>}</section>
+    <section className="community-marketplace" id="more-rallies"><header><div><small>EXPLORE THE MARKETPLACE</small><h2>What’s on your list?</h2><p>Free Rallies are ready to use. Paid access is not on sale yet; explore the other previews below.</p></div></header>{visibleListings.length > 0 && <><div className="ready-divider"><span>FROM PEP RALLY CREATORS</span><p>Explore apps shared by the community.</p></div><div className="community-grid">{visibleListings.map((listing, index) => <article key={listing.id} className={`community-card tone-${index % 4}`}><div className="community-card-top"><span>Made by {listing.creatorName}</span><b>{listing.accessModel === "free" ? "Free" : formatPrice(listing.priceCents)}</b></div><div className="community-icon">{listing.name.slice(0, 1).toUpperCase()}</div><h3>{listing.name}</h3><p>{listing.outcome}</p><small>{listing.proof}</small>{listing.accessModel === "free" && listing.sourceUrl ? <a className="primary center-link" href={listing.sourceUrl} target="_blank" rel="noreferrer">Open free Rally →</a> : <span>Paid access coming later</span>}<p>Hosted and supported by the creator.</p><a href={`/support?rally=${encodeURIComponent(listing.name)}`}>Report a problem</a></article>)}</div></>}<div className="ready-divider"><span>PREVIEWS TO EXPLORE</span><p>Try a preview. Each listing explains what’s included.</p></div><div className="idea-grid">{visibleRallies.map((rally) => <a href={`/discover/${rally.slug}`} className={`idea-card idea-${rally.accent}`} key={rally.slug}><div><span>{rally.monogram}</span><small>{rally.category} · Concept preview</small></div><h3>{rally.title}</h3><p>{rally.promise}</p><b>View Rally →</b></a>)}</div>{!visibleRallies.length && !visibleOriginals.length && !visibleListings.length && <div className="no-ideas"><b>No exact match yet.</b><p>Try a different search or category.</p><button onClick={()=>{setSearch("");setCategory("All");}}>Show all Rallies</button></div>}{marketStatus && <p className="market-status">{marketStatus}</p>}<div className="waitlist-band"><div><b>Paid Rallies aren’t on sale yet.</b><p>Leave your email and we’ll tell you when they open.</p></div>{waitlistDone ? <p role="status" className="waitlist-done">{waitlistDone}</p> : <form onSubmit={joinWaitlist}><label>Email address<input type="email" required maxLength={254} autoComplete="email" placeholder="you@example.com" value={waitlistEmail} onChange={(event) => setWaitlistEmail(event.target.value)} /></label><button className="primary" disabled={waitlistBusy}>{waitlistBusy ? "Joining…" : "Tell me when they open"}</button>{waitlistError && <p role="status" className="waitlist-error">{waitlistError}</p>}</form>}</div></section>
 
 
 

@@ -91,3 +91,10 @@ export const gardenPlans = sqliteTable("garden_plans", {
   data: text("data").notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 }, (table) => [index("idx_garden_plans_owner").on(table.ownerUserId)]);
+
+export const waitlistSignups = sqliteTable("waitlist_signups", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull(),
+  source: text("source").notNull().default("homepage"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+}, (table) => [uniqueIndex("idx_waitlist_signups_email").on(table.email)]);

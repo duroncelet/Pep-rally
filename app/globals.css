@@ -3256,6 +3256,16 @@ footer > span {
 .marketplace-opening > div:last-child span { background: var(--cream); border: 1.5px solid var(--ink); border-radius: 10px; padding: 14px; font-weight: 800; }
 .marketplace-opening span b { display: inline-grid; place-items: center; width: 27px; height: 27px; margin-right: 10px; border-radius: 50%; background: var(--yellow); border: 1px solid var(--ink); }
 .market-status { margin: 20px 0 0; padding: 13px; border: 1px solid var(--ink); border-radius: 8px; background: white; font-weight: 800; }
+/* Waitlist band: one compact band at the bottom of the marketplace section,
+   at the "paid access is not on sale yet" dead end. Email only. */
+.waitlist-band { margin-top: 48px; padding: 28px; border: 2px solid var(--ink); border-radius: 16px; background: var(--cream); box-shadow: 6px 7px 0 var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 28px; flex-wrap: wrap; }
+.waitlist-band b { font-family: "Fraunces"; font-size: 26px; }
+.waitlist-band > div > p { color: #625e59; line-height: 1.55; margin: 6px 0 0; }
+.waitlist-band form { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; flex: 1 1 340px; max-width: 560px; }
+.waitlist-band label { display: grid; gap: 6px; font-size: 10px; font-weight: 800; flex: 1 1 220px; }
+.waitlist-band input { min-width: 0; width: 100%; border: 2px solid var(--ink); border-radius: 999px; background: white; padding: 13px 17px; font: inherit; font-size: 14px; }
+.waitlist-done { font-weight: 800; }
+.waitlist-error { flex-basis: 100%; margin: 0; color: var(--coral); font-weight: 800; }
 .storefront { padding: 95px 7vw; }
 .storefront > header { max-width: 760px; margin-bottom: 38px; }
 .storefront > header small,
