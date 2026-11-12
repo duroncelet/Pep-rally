@@ -2,9 +2,8 @@ export type OutcomeSection = {heading:string;paragraphs?:string[];rows?:string[]
 export type OutcomeDocument={title:string;subtitle:string;sections:OutcomeSection[]};
 
 // Bounds shared by persistence (Part 1B, B1) and the PDF packet (PR #12):
-// a saved outcome must always be renderable as a packet, so the limits
-// match validatePdfDocument in app/outcome-pdf.ts. If either changes, change
-// both, or consolidate them into this one.
+// a saved outcome must always be renderable as a packet. This is the single
+// validator; app/outcome-pdf.ts re-exports it as validatePdfDocument.
 export function validateOutcomeDocument(value: unknown): value is OutcomeDocument {
   if (!value || typeof value !== 'object') return false;
   const doc = value as Partial<OutcomeDocument>;
