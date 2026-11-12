@@ -13,7 +13,7 @@ type PageProps = { params: Promise<{ slug: string }> };
 // Shared links are unguessable tokens, not public content: never index them.
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const doc = await loadPublicOutcome((await params).slug);
-  return { title: doc ? `${doc.title} · Pep Rally` : "Shared plan · Pep Rally", robots: { index: false, follow: false } };
+  return { title: doc ? `${doc.doc.title} · Pep Rally` : "Shared plan · Pep Rally", robots: { index: false, follow: false } };
 }
 
 async function loadPublicOutcome(slug: string): Promise<{ doc: OutcomeDocument; rallySlug: string; isSample: boolean } | null> {

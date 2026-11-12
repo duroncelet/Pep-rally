@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { SAMPLE_OUTCOMES, findSampleOutcome, sampleOutcomeHref } from '../app/sample-outcomes.ts';
 import { validateOutcomeDocument } from '../app/outcome-document.ts';
 import { isValidOutcomeSlug, rallyListingHref } from '../app/saved-outcomes.ts';
@@ -35,4 +36,17 @@ test('sample slugs resolve, never collide with generated slugs, and link from th
   for (const sample of Object.values(SAMPLE_OUTCOMES)) {
     assert.notEqual(rallyListingHref(sample.rallySlug), '/');
   }
+});
+
+// Regression (Nov 12, 2026): generateMetadata read .title off the
+// { doc, rallySlug, isSample } wrapper, so shared pages titled themselves
+// "undefined · Pep Rally". The page component can't run under node --test
+// (it imports the cloudflare:workers D1 binding), so this guards the
+// metadata line itself. (The page body destructures the inner document
+// first, so its own doc.title is correct and untouched.)
+test('shared-page metadata titles the page from the outcome document, not the wrapper', () => {
+  const page = readFileSync(new URL('../app/s/[slug]/page.tsx', import.meta.url), 'utf8');
+  const metadata = page.match(/export async function generateMetadata[\s\S]*?\n}/)[0];
+  assert.match(metadata, /doc\.doc\.title/);
+  assert.doesNotMatch(metadata, /\$\{doc\.title\}/);
 });
