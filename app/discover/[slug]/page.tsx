@@ -28,9 +28,6 @@ export default async function RallyListingPage({ params }: PageProps) {
 
     <section className="concept-trust"><div><small>THE SAFETY LINE</small><h2>Useful, with your judgment still in charge.</h2><p>{rally.guardrail}</p></div><aside><b>Planned paid features</b><span>✓ The working mini-app</span><span>✓ Your private saved workspace</span><span>✓ The promised finished result</span><span>✓ Future updates to this Rally</span></aside></section>
 
-    {rally.sourceNote && <section className="concept-source"><small>WHY THIS RALLY EXISTS</small><p>{rally.sourceNote}</p><a href="https://www.nclex.com/test-plans.page" target="_blank" rel="noreferrer">Review the official NCLEX test plan ↗</a></section>}
-
-
     <footer className="listing-footer"><span><b>Try first.</b> The working preview opens without sign-in.</span><span><b>Keep it.</b> Paid saving and downloads are not on sale yet. Free Rallies include downloads today.</span><div><a href="/policies">Refunds + privacy</a><a href="/support">Support</a><a href="/connections">Service status</a></div></footer>
   </main>;
 }
