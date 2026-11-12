@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { RallyConcept } from "../../../catalog";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../../download-markdown";
+import { downloadOutcomePdf } from "../../../download-pdf";
+import { marketOutcomeDocument } from "../../../market-outcome-pdf";
 import { buildCustomizationKit } from "../../../customization-kit";
 import { parseMoneyToCents, parseDecimal, formatCents, computeEtsyPricing, etsySections, etsyHeadline, ETSY_POLICY_FEES, type EtsyPricingInput } from "../../../etsy-pricing";
 
@@ -81,6 +83,14 @@ export default function EtsyPricingWorkspace({ concept }: { concept: RallyConcep
     downloadMarkdown(`${safeFileName(concept.title)}-outcome.md`, markdown);
   }
 
+  // Part 1B, step A6: this Rally is PDF-first — the designed packet is the price sheet the seller keeps by the workbench. The packet
+  // renders the same computed sections shown on screen, via the shared A6
+  // document builder.
+  async function downloadPacket() {
+    try { await downloadOutcomePdf(marketOutcomeDocument(concept, { headline, summary, sections })); }
+    catch (error) { setSaveStatus((error as Error).message); }
+  }
+
   function downloadCustomization() {
     const markdown = buildCustomizationKit({ title: concept.title, promise: concept.promise, audience: concept.forWhom, inputs: concept.inputs, outputs: concept.outcome, guardrail: concept.guardrail, currentAnswers: { "Product": productName, "Materials and labor": materials.map((row) => row.label).filter(Boolean).join("; "), "Packaging and shipping": packaging, "Fees and margin": targetMargin } });
     downloadMarkdown(`${safeFileName(concept.title)}-customization-kit.md`, markdown);
@@ -121,6 +131,6 @@ export default function EtsyPricingWorkspace({ concept }: { concept: RallyConcep
         </div>}
         {sections.map((section, index) => <article key={section.title}><b>{String(index + 1).padStart(2, "0")} · {section.title}</b>{section.intro && <p>{section.intro}</p>}<ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul></article>)}
         <div className="workspace-review"><b>Before you use it</b><p>{concept.guardrail}</p></div>
-        {access === "unlocked" ? <><div className="rally-actions"><button onClick={downloadOutcome}>Download my outcome .md</button><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={save}>Save to My Rallies</button></div>{saveStatus && <small>{saveStatus}</small>}</> : <div className="preview-lock"><small>WORKING PREVIEW COMPLETE</small><b>Paid access is not on sale yet.</b><p>This is a preview. For a complete plan you can download today, try one of the free Rallies.</p><a className="primary" href={`/discover/${concept.slug}`}>See the full listing →</a></div>}</> : <><p>Add materials and labor to see the true unit cost — then the price that covers it. Paid saving and downloads are not available yet.</p><a className="workspace-listing-link" href={`/discover/${concept.slug}`}>See the full listing →</a></>}</aside></section>
+        {access === "unlocked" ? <><div className="rally-actions"><button onClick={downloadOutcome}>Download my outcome .md</button><button onClick={downloadPacket}>Download PDF packet</button><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={save}>Save to My Rallies</button></div>{saveStatus && <small>{saveStatus}</small>}</> : <div className="preview-lock"><small>WORKING PREVIEW COMPLETE</small><b>Paid access is not on sale yet.</b><p>This is a preview. For a complete plan you can download today, try one of the free Rallies.</p><a className="primary" href={`/discover/${concept.slug}`}>See the full listing →</a></div>}</> : <><p>Add materials and labor to see the true unit cost — then the price that covers it. Paid saving and downloads are not available yet.</p><a className="workspace-listing-link" href={`/discover/${concept.slug}`}>See the full listing →</a></>}</aside></section>
   </main>;
 }
