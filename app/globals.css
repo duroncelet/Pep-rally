@@ -62,6 +62,9 @@
 .start-rally b { font-family:"Fraunces"; font-size:20px; }
 .start-rally p { margin:0; max-width:760px; font-size:13px; }
 .policy-page { min-height:100vh; background:#fbf7ee; color:#1f2440; padding-bottom:60px; }
+/* Each .rally-content block carries 80px of bottom padding, which stacked into
+   a ~120px gap between the support page's two forms. */
+.policy-page .rally-content { padding-bottom:40px; }
 .policy-page nav { display:flex; justify-content:space-between; align-items:center; padding:18px 5vw; border-bottom:1px solid #d8d1c3; }
 .policy-page nav div { display:flex; gap:18px; }
 .policy-page header { padding:72px 7vw 40px; max-width:900px; }
@@ -1398,7 +1401,10 @@
 .garden-room .journal-list article { overflow-wrap:anywhere; }
 .garden-room .forecast-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(95px,1fr)); gap:10px; }
 @media(max-width:650px) { .garden-room .rally-nav button { padding:14px 10px; } .garden-room .setup-grid { grid-template-columns:1fr; } }
-.consumer-home .home-feature-photo { display:block; }
+.consumer-home .home-feature-photo { display:block; min-height: 0; }
+/* The 500px/460px/370px min-heights on .shop-hero-images exist for the
+   absolutely-positioned figure variant; the homepage photo is in normal flow,
+   so they left up to ~200px of dead space under it on phones. */
 .consumer-home .home-feature-photo > img { width:100%; height:440px; object-fit:cover; border:2px solid var(--navy, #22243b); border-radius:130px 130px 20px 20px; box-shadow:8px 8px 0 var(--navy, #22243b); }
 .consumer-home .creator-path { display:block; }
 .consumer-home .creator-path > div { max-width:720px; }
@@ -2456,6 +2462,9 @@
   --ink: #1f2440;
   --cream: #fbf7ee;
   --coral: #ff695d;
+  /* Darker coral for white button text: 4.59:1, passes WCAG AA.
+     --coral stays for decorative accents; white on --coral is 2.83:1. */
+  --coral-dark: #d63d31;
   --yellow: #f7c94b;
   --pink: #f1a9ca;
   --green: #7fcaa2;
@@ -2530,7 +2539,7 @@ nav {
   border-radius: 999px;
   padding: 14px 21px;
   font-weight: 700;
-  background: var(--coral);
+  background: var(--coral-dark);
   color: white;
   box-shadow: 3px 4px 0 var(--ink);
 }
@@ -3183,8 +3192,14 @@ footer > span {
 }
 
 /* Consumer storefront */
-.consumer-home { overflow: hidden; }
+/* overflow: hidden created a scroll container that broke the sticky nav.
+   overflow-x: clip still clips the rotated hero figures horizontally
+   without creating one, so the nav sticks again. */
+.consumer-home { overflow-x: clip; }
 .store-nav { position: sticky; }
+/* The nav is sticky at 82px, so anchored sections need clearance or their
+   headers land tucked under the bar. */
+#marketplace, #free, #creators, #faq, #reviews { scroll-margin-top: 96px; }
 .shop-hero {
   min-height: 680px;
   padding: 78px 6vw 70px;
@@ -3247,7 +3262,16 @@ footer > span {
 .community-card h3 { font-family: "Fraunces"; font-size: 31px; margin: 0 0 10px; }
 .community-card > p { color: #4f4b45; line-height: 1.55; }
 .community-card > small { margin: 8px 0 24px; color: #5f5a52; line-height: 1.45; }
-.community-card > a, .community-card > button { margin-top: auto; width: 100%; }
+.community-card > a.primary, .community-card > button, .community-card > span { margin-top: auto; width: 100%; }
+.community-card > span { text-align: center; font-weight: 800; }
+/* "Report a problem" sits under the CTA: it is not the pinned action, so it
+   gets a plain gap and an underline instead of sharing the auto margin. */
+.community-card > a:not(.primary) {
+  margin-top: 12px;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .marketplace-opening { border: 2px solid var(--ink); border-radius: 18px; padding: 34px; box-shadow: 7px 9px 0 var(--ink); background: #dce9ff; display: grid; grid-template-columns: 1.2fr .8fr; gap: 7vw; align-items: center; }
 .marketplace-opening small { color: var(--coral); font-weight: 900; letter-spacing: 1.4px; }
 .marketplace-opening h3 { font-family: "Fraunces"; font-size: clamp(34px, 4vw, 54px); margin: 10px 0; }
@@ -3270,12 +3294,17 @@ footer > span {
 .storefront > header p { color: #666; line-height: 1.6; }
 .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
 .product-card {
-  background: white !important;
+  background: white;
   border: 2px solid var(--ink);
   border-radius: 17px;
   overflow: hidden;
   box-shadow: 7px 9px 0 var(--ink);
 }
+/* The data model colors each Rally (coral / green), but `background: white
+   !important` silenced it. Near-white tints, so the cards stay white-looking
+   while the per-product color finally does something. */
+.product-card.coral { background: #fff6f4; }
+.product-card.green { background: #f2faf4; }
 .product-photo { height: 315px; position: relative; }
 .product-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .product-photo span { position: absolute; right: 16px; bottom: 16px; background: var(--cream); border: 1.5px solid var(--ink); border-radius: 999px; padding: 10px 15px; font-family: "Fraunces"; font-size: 20px; box-shadow: 2px 3px 0 var(--ink); }
@@ -3289,6 +3318,18 @@ footer > span {
 .product-stats { display: flex; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); margin-top: 12px; padding: 14px 0; color: #777; font-size: 10px; }
 .product-copy .full { width: 100%; display: block; }
 .center-link { text-align: center; }
+/* The white "Open free Rally" pill casts a solid 4px navy shadow below its
+   bottom edge, and the link underneath had 0px of clearance, so the shadow
+   struck through the link text. 16px clears the shadow with air to spare,
+   and the underline repairs the link's plain-text look. The .primary shadow
+   itself is the site-wide button style and is left alone. */
+.product-copy > a:not(.primary) {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .demo-note { text-align: center; display: block; margin-top: 10px; color: #777; }
 .store-status { text-align: center; color: var(--coral); font-weight: 800; }
 .simple-how { padding: 95px 7vw; background: var(--pink); }
@@ -3515,7 +3556,7 @@ footer > span {
 .idea-card.idea-yellow { background: #f7d76d; }
 .idea-card > div { display: flex; align-items: center; gap: 9px; }
 .idea-card > div > span { width: 42px; height: 42px; display: grid; place-items: center; flex: none; border: 1.5px solid var(--ink); border-radius: 11px; background: var(--cream); font-family: "Fraunces"; font-weight: 900; transform: rotate(-3deg); }
-.idea-card > div small { font-size: 7px; font-weight: 900; letter-spacing: .7px; }
+.idea-card > div small { font-size: 9px; font-weight: 900; letter-spacing: .7px; }
 .idea-card h3 { font-family: "Fraunces"; font-size: 24px; line-height: 1.03; margin: 24px 0 10px; }
 .idea-card p { color: #514d47; font-size: 10px; line-height: 1.55; }
 .idea-card > b { margin-top: auto; font-size: 9px; text-decoration: underline; }
@@ -3630,13 +3671,21 @@ footer > span {
 .concept-trust aside span { padding: 10px; border-radius: 7px; background: #f7f2e7; font-size: 10px; }
 .concept-source { padding: 45px 7vw; background: #fff; }
 .concept-source p { max-width: 900px; font-size: 15px; line-height: 1.6; }
-.concept-source a { color: inherit; font-size: 11px; font-weight: 900; }
+.concept-source a { color: inherit; font-size: 11px; font-weight: 900; text-decoration: underline; text-underline-offset: 3px; }
 .concept-claim, .pdp-finish { padding: 75px 7vw; display: flex; justify-content: space-between; align-items: center; gap: 5vw; background: var(--yellow); }
 .concept-claim p, .pdp-finish p { max-width: 760px; line-height: 1.6; color: #5c564d; }
 .concept-missing { padding: 100px 7vw; }
 .concept-missing h1 { font-size: 70px; }
 
 .pdp-hero { padding: 70px 7vw; display: grid; grid-template-columns: 1fr .9fr; gap: 5vw; align-items: center; }
+/* Near-white tints matching the product-card colors (see .product-card). */
+.pdp-coral .pdp-hero { background: #fff6f4; }
+.pdp-green .pdp-hero { background: #f2faf4; }
+/* The hero button is an inline anchor, so its vertical padding paints outside
+   its line box and its 4px shadow lands on the checklist below despite
+   .pdp-assurance's 15px margin. As a block, the padding takes layout space
+   and the 15px margin becomes real clearance. */
+.pdp-copy > .primary { display: block; }
 .pdp-photo { position: relative; border: 2px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 8px 10px 0 var(--ink); }
 .pdp-photo img { width: 100%; height: 560px; object-fit: cover; display: block; }
 .pdp-photo span { position: absolute; left: 18px; bottom: 18px; padding: 10px 13px; border: 1px solid var(--ink); border-radius: 999px; background: var(--cream); font-size: 9px; font-weight: 900; }
@@ -3644,7 +3693,7 @@ footer > span {
 .pdp-copy > p { color: #5e5953; font-size: 16px; line-height: 1.65; }
 .pdp-price { display: flex; align-items: center; gap: 15px; margin: 24px 0; padding: 16px 0; border-block: 1px solid var(--line); }
 .pdp-price b { font-family: "Fraunces"; font-size: 34px; }
-.pdp-price span { color: #777; font-size: 10px; }
+.pdp-price span { color: #5f5a52; font-size: 10px; }
 .pdp-assurance { display: grid; gap: 5px; margin-top: 15px; color: #666; font-size: 9px; }
 .pdp-outcome { padding: 90px 7vw; background: #f7c9d8; border-block: 2px solid var(--ink); }
 .pdp-outcome > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-top: 35px; }
@@ -3655,7 +3704,7 @@ footer > span {
 .pdp-trust > div > span { font-size: 10px; font-weight: 850; }
 .pdp-trust aside { padding: 23px; border: 2px solid var(--ink); border-radius: 13px; background: #dce9ff; box-shadow: 5px 6px 0 var(--ink); }
 .pdp-trust aside b { font-family: "Fraunces"; font-size: 24px; }
-.pdp-trust aside a { color: inherit; font-size: 10px; font-weight: 900; }
+.pdp-trust aside a { color: inherit; font-size: 10px; font-weight: 900; text-decoration: underline; text-underline-offset: 3px; }
 .pdp-reviews { padding: 85px 7vw; background: #e8f5dc; border-top: 2px solid var(--ink); }
 .pdp-reviews header { max-width: 800px; }
 .pdp-reviews header p { color: #5a6454; }
@@ -3710,7 +3759,10 @@ footer > span {
 @media (max-width: 850px) {
   .store-nav { gap:10px; }
   .nav-links { display:flex; overflow-x:auto; white-space:nowrap; scrollbar-width:none; }
-  .store-nav { flex-wrap:wrap; }
+  /* The links wrap to a second row at this width, but the base nav rule fixes
+     height: 82px, so the second row rendered below the bar, over the hero,
+     with no background behind it. Let the bar grow to fit. */
+  .store-nav { flex-wrap:wrap; height:auto; }
   .store-nav .nav-links { order:3; flex-basis:100%; justify-content:space-between; padding:8px 0; }
   .nav-links a:nth-child(n+3) { display:inline; }
   .hero {

@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const product = findOriginal((await params).slug);
-  if (!product) return <main className="pdp-page"><nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a></nav><section className="concept-missing"><h1>This Rally moved.</h1><a href="/">Back to Pep Rally →</a></section></main>;
+  if (!product) return <main className="pdp-page"><nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a></nav><section className="concept-missing"><h1>This Rally moved.</h1><a href="/">Back to Pep Rally →</a></section><footer className="consumer-footer"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><p>Working apps, made by people who know the problem.</p><div><a href="/#marketplace">Shop Rallies</a><a href="/#creators">Sell your Rally</a><a href="/policies">Trust + policies</a><a href="/support">Support</a></div><span>Open. Finish. Keep.</span></footer></main>;
 
   return <main className={`pdp-page pdp-${product.color}`}>
     <nav><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div><a href="/#marketplace">Marketplace</a><a href="#reviews">Reviews</a><a href="/library">My Rallies</a></div></nav>
@@ -31,5 +31,7 @@ export default async function ProductPage({ params }: PageProps) {
     <ReviewPanel slug={product.slug}/>
 
     <section className="pdp-finish"><div><small>READY TO FINISH SOMETHING?</small><h2>Open the working app.</h2><p>Bring your real details, review the result, and keep the finished workspace in My Rallies.</p></div><a className="primary" href={product.appHref}>{product.slug === "garden-planner" ? "Plan my garden →" : "Plan your weekend →"}</a></section>
+
+    <footer className="consumer-footer"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><p>Working apps, made by people who know the problem.</p><div><a href="/#marketplace">Shop Rallies</a><a href="/#creators">Sell your Rally</a><a href="/policies">Trust + policies</a><a href="/support">Support</a></div><span>Open. Finish. Keep.</span></footer>
   </main>;
 }
