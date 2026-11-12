@@ -42,7 +42,10 @@ export async function POST(request: Request) {
   } catch (error) {
     // A duplicate signup is not an error for the visitor: the UI renders
     // the 409 in the success style ("You're already on the list.").
-    if (error instanceof Error && error.message.includes("UNIQUE constraint failed"))
+    // Drizzle wraps the driver error in DrizzleQueryError, whose message is
+    // only "Failed query: ..." — the UNIQUE text lives on error.cause.
+    const causeText = error instanceof Error && error.cause instanceof Error ? error.cause.message : "";
+    if (error instanceof Error && (error.message.includes("UNIQUE constraint failed") || causeText.includes("UNIQUE constraint failed")))
       return Response.json({ ok: true, already: true, message: "You're already on the list." }, { status: 409 });
     return Response.json({ error: "Something went wrong — try again in a minute." }, { status: 500 });
   }

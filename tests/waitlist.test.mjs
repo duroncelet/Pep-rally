@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
+import { DatabaseSync } from "node:sqlite";
+import { DrizzleQueryError } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
+import { waitlistSignups } from "../db/schema.ts";
 
 test("ships the homepage waitlist: band, public POST route, D1 storage", async () => {
   const migrationFiles = (await readdir(new URL("../drizzle", import.meta.url)))
@@ -61,4 +65,45 @@ test("ships the homepage waitlist: band, public POST route, D1 storage", async (
   assert.match(css, /\.waitlist-band \{/);
   assert.match(css, /\.waitlist-done \{/);
   assert.match(css, /\.waitlist-error \{/);
+});
+
+// Regression (Nov 12, 2026): Drizzle wraps every query error in
+// DrizzleQueryError, whose message is only "Failed query: ..." — the
+// "UNIQUE constraint failed" text lives on error.cause. The route used to
+// check only error.message, so a duplicate signup returned 500 instead of
+// 409. The route handlers can't run under node --test (they import the
+// cloudflare:workers D1 binding), so this test proves the mechanism against
+// the real migration + real drizzle, and that the route inspects the cause.
+test("a duplicate signup surfaces UNIQUE on error.cause, and the route checks the cause", async () => {
+  const migrationFiles = (await readdir(new URL("../drizzle", import.meta.url)))
+    .filter((name) => name.startsWith("0014_") && name.endsWith(".sql"));
+  const migration = await readFile(new URL(`../drizzle/${migrationFiles[0]}`, import.meta.url), "utf8");
+  const sqlite = new DatabaseSync(":memory:");
+  sqlite.exec(migration);
+  // Minimal D1-compatible binding over node:sqlite: drizzle's D1 driver
+  // only needs prepare() -> { bind, run, all }.
+  const d1 = {
+    prepare: (sql) => {
+      let params = [];
+      const stmt = {
+        bind: (...args) => { params = args; return stmt; },
+        run: () => { sqlite.prepare(sql).run(...params); return Promise.resolve({ success: true }); },
+        all: () => Promise.resolve({ success: true, results: sqlite.prepare(sql).all(...params) }),
+      };
+      return stmt;
+    },
+  };
+  const db = drizzle(d1, { schema: { waitlistSignups } });
+  const row = (id) => ({ id, email: "dup@example.com", source: "homepage", createdAt: new Date() });
+  await db.insert(waitlistSignups).values(row("first"));
+  await assert.rejects(db.insert(waitlistSignups).values(row("second")), (error) => {
+    assert.ok(error instanceof DrizzleQueryError);
+    assert.doesNotMatch(error.message, /UNIQUE constraint failed/);
+    assert.ok(error.cause instanceof Error);
+    assert.match(error.cause.message, /UNIQUE constraint failed: waitlist_signups\.email/);
+    return true;
+  });
+  const route = await readFile(new URL("../app/api/waitlist/route.ts", import.meta.url), "utf8");
+  assert.match(route, /error\.cause instanceof Error/);
+  assert.match(route, /causeText\.includes\("UNIQUE constraint failed"\)/);
 });
