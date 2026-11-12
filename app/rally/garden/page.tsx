@@ -6,6 +6,7 @@ import {readBrowserDraft,useBrowserDraft} from "../../browser-draft";
 import OutcomePreview from "../../OutcomePreview";
 import type {OutcomeDocument} from "../../outcome-document";
 import { gardenAssignments } from "./assignments";
+import { gardenWeatherActions, weatherRequestGate } from "./weather";
 import { buildCustomizationKit } from "../../customization-kit";
 
 type GardenTask = { id: string; text: string; done: boolean; timing: string };
@@ -60,8 +61,14 @@ export default function GardenRally() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [choices, setChoices] = useState<Record<number,string>>({});
-  const weatherRequest = useRef(0);
-  useEffect(() => { weatherRequest.current++; setWeather(null); setWeatherChoices([]);setWeatherPlace(''); setWeatherStatus("Load the forecast for your garden."); }, [location]);
+  const weatherRequest = useRef(weatherRequestGate());
+  useEffect(() => {
+    weatherRequest.current.invalidate();
+    setWeather(null); setWeatherChoices([]); setWeatherPlace('');
+    setWeatherStatus(location.trim().length >= 2 ? "Loading live weather…" : "Add your location to load a live 7-day forecast.");
+    const timer = location.trim().length >= 2 ? setTimeout(() => { void loadWeather(''); }, 500) : undefined;
+    return () => { clearTimeout(timer); weatherRequest.current.invalidate(); };
+  }, [location]);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authState, setAuthState] = useState<"checking" | "guest" | "signed-in">("checking");
@@ -108,32 +115,21 @@ export default function GardenRally() {
 
   const weatherActions = useMemo(() => {
     if (!weather) return [];
-    const rain = weather.daily.precipitation_sum.reduce((sum, value) => sum + value, 0);
-    const hottest = Math.max(...weather.daily.temperature_2m_max);
-    const coldest = Math.min(...weather.daily.temperature_2m_min);
-    const windiest = Math.max(...weather.daily.wind_speed_10m_max);
-    const actions: string[] = [];
-    if (rain > 20) actions.push("Rainy stretch ahead: check soil moisture before watering and inspect drainage after the heaviest day.");
-    else if (rain < 4) actions.push("Dry week ahead: check soil moisture daily; containers may need more frequent watering.");
-    if (hottest >= 32) actions.push("Heat watch: water early, mulch exposed soil, and give tender transplants afternoon shade.");
-    if (coldest <= 4) actions.push("Cold-night watch: delay tender planting or keep row cover ready.");
-    if (windiest >= 35) actions.push("Wind watch: secure trellises, pots, and young stems before the windiest day.");
-    if (!actions.length) actions.push("Conditions look moderate. Keep the normal soil-check and watering rhythm.");
-    return actions;
+    return gardenWeatherActions(weather.daily);
   }, [weather]);
 
   async function loadWeather(place=weatherPlace) {
-    const request = ++weatherRequest.current;
+    const isCurrent = weatherRequest.current.begin();
     setWeatherStatus("Loading live weather…"); setWeather(null);
     try {
     const response = await fetch(`/api/garden-weather?location=${encodeURIComponent(location)}${place ? `&place=${encodeURIComponent(place)}`:''}`);
     const data = await response.json();
-    if (request !== weatherRequest.current) return;
+    if (!isCurrent()) return;
     if (!response.ok) { setWeatherStatus(data.error ?? "Weather is unavailable."); return; }
     if(data.choices) {setWeatherChoices(data.choices);setWeatherStatus('Choose your location to see the forecast.');return;}
     setWeatherChoices([]);setWeatherPlace(place);
     setWeather(data); setWeatherStatus(`Live forecast for ${data.place.name}${data.place.region ? `, ${data.place.region}` : ""}`);
-    } catch { if (request === weatherRequest.current) setWeatherStatus("Weather could not load. You can still use your garden plan and retry."); }
+    } catch { if (isCurrent()) setWeatherStatus("Weather could not load. You can still use your garden plan and retry."); }
   }
 
   function snapshot() { return { version:3, growingProfile, timings, plots, choices, location, space, bedCount, length, width, sun, watering, experience, goal, crops, tasks, journal }; }
