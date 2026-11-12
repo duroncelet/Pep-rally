@@ -4328,3 +4328,13 @@ footer > span {
 .suggestion-group ul { list-style:none; padding:0; }
 .suggestion-group li { padding:8px 0; border-bottom:1px solid #eee3d3; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
 @media(max-width:650px) { .category-grid { grid-template-columns:1fr; } }
+/* Bachelorette prescriptive planner — schedule guardrails + shopping (Part 3). */
+.schedule-warnings { background:#fdf0d5; border:1.5px solid #d9a441; border-radius:12px; padding:16px 18px; margin:0 0 20px; }
+.schedule-warnings ul { margin:8px 0 0; padding-left:20px; }
+.schedule-warnings li { line-height:1.6; margin:4px 0; }
+.planner-mode-note { font-size:.92rem; line-height:1.6; color:#4d5a5b; margin:0; }
+.order-list { margin-top:24px; }
+.order-rows article { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #ccd0c7; }
+.order-rows article label:first-child { flex:1 1 220px; display:flex; gap:8px; align-items:center; }
+.order-rows article>span { flex:2 1 260px; font-size:.9rem; color:#4d5a5b; }
+.order-rows input[type="number"] { width:64px; padding:8px; border:1px solid #657273; border-radius:8px; font:inherit; }
