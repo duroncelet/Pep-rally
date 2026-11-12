@@ -91,3 +91,22 @@ export const gardenPlans = sqliteTable("garden_plans", {
   data: text("data").notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 }, (table) => [index("idx_garden_plans_owner").on(table.ownerUserId)]);
+
+// Part 1B, step B1: saved outcomes — the finished artifact behind a shareable
+// mini-site link. Private by default (is_public = 0); the public route
+// /s/<slug> renders only rows the owner opted into sharing. The slug is a
+// random unguessable token, never derived from the title.
+export const savedOutcomes = sqliteTable("saved_outcomes", {
+  id: text("id").primaryKey(),
+  ownerUserId: text("owner_user_id").notNull(),
+  rallySlug: text("rally_slug").notNull(),
+  title: text("title").notNull(),
+  document: text("document").notNull(),
+  slug: text("slug").notNull(),
+  isPublic: integer("is_public").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+}, (table) => [
+  uniqueIndex("idx_saved_outcomes_slug").on(table.slug),
+  index("idx_saved_outcomes_owner_updated").on(table.ownerUserId, table.updatedAt),
+]);
