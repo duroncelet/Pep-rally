@@ -11,6 +11,7 @@ import { buildCustomizationKit } from "../../../customization-kit";
 import IepOrganizerWorkspace from "./IepOrganizerWorkspace";
 import { createWorkingResult } from "../../../rally-results";
 import BidCompareWorkspace from "./BidCompareWorkspace";
+import RoommateMoveOutWorkspace from "./RoommateMoveOutWorkspace";
 
 export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   // Part 4: Rallies with real computation get a dedicated structured
@@ -18,6 +19,7 @@ export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   // Rally adds one branch here; keep both sides when resolving conflicts.
   if (concept.slug === "home-project-bid-compare") return <BidCompareWorkspace concept={concept} />;
   if (concept.slug === "iep-meeting-organizer") return <IepOrganizerWorkspace concept={concept} />;
+  if (concept.slug === "roommate-move-out-splitter") return <RoommateMoveOutWorkspace concept={concept} />;
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [created, setCreated] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");

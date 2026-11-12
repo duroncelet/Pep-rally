@@ -4190,3 +4190,27 @@ footer > span {
 .public-outcome-grid { display:grid; gap:6px; margin:8px 0; }
 .public-outcome-cell { border:1px solid #718366; background:#edf4dc; border-radius:8px; min-height:56px; padding:8px; overflow-wrap:anywhere; font-size:12px; }
 @media(max-width:650px){.public-outcome-sections section{padding:18px}.public-outcome-sections th,.public-outcome-sections td{font-size:12px;padding:5px}}
+/* Roommate Move-Out Splitter (Part 4) — structured deposit, condition, and
+   task inputs, the settlement table, and the review checklist. */
+.rm-note { margin: -4px 0 4px; color: #5b5650; font-size: 11px; line-height: 1.6; }
+.rm-card { padding: 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: #f7f2e7; display: grid; gap: 10px; }
+.rm-card input, .rm-card select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 11px; }
+.rm-card input[type="checkbox"] { width: auto; }
+.rm-subhead { display: grid; gap: 2px; }
+.rm-subhead b { font-size: 11px; }
+.rm-subhead span { color: #666; font-size: 10px; line-height: 1.45; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr 28px; gap: 8px; align-items: center; }
+.rm-row.three { grid-template-columns: 1fr 1fr 1fr 28px; }
+.rm-row.single { grid-template-columns: 1fr 28px; }
+.rm-row.two { grid-template-columns: 1fr 1fr; }
+.rm-row button { border: 0; border-radius: 999px; padding: 6px; background: white; font: inherit; font-size: 12px; font-weight: 900; }
+.rm-check { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.rm-item-group { display: grid; gap: 8px; }
+.rm-sublabel { display: grid; grid-template-columns: 160px 1fr; gap: 8px; align-items: center; font-size: 10px; font-weight: 700; }
+.rm-add { width: fit-content; padding: 8px 12px; border: 1.5px dashed var(--ink); border-radius: 999px; background: white; font: inherit; font-size: 9px; font-weight: 900; }
+.rm-table { border: 1.5px solid var(--ink); border-radius: 9px; overflow: hidden; background: white; }
+.rm-table-row { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 10px; align-items: center; }
+.rm-table-row:last-child { border-bottom: 0; }
+.rm-table-row.labels { background: var(--ink); color: white; font-size: 9px; font-weight: 800; }
+.rm-review { display: grid; gap: 8px; margin-top: 10px; }
+.rm-review label { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; }
