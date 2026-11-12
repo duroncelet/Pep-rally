@@ -22,6 +22,13 @@ export async function saveOutcome(input: { id?: string; rallySlug: string; title
   return response.json();
 }
 
+// Revoke a shared link: the saved outcome is deleted, so the link stops
+// working immediately. A future share mints a fresh slug.
+export async function revokeOutcome(id: string): Promise<void> {
+  const response = await fetch(`/api/outcomes?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!response.ok) throw new Error(await readError(response, "The link could not be revoked."));
+}
+
 // The owner's latest saved outcome for one Rally, if any.
 export async function latestOutcome(rallySlug: string): Promise<SavedOutcomeMeta | null> {
   const response = await fetch(`/api/outcomes?rallySlug=${encodeURIComponent(rallySlug)}`);

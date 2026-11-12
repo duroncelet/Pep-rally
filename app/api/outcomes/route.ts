@@ -55,3 +55,19 @@ export async function POST(request: Request) {
   }
   return Response.json({ error: "The outcome could not be saved. Try again." }, { status: 500 });
 }
+
+// DELETE /api/outcomes?id=<id> — revoke a shared link (Part 1B, D1). The row
+// is deleted, so the link stops working immediately and can never be
+// re-enabled: a future share mints a fresh slug. The workspace itself is
+// untouched — only the share record goes.
+export async function DELETE(request: Request) {
+  const user = await getChatGPTUser();
+  if (!user) return Response.json({ error: "Sign in required", signIn: chatGPTSignInPath("/library") }, { status: 401 });
+  const id = new URL(request.url).searchParams.get("id") ?? "";
+  if (!id) return Response.json({ error: "Choose a shared outcome to revoke." }, { status: 400 });
+  const db = getDb();
+  const [existing] = await db.select({ id: savedOutcomes.id }).from(savedOutcomes).where(and(eq(savedOutcomes.id, id), eq(savedOutcomes.ownerUserId, user.userId))).limit(1);
+  if (!existing) return Response.json({ error: "That shared outcome could not be found." }, { status: 404 });
+  await db.delete(savedOutcomes).where(eq(savedOutcomes.id, id));
+  return Response.json({ ok: true });
+}
