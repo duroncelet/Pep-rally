@@ -31,7 +31,11 @@ export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   }
 
   function downloadOutcome() {
-    const markdown = `# ${result.headline}\n\n> ${result.summary}\n\n## What I brought\n\n${concept.inputs.map((item) => `- **${item}:** ${markdownCell(answers[item] || "Not answered")}`).join("\n")}\n\n${result.sections.map((section) => `## ${section.title}\n\n${section.intro ? `${section.intro}\n\n` : ""}${section.items.map((item) => `- ${markdownCell(item)}`).join("\n")}`).join("\n\n")}\n\n## Before using it\n\n${concept.guardrail}\n\n---\nCreated with Pep Rally · ${new Date().toLocaleDateString()}\n`;
+    const brought = concept.inputs.filter((item) => answers[item]?.trim());
+    const broughtSection = brought.length
+      ? `## What I brought\n\n${brought.map((item) => `- **${item}:** ${markdownCell(answers[item])}`).join("\n")}`
+      : `## What I brought\n\nNo context entered yet. Fill in the inputs in the workspace to record what you brought.`;
+    const markdown = `# ${result.headline}\n\n> ${result.summary}\n\n${broughtSection}\n\n${result.sections.map((section) => `## ${section.title}\n\n${section.intro ? `${section.intro}\n\n` : ""}${section.items.map((item) => `- ${markdownCell(item)}`).join("\n")}`).join("\n\n")}\n\n## Before using it\n\n${concept.guardrail}\n\n---\nCreated with Pep Rally · ${new Date().toLocaleDateString()}\n`;
     downloadMarkdown(`${safeFileName(concept.title)}-outcome.md`, markdown);
   }
 
