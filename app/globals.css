@@ -4035,6 +4035,34 @@ footer > span {
 .forecast-grid strong { display:block; font-size:1.7rem; margin:10px 0; }
 .split-person { display:inline-flex; gap:8px; margin:10px; align-items:center; }
 .bill-row { display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid #ccd0c7; padding:14px 0; }
+/* Farmers Market Morning Board (Part 4) — tally inputs, the printable
+   morning board, and the pack checklist. Built for 5am, dirty hands. */
+.fm-note { margin: -4px 0 4px; color: #5b5650; font-size: 11px; line-height: 1.6; }
+.fm-card { padding: 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: #f7f2e7; display: grid; gap: 10px; }
+.fm-card input, .fm-card select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 11px; }
+.fm-card input[type="checkbox"] { width: auto; }
+.fm-subhead { display: grid; gap: 2px; }
+.fm-subhead b { font-size: 11px; }
+.fm-subhead span { color: #666; font-size: 10px; line-height: 1.45; }
+.fm-row { display: grid; grid-template-columns: 1fr 1fr 28px; gap: 8px; align-items: center; }
+.fm-row.crop { grid-template-columns: 1.3fr 0.8fr 0.7fr 0.7fr 0.7fr 0.8fr 28px; }
+.fm-row.three { grid-template-columns: 1fr 1fr 80px 28px; }
+.fm-row.single { grid-template-columns: 1fr 28px; }
+.fm-row.two { grid-template-columns: 1fr 1fr; }
+.fm-row.labels { font-size: 9px; font-weight: 800; letter-spacing: 0.5px; }
+.fm-row button { border: 0; border-radius: 999px; padding: 6px; background: white; font: inherit; font-size: 12px; font-weight: 900; }
+.fm-conditions, .fm-pack { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.fm-conditions label, .fm-pack label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; }
+.fm-add { width: fit-content; padding: 8px 12px; border: 1.5px dashed var(--ink); border-radius: 999px; background: white; font: inherit; font-size: 9px; font-weight: 900; }
+.fm-board { padding: 18px; border: 2px solid var(--ink); border-radius: 10px; background: white; display: grid; gap: 10px; }
+.fm-board > b { font-family: "Fraunces"; font-size: 24px; line-height: 1.1; }
+.fm-board > p { margin: 0; color: #514d47; font-size: 11px; line-height: 1.5; }
+.fm-board-alert { color: #a73e36 !important; font-weight: 800; }
+.fm-board-table { border: 1.5px solid var(--ink); border-radius: 9px; overflow: hidden; }
+.fm-board-row { display: grid; grid-template-columns: 1fr 1fr 1.2fr 1.2fr; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 11px; align-items: center; }
+.fm-board-row:last-child { border-bottom: 0; }
+.fm-board-row.labels { background: var(--ink); color: white; font-size: 9px; font-weight: 800; }
+.fm-board-row span:first-child { font-weight: 800; }
 .trip-notice { padding:16px; background:#e5efdf; border-radius:12px; }
 .inquiry-copy { white-space:pre-wrap; }
 @media(max-width:650px) { .trip-grid { grid-template-columns:1fr; } .trip-card, .destination-feature, .trip-grid>article { padding:16px; } .trip-fields { flex-direction:column; } .trip-fields label { flex-basis:auto; } .bill-row { align-items:flex-start; } }
