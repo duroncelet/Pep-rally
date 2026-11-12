@@ -3229,7 +3229,9 @@ footer > span {
 #marketplace, #free, #creators, #faq, #reviews { scroll-margin-top: 96px; }
 .shop-hero {
   min-height: 680px;
-  padding: 78px 6vw 70px;
+  /* Bottom padding tightened (was 70px) so the "Shop Rallies" CTA's jump to
+     #marketplace lands close to its destination instead of across a gap. */
+  padding: 78px 6vw 48px;
   display: grid;
   grid-template-columns: 1fr .9fr;
   gap: 6vw;
@@ -3317,7 +3319,9 @@ footer > span {
 .waitlist-band input { min-width: 0; width: 100%; border: 2px solid var(--ink); border-radius: 999px; background: white; padding: 13px 17px; font: inherit; font-size: 14px; }
 .waitlist-done { font-weight: 800; }
 .waitlist-error { flex-basis: 100%; margin: 0; color: var(--coral); font-weight: 800; }
-.storefront { padding: 95px 7vw; }
+/* Top padding tightened (was 95px) so the marketplace sits adjacent to the
+   hero the "Shop Rallies" CTA jumps from; bottom and sides unchanged. */
+.storefront { padding: 48px 7vw 95px; }
 .storefront > header { max-width: 760px; margin-bottom: 38px; }
 .storefront > header small,
 .simple-how header small,
@@ -3967,7 +3971,7 @@ footer > span {
   .hero {
     padding: 50px 22px 70px;
   }
-  .shop-hero { padding: 55px 22px 65px; }
+  .shop-hero { padding: 55px 22px 40px; }
   .shop-hero h1 { font-size: 58px; letter-spacing: -3px; }
   .shop-hero-copy > div { align-items: flex-start; flex-direction: column; }
   .shop-hero-images { min-height: 370px; }
@@ -3979,6 +3983,9 @@ footer > span {
   .builder-invite,
   .what-you-get,
   .consumer-faq { padding: 70px 22px; }
+  /* Same hero-to-marketplace tightening as desktop: the storefront shares the
+     70px rule above, so its top padding is cut back on its own line. */
+  .storefront { padding-top: 40px; }
   .creator-path,
   .market-workspace-grid { padding: 70px 22px; }
   .connection-promise { padding: 70px 22px; }
