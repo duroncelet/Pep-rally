@@ -4036,6 +4036,33 @@ footer > span {
 .split-person { display:inline-flex; gap:8px; margin:10px; align-items:center; }
 .bill-row { display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:1px solid #ccd0c7; padding:14px 0; }
 .trip-notice { padding:16px; background:#e5efdf; border-radius:12px; }
+/* Etsy Profit & Pricing Desk (Part 4) — structured cost inputs, the
+   take-home reveal, and the three-scenario price table. */
+.etsy-note { margin: -4px 0 4px; color: #5b5650; font-size: 11px; line-height: 1.6; }
+.etsy-top-field input { width: 100%; min-width: 0; padding: 11px; border: 1px solid var(--ink); border-radius: 8px; background: #f7f2e7; font: inherit; font-size: 11px; }
+.etsy-card { padding: 16px; border: 1.5px solid var(--ink); border-radius: 10px; background: #f7f2e7; display: grid; gap: 10px; }
+.etsy-card input, .etsy-card select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--ink); border-radius: 8px; background: white; font: inherit; font-size: 11px; }
+.etsy-card input[type="checkbox"] { width: auto; }
+.etsy-subhead { display: grid; gap: 2px; }
+.etsy-subhead b { font-size: 11px; }
+.etsy-subhead span { color: #666; font-size: 10px; line-height: 1.45; }
+.etsy-row { display: grid; grid-template-columns: 1fr 110px 28px; gap: 8px; align-items: center; }
+.etsy-row.two { grid-template-columns: 1fr 1fr; }
+.etsy-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.etsy-row button { border: 0; border-radius: 999px; padding: 6px; background: white; font: inherit; font-size: 12px; font-weight: 900; }
+.etsy-check { display: flex !important; align-items: center; gap: 8px; font-size: 10px; font-weight: 700; line-height: 1.4; }
+.etsy-add { width: fit-content; padding: 8px 12px; border: 1.5px dashed var(--ink); border-radius: 999px; background: white; font: inherit; font-size: 9px; font-weight: 900; }
+.etsy-flag { padding: 14px; border: 2px solid var(--ink); border-radius: 10px; background: #ffe2dc; }
+.etsy-flag b { font-family: "Fraunces"; font-size: 20px; }
+.etsy-flag p { margin: 6px 0 0; color: #514d47; font-size: 11px; line-height: 1.55; }
+.etsy-reveal { padding: 16px; border: 2px solid var(--ink); border-radius: 10px; background: var(--yellow); }
+.etsy-reveal b { display: block; font-family: "Fraunces"; font-size: 22px; }
+.etsy-reveal p { margin: 8px 0 0; color: #514d47; font-size: 11px; line-height: 1.55; }
+.etsy-table { border: 1.5px solid var(--ink); border-radius: 9px; overflow: hidden; background: white; }
+.etsy-table-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 10px; align-items: center; }
+.etsy-table-row:last-child { border-bottom: 0; }
+.etsy-table-row.labels { background: var(--ink); color: white; font-size: 9px; font-weight: 800; }
+.etsy-table-row.best { background: #e8f5dc; font-weight: 800; }
 .inquiry-copy { white-space:pre-wrap; }
 @media(max-width:650px) { .trip-grid { grid-template-columns:1fr; } .trip-card, .destination-feature, .trip-grid>article { padding:16px; } .trip-fields { flex-direction:column; } .trip-fields label { flex-basis:auto; } .bill-row { align-items:flex-start; } }
 @media(max-width:650px) { .trip-city-form { align-items:stretch; flex-direction:column; } }

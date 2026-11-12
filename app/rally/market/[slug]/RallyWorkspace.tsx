@@ -8,9 +8,14 @@ import { downloadXlsx } from "../../../download-xlsx";
 import { bidWorksheetXlsx } from "../../../bid-worksheet";
 import { marketOutcomeDocument, PDF_FIRST_SLUGS } from "../../../market-outcome-pdf";
 import { buildCustomizationKit } from "../../../customization-kit";
+import EtsyPricingWorkspace from "./EtsyPricingWorkspace";
 import { createWorkingResult } from "../../../rally-results";
 
 export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
+  // Part 4: Rallies with real computation get a dedicated structured
+  // workspace instead of the generic three-textarea form. Each computed
+  // Rally adds one branch here; keep both sides when resolving conflicts.
+  if (concept.slug === "etsy-profit-pricing-desk") return <EtsyPricingWorkspace concept={concept} />;
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [created, setCreated] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
