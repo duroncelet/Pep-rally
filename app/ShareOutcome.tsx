@@ -15,17 +15,24 @@ export default function ShareOutcome({ rallySlug, document, label, hint }: { ral
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   const [savedSnapshot, setSavedSnapshot] = useState("");
+  // The page title is the shared page's heading. It defaults to the outcome
+  // title; the owner can rename it — for a travel adviser, this is what
+  // brands the proposal link as theirs.
+  const [pageTitle, setPageTitle] = useState(document.title);
+  const [titleTouched, setTitleTouched] = useState(false);
 
   useEffect(() => { setOrigin(location.origin); latestOutcome(rallySlug).then(setMeta).catch(() => setMeta(null)).finally(() => setChecked(true)); }, [rallySlug]);
+  useEffect(() => { if (!titleTouched) setPageTitle(document.title); }, [document.title, titleTouched]);
 
-  const stale = Boolean(meta?.isPublic && savedSnapshot && savedSnapshot !== JSON.stringify(document));
+  const sharedDocument = { ...document, title: pageTitle.trim() || document.title };
+  const stale = Boolean(meta?.isPublic && savedSnapshot && savedSnapshot !== JSON.stringify(sharedDocument));
 
   async function share() {
     setBusy(true); setStatus("");
     try {
-      const result = await saveOutcome({ id: meta?.id, rallySlug, title: document.title, document, isPublic: true });
-      setMeta({ id: result.id, slug: result.slug, title: document.title, isPublic: true, updatedAt: new Date().toISOString() });
-      setSavedSnapshot(JSON.stringify(document));
+      const result = await saveOutcome({ id: meta?.id, rallySlug, title: sharedDocument.title, document: sharedDocument, isPublic: true });
+      setMeta({ id: result.id, slug: result.slug, title: sharedDocument.title, isPublic: true, updatedAt: new Date().toISOString() });
+      setSavedSnapshot(JSON.stringify(sharedDocument));
       setStatus(meta?.isPublic ? "Shared page updated. Anyone with the link sees the latest plan." : "Shareable link created. Anyone with the link can read the page.");
     } catch (error) { setStatus((error as Error).message); }
     finally { setBusy(false); }
@@ -40,6 +47,7 @@ export default function ShareOutcome({ rallySlug, document, label, hint }: { ral
 
   return <section className="rally-content outcome-preview"><div className="workspace-intro"><div><h2>{label}</h2><p>{hint}</p></div></div>
     {!checked ? <p>Checking for a shared page…</p> : <>
+      <label>Page title<input value={pageTitle} maxLength={160} onChange={(event) => { setPageTitle(event.target.value); setTitleTouched(true); }} /></label>
       {meta?.isPublic && origin && <label>Your shared link<input readOnly value={`${origin}/s/${meta.slug}`} onFocus={(event) => event.target.select()} /></label>}
       <div className="rally-actions">
         {meta?.isPublic && <button onClick={copy}>Copy link</button>}
