@@ -5,6 +5,7 @@ import {
   placeLabel, mapsSearchUrl, webSearchUrl, groupSizeAdvice, categoryCards,
   suggestionFromEvent, unpickedSuggestions,
 } from '../app/rally/bachelorette/planner.ts';
+import { GET as geoLookup } from '../app/api/party-geo/route.ts';
 
 test('place labels join name, region, and country, skipping empty parts', () => {
   assert.equal(placeLabel({ name: 'Palm Springs', region: 'California', country: 'United States' }), 'Palm Springs, California, United States');
@@ -83,4 +84,26 @@ test('geo route and suggestions wiring exist in the workspace', async () => {
   assert.match(events, /geoPoint/);
   assert.match(events, /arts & theatre/);
   assert.match(events, /sports/);
+});
+
+test('geo lookup labels same-name places distinctly (Austin, TX vs Austin, MN)', async () => {
+  const original = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => Response.json({ results: [
+      { id: 1, name: 'Austin', admin1: 'Texas', country: 'United States', latitude: 30.27, longitude: -97.74 },
+      { id: 2, name: 'Austin', admin1: 'Minnesota', country: 'United States', latitude: 43.67, longitude: -92.97 },
+      { id: 3, name: 'Austin', country: 'United States', latitude: 40.0, longitude: -90.0 },
+    ] });
+    const response = await geoLookup(new Request('https://example.com/api/party-geo?q=Austin'));
+    assert.equal(response.status, 200);
+    const { places } = await response.json();
+    assert.deepEqual(places.map((p) => p.label), [
+      'Austin, Texas, United States',
+      'Austin, Minnesota, United States',
+      'Austin, United States',
+    ]);
+    assert.equal(new Set(places.map((p) => p.label)).size, 3);
+  } finally {
+    globalThis.fetch = original;
+  }
 });
