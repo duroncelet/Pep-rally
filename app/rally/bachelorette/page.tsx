@@ -5,6 +5,7 @@ import { downloadMarkdown, markdownCell, safeFileName } from "../../download-mar
 import { buildCustomizationKit } from "../../customization-kit";
 import {readBrowserDraft,useBrowserDraft} from "../../browser-draft";
 import OutcomePreview from "../../OutcomePreview";
+import ShareOutcome from "../../ShareOutcome";
 import type {OutcomeDocument} from "../../outcome-document";
 import AgenticPlanner from "./AgenticPlanner";
 import SavedDraft from "./SavedDraft";
@@ -177,6 +178,7 @@ export default function BacheloretteRally() {
     {heading:"The weekend",columns:["Day","Time","Plan","Est. each (USD)","Status"],rows:[...events].sort((a,b)=>a.day-b.day).map(e=>[`Day ${e.day}`,e.time,e.title+(e.note ? ` — ${e.note}` : ""),e.estimatedCost ? `$${e.estimatedCost.toFixed(2)}` : "—",e.status])},
     {heading:"Stay shortlist",paragraphs:stayOptions.length?stayOptions.map(s=>`${s.name} · ${s.status} · $${s.total.toFixed(2)} USD total · ${s.url}\n${s.cancellation}`):["No stay chosen yet. The organizer will share confirmed details."]},
     {heading:"Packing",paragraphs:packing.length?packing.map(p=>"☐ "+p):["Packing list coming soon."]},
+    ...(shareBalances?[{heading:"Group and RSVP",columns:["Guest","RSVP"],rows:guests.map(g=>[g.name,g.rsvp])}]:[]),
     ...(shareBalances?[{heading:"Suggested repayments",paragraphs:[...settleBills(bills, fundHolder ? guests.filter(g=>g.id!==fundHolder&&g.paid>0).map(g=>({from:g.id,to:fundHolder,cents:Math.round(g.paid*100)})):[]).map(s=>`${guestName(s.from)} pays ${guestName(s.to)} $${(s.cents/100).toFixed(2)} USD`),"These are calculated suggestions, not bank confirmations. Recorded contributions are included only when a fund holder has been selected."]}]:[]),
   ]};
   async function save() {
@@ -294,6 +296,7 @@ export default function BacheloretteRally() {
 
     {tab === "plan" && <section className="rally-content"><label><input type="checkbox" checked={shareBalances} onChange={e=>setShareBalances(e.target.checked)}/> Include names and calculated repayments in the shared plan</label></section>}
     {tab === "plan" && <OutcomePreview document={weekendDocument} label="Share the weekend" privacy="Preview before sending. Guest contacts, private needs, organizer notes and individual comfort budgets are excluded."/>}
+    {tab === "plan" && <ShareOutcome rallySlug="bachelorette-blueprint" document={weekendDocument} label="Trip HQ link" hint="One link for the group chat: itinerary, crew RSVPs, split tracker, and lodging shortlist. Update the same link as plans change."/>}
     {workspaceReady && <p className="trip-notice" role="status">{backup.status} <a href="/library">My Rallies</a></p>}
     {tab === "plan" && <details className="rally-content"><summary>Planning checklist</summary><div className="rally-title"><div><small>TASKS</small><h2>No invisible labor.</h2></div><button onClick={() => setTasks([...tasks, { id: crypto.randomUUID(), text: "New task", owner: owners[0].name, done: false, due: "This week" }])}>+ Add task</button></div><div className="task-list">{tasks.map((task, index) => <article className={task.done ? "done" : ""} key={task.id}><button className="check" onClick={() => setTasks(tasks.map((item, i) => i === index ? { ...item, done: !item.done } : item))}>{task.done ? "✓" : ""}</button><input value={task.text} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, text: e.target.value } : item))}/><select value={task.owner} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, owner: e.target.value } : item))}>{owners.map((guest) => <option key={guest.id}>{guest.name}</option>)}</select><input value={task.due} onChange={(e) => setTasks(tasks.map((item, i) => i === index ? { ...item, due: e.target.value } : item))}/><button onClick={() => setTasks(tasks.filter((item) => item.id !== task.id))}>×</button></article>)}</div></details>}
 
