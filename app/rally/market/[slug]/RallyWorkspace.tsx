@@ -9,6 +9,7 @@ import { bidWorksheetXlsx } from "../../../bid-worksheet";
 import { marketOutcomeDocument, PDF_FIRST_SLUGS } from "../../../market-outcome-pdf";
 import { buildCustomizationKit } from "../../../customization-kit";
 import IepOrganizerWorkspace from "./IepOrganizerWorkspace";
+import EtsyPricingWorkspace from "./EtsyPricingWorkspace";
 import { createWorkingResult } from "../../../rally-results";
 import BidCompareWorkspace from "./BidCompareWorkspace";
 import RoommateMoveOutWorkspace from "./RoommateMoveOutWorkspace";
@@ -20,6 +21,7 @@ export default function RallyWorkspace({ concept }: { concept: RallyConcept }) {
   if (concept.slug === "home-project-bid-compare") return <BidCompareWorkspace concept={concept} />;
   if (concept.slug === "iep-meeting-organizer") return <IepOrganizerWorkspace concept={concept} />;
   if (concept.slug === "roommate-move-out-splitter") return <RoommateMoveOutWorkspace concept={concept} />;
+  if (concept.slug === "etsy-profit-pricing-desk") return <EtsyPricingWorkspace concept={concept} />;
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [created, setCreated] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
