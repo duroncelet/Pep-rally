@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
+import { DrizzleQueryError } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/d1';
+import { savedOutcomes } from '../db/schema.ts';
 import { validateOutcomeDocument } from '../app/outcome-document.ts';
 import { OUTCOME_RALLY_SLUGS, isValidOutcomeSlug, newOutcomeSlug, publicOutcomeFromRow, rallyListingHref, validateSaveOutcomeBody } from '../app/saved-outcomes.ts';
 
@@ -100,4 +103,44 @@ test('migration 0013 creates the table; the public lookup returns only opted-in 
   assert.equal(latest.get('user-1', 'bachelorette-blueprint').id, 'id-private');
   assert.equal(latest.get('user-2', 'bachelorette-blueprint'), undefined);
   db.close();
+});
+
+// Regression (Nov 12, 2026): the POST /api/outcomes slug-collision retry
+// checked only error.message for UNIQUE, but Drizzle wraps every query
+// error in DrizzleQueryError, whose message is only "Failed query: ..." —
+// the UNIQUE text lives on error.cause. The retry was dead code: a
+// collision threw instead of retrying. The route handler can't run under
+// node --test (it imports the cloudflare:workers D1 binding and Clerk), so
+// this test proves the mechanism against the real migration + real drizzle,
+// and that the route inspects the cause chain before deciding to retry.
+test('a slug collision surfaces UNIQUE on error.cause, and the retry checks the cause', async () => {
+  const sqlite = new DatabaseSync(':memory:');
+  sqlite.exec(readFileSync(new URL('../drizzle/0013_saved_outcomes.sql', import.meta.url), 'utf8'));
+  // Minimal D1-compatible binding over node:sqlite: drizzle's D1 driver
+  // only needs prepare() -> { bind, run, all }.
+  const d1 = {
+    prepare: (sql) => {
+      let params = [];
+      const stmt = {
+        bind: (...args) => { params = args; return stmt; },
+        run: () => { sqlite.prepare(sql).run(...params); return Promise.resolve({ success: true }); },
+        all: () => Promise.resolve({ success: true, results: sqlite.prepare(sql).all(...params) }),
+      };
+      return stmt;
+    },
+  };
+  const db = drizzle(d1, { schema: { savedOutcomes } });
+  const now = new Date();
+  const row = (id) => ({ id, ownerUserId: 'user-1', rallySlug: 'garden-planner', title: 'Plan', document: '{}', slug: 'abcdefgh2345', isPublic: 0, createdAt: now, updatedAt: now });
+  await db.insert(savedOutcomes).values(row('first'));
+  await assert.rejects(db.insert(savedOutcomes).values(row('second')), (error) => {
+    assert.ok(error instanceof DrizzleQueryError);
+    assert.doesNotMatch(error.message, /UNIQUE/i);
+    assert.ok(error.cause instanceof Error);
+    assert.match(error.cause.message, /UNIQUE constraint failed: saved_outcomes\.slug/);
+    return true;
+  });
+  const route = readFileSync(new URL('../app/api/outcomes/route.ts', import.meta.url), 'utf8');
+  assert.match(route, /error\.cause instanceof Error/);
+  assert.match(route, /\/UNIQUE\/i\.test\(text\)/);
 });

@@ -50,7 +50,10 @@ export async function POST(request: Request) {
       await db.insert(savedOutcomes).values({ id: newId, ownerUserId: user.userId, rallySlug, title, document: JSON.stringify(document), slug, isPublic: isPublic ? 1 : 0, createdAt: now, updatedAt: now });
       return Response.json({ ok: true, id: newId, slug, url: `/s/${slug}`, isPublic }, { status: 201 });
     } catch (error) {
-      if (attempt === 2 || !(error instanceof Error) || !/UNIQUE/i.test(error.message)) throw error;
+      // Drizzle wraps the driver error: the UNIQUE text lives on error.cause,
+      // not on the DrizzleQueryError message ("Failed query: ...").
+      const text = error instanceof Error ? `${error.message} ${error.cause instanceof Error ? error.cause.message : ""}` : "";
+      if (attempt === 2 || !(error instanceof Error) || !/UNIQUE/i.test(text)) throw error;
     }
   }
   return Response.json({ error: "The outcome could not be saved. Try again." }, { status: 500 });
