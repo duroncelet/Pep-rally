@@ -4350,3 +4350,5 @@ footer > span {
 .chase-view ul { list-style:none; padding:0; }
 .chase-view li { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid #eee3d3; }
 .poll-option .primary, .room-plan>button, .date-poll>button { margin-top:12px; }
+.sample-banner { background:#fff4bf; border:1.5px solid #1f2440; border-radius:12px; padding:14px 18px; font-size:14px !important; box-shadow:3px 4px 0 #1f2440; }
+.pdp-sample-link { display:block; text-align:center; margin:18px auto 0; font-size:14px; text-decoration:underline; text-underline-offset:3px; }
