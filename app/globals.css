@@ -4039,3 +4039,16 @@ footer > span {
 .inquiry-copy { white-space:pre-wrap; }
 @media(max-width:650px) { .trip-grid { grid-template-columns:1fr; } .trip-card, .destination-feature, .trip-grid>article { padding:16px; } .trip-fields { flex-direction:column; } .trip-fields label { flex-basis:auto; } .bill-row { align-items:flex-start; } }
 @media(max-width:650px) { .trip-city-form { align-items:stretch; flex-direction:column; } }
+
+/* Public shared-outcome page (/s/<slug>): the standalone mini-site view. */
+.public-outcome-note { font-size:14px !important; color:#5b5f6b; }
+.public-outcome-sections { padding:0 7vw; max-width:1100px; }
+.public-outcome-sections section { margin:0 0 18px; padding:26px; border:1.5px solid #1f2440; border-radius:14px; background:#fff; box-shadow:4px 5px 0 #1f2440; }
+.public-outcome-sections h2 { font-size:30px; margin:0 0 14px; }
+.public-outcome-sections p { font-size:14px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; margin:0 0 10px; }
+.public-outcome-sections table { width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
+.public-outcome-sections th, .public-outcome-sections td { text-align:left; padding:8px; border-bottom:1px solid #d8d1c3; overflow-wrap:anywhere; }
+.public-outcome-sections th { color:#ff695d; font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+.public-outcome-grid { display:grid; gap:6px; margin:8px 0; }
+.public-outcome-cell { border:1px solid #718366; background:#edf4dc; border-radius:8px; min-height:56px; padding:8px; overflow-wrap:anywhere; font-size:12px; }
+@media(max-width:650px){.public-outcome-sections section{padding:18px}.public-outcome-sections th,.public-outcome-sections td{font-size:12px;padding:5px}}
