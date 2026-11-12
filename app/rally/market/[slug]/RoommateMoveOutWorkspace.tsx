@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { RallyConcept } from "../../../catalog";
 import { downloadMarkdown, markdownCell, safeFileName } from "../../../download-markdown";
+import { downloadOutcomePdf } from "../../../download-pdf";
+import { marketOutcomeDocument } from "../../../market-outcome-pdf";
 import { buildCustomizationKit } from "../../../customization-kit";
 import { parseMoneyToCents, formatCents, computeMoveOut, roommateSections, roommateHeadline, type RoommateMoveOutInput, type LeaseStructure, type SharedItem } from "../../../roommate-move-out";
 
@@ -85,6 +87,14 @@ export default function RoommateMoveOutWorkspace({ concept }: { concept: RallyCo
     downloadMarkdown(`${safeFileName(concept.title)}-outcome.md`, markdown);
   }
 
+  // Part 1B, step A6: this Rally is PDF-first — the designed packet is the agreement the roommates review, sign, and file. The packet
+  // renders the same computed sections shown on screen, via the shared A6
+  // document builder.
+  async function downloadPacket() {
+    try { await downloadOutcomePdf(marketOutcomeDocument(concept, { headline, summary, sections })); }
+    catch (error) { setSaveStatus((error as Error).message); }
+  }
+
   function downloadCustomization() {
     const markdown = buildCustomizationKit({ title: concept.title, promise: concept.promise, audience: concept.forWhom, inputs: concept.inputs, outputs: concept.outcome, guardrail: concept.guardrail, currentAnswers: { "Roommates": names.join("; "), "Deposit and costs": deposit, "Condition and deadlines": rooms.map((row) => row.room).filter(Boolean).join("; ") } });
     downloadMarkdown(`${safeFileName(concept.title)}-customization-kit.md`, markdown);
@@ -125,6 +135,6 @@ export default function RoommateMoveOutWorkspace({ concept }: { concept: RallyCo
         {sections.map((section, index) => <article key={section.title}><b>{String(index + 1).padStart(2, "0")} · {section.title}</b>{section.intro && <p>{section.intro}</p>}<ul>{section.items.map((item) => <li key={item}>{item}</li>)}</ul></article>)}
         {names.length > 0 && <article><b>Reviewed by</b><p>Every roommate reviews the same record before anything is sent or paid. Check off each person as they review it.</p><div className="rm-review">{names.map((name) => <label key={name}><input type="checkbox" checked={acknowledged.includes(name)} onChange={(event) => { setAcknowledged(event.target.checked ? [...acknowledged, name] : acknowledged.filter((item) => item !== name)); }} /> {name} reviewed it</label>)}</div></article>}
         <div className="workspace-review"><b>Before you use it</b><p>{concept.guardrail}</p></div>
-        {access === "unlocked" ? <><div className="rally-actions"><button onClick={downloadOutcome}>Download my outcome .md</button><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={save}>Save to My Rallies</button></div>{saveStatus && <small>{saveStatus}</small>}</> : <div className="preview-lock"><small>WORKING PREVIEW COMPLETE</small><b>Paid access is not on sale yet.</b><p>This is a preview. For a complete plan you can download today, try one of the free Rallies.</p><a className="primary" href={`/discover/${concept.slug}`}>See the full listing →</a></div>}</> : <><p>Add the roommates and the deposit to see the split — plus the condition record and the review list. Paid saving and downloads are not available yet.</p><a className="workspace-listing-link" href={`/discover/${concept.slug}`}>See the full listing →</a></>}</aside></section>
+        {access === "unlocked" ? <><div className="rally-actions"><button onClick={downloadOutcome}>Download my outcome .md</button><button onClick={downloadPacket}>Download PDF packet</button><button onClick={downloadCustomization}>Customize this Rally .md</button><button onClick={save}>Save to My Rallies</button></div>{saveStatus && <small>{saveStatus}</small>}</> : <div className="preview-lock"><small>WORKING PREVIEW COMPLETE</small><b>Paid access is not on sale yet.</b><p>This is a preview. For a complete plan you can download today, try one of the free Rallies.</p><a className="primary" href={`/discover/${concept.slug}`}>See the full listing →</a></div>}</> : <><p>Add the roommates and the deposit to see the split — plus the condition record and the review list. Paid saving and downloads are not available yet.</p><a className="workspace-listing-link" href={`/discover/${concept.slug}`}>See the full listing →</a></>}</aside></section>
   </main>;
 }
