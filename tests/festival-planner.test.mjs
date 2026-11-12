@@ -27,6 +27,9 @@ test('the Festival Planner listing is generic and promises the wishlist', () => 
   const text = JSON.stringify(concept).toLowerCase();
   assert.ok(!text.includes('coachella'), 'listing leans on the Coachella trademark');
   assert.ok(concept.guardrail.includes('No schedule or conflict flags'));
+  // The price point is Kelly's decision (bundle §6); the listing must not
+  // pick one. An undecided price is an omitted priceCents, not $0.00.
+  assert.equal(concept.priceCents, undefined);
 });
 
 test('the wishlist produces artists, outfits, packing, and a cost split — no schedule', () => {
@@ -41,6 +44,42 @@ test('the wishlist produces artists, outfits, packing, and a cost split — no s
   for (const section of result.sections) {
     assert.ok(!/schedule|conflict|set time/i.test(section.title), `wishlist has a schedule section: ${section.title}`);
   }
+});
+
+test('the planned split totals the group costs and shows each share', () => {
+  const concept = findConcept('festival-planner');
+  const result = createWorkingResult(concept, answers);
+  const split = result.sections.find((s) => s.title === 'Group cost split');
+  assert.ok(split);
+  // House $900 shared by 3 ($300 each) + tickets $450 each = $2,250 total.
+  assert.ok(split.items.includes('Group total: $2,250.00 across 3 people.'));
+  assert.ok(split.items.includes("Maya's share: $750.00."));
+  assert.ok(split.items.includes("Jordan's share: $750.00."));
+  assert.ok(split.items.includes("Sam's share: $750.00."));
+  assert.ok(split.items.some((item) => item.includes('No payments recorded yet')));
+  assert.ok(!split.items.some((item) => item.startsWith('Split:')), 'entered text is labelled, not calculated');
+});
+
+test('the split calculates uneven shares and settle-up with distinctive numbers', () => {
+  const concept = findConcept('festival-planner');
+  const result = createWorkingResult(concept, {
+    ...answers,
+    'Group members and shared costs': 'Maya, Jordan, Sam; house $901, tickets $137 each; Maya paid $901',
+  });
+  const split = result.sections.find((s) => s.title === 'Group cost split');
+  assert.ok(split);
+  // $901 shared + $137 each x 3 = $1,312 total. The $901 does not divide by
+  // 3 evenly, so the first share carries the extra cent: $437.34 / $437.33 /
+  // $437.33, which sums back to $1,312.00.
+  assert.ok(split.items.includes('Group total: $1,312.00 across 3 people.'));
+  assert.ok(split.items.includes("Maya's share: $437.34."));
+  assert.ok(split.items.includes("Jordan's share: $437.33."));
+  assert.ok(split.items.includes("Sam's share: $437.33."));
+  // Maya paid the $901 house in full; her share of the paid money is
+  // $300.34, so Jordan and Sam each owe her $300.33.
+  assert.ok(split.items.includes('Jordan pays Maya $300.33.'));
+  assert.ok(split.items.includes('Sam pays Maya $300.33.'));
+  assert.ok(split.items.some((item) => item.includes('Calculated suggestions only')));
 });
 
 test('the Festival wishlist produces a packet like Bachelorette', async () => {

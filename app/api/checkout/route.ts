@@ -13,6 +13,8 @@ export async function POST(request:Request){
  // Originals remain free; third-party commerce requires a separate Connect/access implementation.
  const concept=typeof body?.conceptSlug==="string"?findConcept(body.conceptSlug):undefined;
  if(!concept||body.creatorAppId)return Response.json({error:"This Rally is not available for purchase."},{status:404});
+ // A Rally with no priceCents has no price ruled yet; it cannot be sold.
+ if(concept.priceCents===undefined)return Response.json({error:"Paid access is not on sale yet. Try the free preview.",code:"checkout_unavailable"},{status:503});
  const returnPath="/discover/"+concept.slug;
  const user=await getChatGPTUser();
  if(!user)return Response.json({error:"Sign in to keep your purchase.",signIn:chatGPTSignInPath(returnPath)},{status:401});

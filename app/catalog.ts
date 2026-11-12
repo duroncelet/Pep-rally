@@ -12,7 +12,10 @@ export type RallyConcept = {
   href?: string;
   accent: "coral" | "green" | "blue" | "yellow";
   monogram: string;
-  priceCents: number;
+  // Omitted while Kelly rules the price point (bundle §6: "Do not pick a
+  // price"). A Rally with no priceCents renders "Price to be decided" and
+  // cannot open a checkout; setting the price is a single-field change.
+  priceCents?: number;
   sourceNote?: string;
 };
 
@@ -181,7 +184,6 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "yellow",
     monogram: "FP",
-    priceCents: 1200,
   },
 ];
 
