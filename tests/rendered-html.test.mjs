@@ -96,7 +96,7 @@ test("ships a usable sign-in product and downloadable outcomes", async () => {
 
   assert.doesNotMatch(home, /href="\/demo">Demo/);
   assert.match(home, /My Rallies/);
-  assert.match(home, /Why do I sign in/);
+  assert.match(home, /How do I save my Rallies/);
   assert.match(demo, /redirect\("\/"\)/);
   for (const source of [bachelorette, garden, workspace]) assert.match(source, /Customize this Rally \.md|Download customization prompts \.md/);
   for (const source of [bachelorette, garden, workspace]) assert.match(source, /Download my (plan|outcome) \.md|Download Markdown/);
@@ -222,7 +222,7 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
   assert.doesNotMatch(page, /WHAT COUNTS AS A RALLY/);
   assert.match(page, /Make a plan you can use and download/);
   assert.match(page, /Each listing explains what’s included/);
-  assert.match(page, /Why do I sign in/);
+  assert.match(page, /How do I save my Rallies/);
   for (const idea of ["Etsy Profit & Pricing Desk", "Travel Proposal Studio", "Farmers Market Morning Board", "IEP Meeting Organizer"]) assert.match(catalog, new RegExp(idea.replace(/[&]/g, "\\&")));
   assert.match(concept, /PurchaseButton/);
   assert.match(concept, /Try it with your own details/);
