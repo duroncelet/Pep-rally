@@ -36,7 +36,7 @@ test("ships a clear build-and-marketplace homepage", async () => {
   assert.match(page, /href="#faq">FAQ/);
   assert.doesNotMatch(page + layout, /useful little app/i);
   assert.match(page, /Start with something free/);
-  assert.ok(page.indexOf('Search all Rallies') < page.indexOf('id="free"'));
+  assert.ok(page.indexOf('Search for a project') < page.indexOf('id="free"'));
   assert.ok(page.indexOf('id="marketplace"') < page.indexOf('id="creators"'));
   assert.match(builder, /MAKE A RALLY/);
   assert.match(builder, /Upload or link your mini-app/);
@@ -215,7 +215,7 @@ test("ships marketplace discovery, product trust, libraries, analytics, and a co
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  assert.match(page, /Search all Rallies/);
+  assert.match(page, /Search for a project/);
   assert.doesNotMatch(page, /WHAT A COMPLETE LISTING SHOWS/);
   assert.match(page, /href="\/policies"/);
   assert.doesNotMatch(page, /Try the outcome|No mystery|Human say/);
