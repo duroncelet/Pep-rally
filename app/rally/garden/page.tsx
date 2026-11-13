@@ -203,7 +203,7 @@ export default function GardenRally() {
       <figure className="rally-cover"><img src="/rallies/lush-garden.jpg" alt="A lush edible garden with raised beds, herbs, flowers, and containers"/><figcaption><b>Free Rally</b><span>From your space and weather to a growing plan</span></figcaption></figure>
       {ready && <div className="rally-header-actions">{authState === "guest" ? <button className="primary" onClick={keepThisRally}>Sign in to save</button> : <button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save garden"}</button>}</div>}
     </header>
-    {authState === "guest" && <div className="guest-preview-note"><span>Free to use. No account needed to start. Your draft is backed up on this browser. Sign in to save across devices. Do not use a shared device for private notes.</span></div>}
+    {authState === "guest" && <div className="guest-preview-note"><span>Free to use. No account needed to start. Your draft is backed up on this browser. Sign in to save across devices.</span></div>}
     {ready && <p className="trip-notice" role="status">{backup.status} <a href="/library">My Rallies</a></p>}
     {error && <p role="alert" className="trip-notice">{error}</p>}
     {ready && <nav className="rally-nav">{nav.map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{labels[item]}</button>)}<button onClick={()=>setTab("setup")}>Garden settings</button></nav>}

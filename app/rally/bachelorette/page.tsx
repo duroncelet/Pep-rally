@@ -339,7 +339,7 @@ ${unpickedSuggestions(suggestions).length ? unpickedSuggestions(suggestions).map
 
   return <main className="rally-room bach-room">
     <header className="rally-header photo-rally-header bach-header"><a href="/" className="brand"><span className="brand-mark">P</span>Pep Rally</a><div className="rally-header-copy"><small>BACHELORETTE BLUEPRINT</small><h1>{partyName}</h1><p>The people, plans and split bills—all in one place.</p></div><figure className="rally-cover"><img src="/rallies/bachelorette-pool.jpg" alt="Friends relaxing together beside a sunny pool"/><figcaption><b>Free Rally</b><span>Plan here; review before you send or book</span></figcaption></figure><div className="rally-header-actions" hidden={!workspaceReady}>{authState === "guest" ? <button className="primary" onClick={() => keepThisRally()}>Sign in to save</button> : <button className="primary" onClick={save}>{saved ? "Saved ✓" : "Save Rally"}</button>}</div></header>
-    {authState === "guest" && <div className="guest-preview-note"><span>Free to use. No account needed to start. Your draft is backed up on this browser. Sign in to save across devices. Avoid shared devices for private details.</span></div>}
+    {authState === "guest" && <div className="guest-preview-note"><span>Free to use. No account needed to start. Your draft is backed up on this browser. Sign in to save across devices.</span></div>}
     {saveError && <p role="alert" className="trip-notice">{saveError}</p>}
     {!workspaceReady && <AgenticPlanner onApply={applyItinerary}/>}
     {!workspaceReady && <SavedDraft onApply={applyItinerary}/>}
