@@ -1,4 +1,4 @@
-import { placeLabel } from "../../rally/bachelorette/planner";
+import { placeLabel } from "../../rally/bachelorette/planner.ts";
 
 export const dynamic = "force-dynamic";
 
@@ -20,15 +20,21 @@ export async function GET(request: Request) {
     const data = (await response.json()) as {
       results?: Array<{ id: number; name: string; admin1?: string; admin2?: string; country?: string; latitude: number; longitude: number }>;
     };
-    const places = (data.results || []).map((place) => ({
-      id: place.id,
-      name: place.name,
-      region: place.admin1,
-      country: place.country,
-      latitude: place.latitude,
-      longitude: place.longitude,
-      label: placeLabel(place),
-    }));
+    const places = (data.results || []).map((place) => {
+      // Map first, then label from the mapped place: placeLabel reads
+      // `region`, and the raw Open-Meteo result carries it as `admin1` —
+      // labelling the raw result dropped the region, so every same-name
+      // match rendered identically ("Austin, United States" x8).
+      const mapped = {
+        id: place.id,
+        name: place.name,
+        region: place.admin1,
+        country: place.country,
+        latitude: place.latitude,
+        longitude: place.longitude,
+      };
+      return { ...mapped, label: placeLabel(mapped) };
+    });
     return Response.json({ places }, { headers: { "Cache-Control": "public, max-age=3600" } });
   } catch {
     return Response.json({ error: "Place lookup is unavailable right now. You can still type a destination." }, { status: 502 });
