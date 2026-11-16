@@ -27,9 +27,9 @@ test('the Festival Planner listing is generic and promises the wishlist', () => 
   const text = JSON.stringify(concept).toLowerCase();
   assert.ok(!text.includes('coachella'), 'listing leans on the Coachella trademark');
   assert.ok(concept.guardrail.includes('No schedule or conflict flags'));
-  // The price point is Kelly's decision (bundle §6); the listing must not
-  // pick one. An undecided price is an omitted priceCents, not $0.00.
-  assert.equal(concept.priceCents, undefined);
+  // Price ruling, Nov 15, 2026: $10 flat per Rally. The listing used to
+  // ship unpriced while Kelly decided; it is priced now.
+  assert.equal(concept.priceCents, 1000);
 });
 
 test('the wishlist produces artists, outfits, packing, and a cost split — no schedule', () => {
