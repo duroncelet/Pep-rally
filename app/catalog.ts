@@ -12,9 +12,10 @@ export type RallyConcept = {
   href?: string;
   accent: "coral" | "green" | "blue" | "yellow";
   monogram: string;
-  // Omitted while Kelly rules the price point (bundle §6: "Do not pick a
-  // price"). A Rally with no priceCents renders "Price to be decided" and
-  // cannot open a checkout; setting the price is a single-field change.
+  // Flat $10 per Rally, ruled by Kelly Nov 15, 2026. A Rally with no
+  // priceCents renders "Price to be decided" and cannot open a checkout;
+  // every listed Rally is priced, and tests/catalog-pricing.test.mjs
+  // enforces it.
   priceCents?: number;
   sourceNote?: string;
 };
@@ -33,7 +34,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "green",
     monogram: "CR",
-    priceCents: 1200,
+    priceCents: 1000,
   },
   {
     slug: "etsy-profit-pricing-desk",
@@ -48,7 +49,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "coral",
     monogram: "EP",
-    priceCents: 1800,
+    priceCents: 1000,
   },
   {
     slug: "travel-proposal-studio",
@@ -63,7 +64,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "blue",
     monogram: "TP",
-    priceCents: 2400,
+    priceCents: 1000,
   },
   {
     slug: "farmers-market-morning-board",
@@ -78,7 +79,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "green",
     monogram: "FM",
-    priceCents: 1200,
+    priceCents: 1000,
   },
   {
     slug: "iep-meeting-organizer",
@@ -93,7 +94,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "yellow",
     monogram: "IE",
-    priceCents: 1200,
+    priceCents: 1000,
   },
   {
     slug: "roommate-move-out-splitter",
@@ -108,7 +109,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "coral",
     monogram: "RM",
-    priceCents: 900,
+    priceCents: 1000,
   },
   {
     slug: "home-project-bid-compare",
@@ -123,7 +124,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "blue",
     monogram: "HB",
-    priceCents: 1800,
+    priceCents: 1000,
   },
   {
     slug: "festival-planner",
@@ -138,6 +139,7 @@ export const rallyConcepts: RallyConcept[] = [
     status: "working",
     accent: "yellow",
     monogram: "FP",
+    priceCents: 1000,
   },
 ];
 
