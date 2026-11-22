@@ -3319,6 +3319,19 @@ footer > span {
 .waitlist-band input { min-width: 0; width: 100%; border: 2px solid var(--ink); border-radius: 999px; background: white; padding: 13px 17px; font: inherit; font-size: 14px; }
 .waitlist-done { font-weight: 800; }
 .waitlist-error { flex-basis: 100%; margin: 0; color: var(--coral); font-weight: 800; }
+
+.creator-path .waitlist-band {
+  color: var(--ink);
+  box-shadow: 6px 7px 0 var(--yellow);
+}
+
+.creator-path .waitlist-band .primary {
+  margin-top: 0;
+}
+
+.waitlist-band [role="status"]:empty {
+  position: absolute;
+}
 /* Top padding tightened (was 95px) so the marketplace sits adjacent to the
    hero the "Shop Rallies" CTA jumps from; bottom and sides unchanged. */
 .storefront { padding: 48px 7vw 95px; }

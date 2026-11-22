@@ -115,5 +115,6 @@ export const waitlistSignups = sqliteTable("waitlist_signups", {
   id: text("id").primaryKey(),
   email: text("email").notNull(),
   source: text("source").notNull().default("homepage"),
+  audience: text("audience", { enum: ["buyer", "creator"] }).notNull().default("buyer"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-}, (table) => [uniqueIndex("idx_waitlist_signups_email").on(table.email)]);
+}, (table) => [uniqueIndex("idx_waitlist_signups_email_audience").on(table.email, table.audience)]);

@@ -10,17 +10,18 @@ test("ships the homepage waitlist: band, public POST route, D1 storage", async (
   const migrationFiles = (await readdir(new URL("../drizzle", import.meta.url)))
     .filter((name) => name.startsWith("0014_") && name.endsWith(".sql"));
   assert.equal(migrationFiles.length, 1, `expected one 0014 migration, found ${migrationFiles.join(", ")}`);
-  const [schema, migration, route, home, css] = await Promise.all([
+  const [schema, migration, route, home, form, css] = await Promise.all([
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL(`../drizzle/${migrationFiles[0]}`, import.meta.url), "utf8"),
     readFile(new URL("../app/api/waitlist/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/WaitlistForm.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
 
-  // Storage: D1 via Drizzle, one row per email, source for future placements.
+  // Storage: D1 via Drizzle, one row per email and audience, source for future placements.
   assert.match(schema, /waitlistSignups = sqliteTable\("waitlist_signups"/);
-  assert.match(schema, /uniqueIndex\("idx_waitlist_signups_email"\)\.on\(table\.email\)/);
+  assert.match(schema, /uniqueIndex\("idx_waitlist_signups_email_audience"\)\.on\(table\.email, table\.audience\)/);
   assert.match(schema, /source: text\("source"\)\.notNull\(\)\.default\("homepage"\)/);
   assert.match(schema, /createdAt: integer\("created_at", \{ mode: "timestamp_ms" \}\)\.notNull\(\)/);
   assert.match(migration, /CREATE TABLE waitlist_signups/);
@@ -46,20 +47,23 @@ test("ships the homepage waitlist: band, public POST route, D1 storage", async (
   assert.match(route, /The waitlist is unavailable\. Please retry later\./);
   assert.match(route, /status: 503/);
 
-  // Homepage: one compact band at the bottom of the marketplace section, at
-  // the "paid access is not on sale yet" dead end. Email only, hidden
-  // source="homepage" riding with the POST. No hero form, no popup.
-  assert.ok(home.indexOf('className="waitlist-band"') > home.indexOf('id="more-rallies"'));
-  assert.ok(home.indexOf('className="waitlist-band"') < home.indexOf('id="faq"'));
-  assert.match(home, /Paid Rallies aren’t on sale yet\./);
-  assert.match(home, /Leave your email for first access when they open, plus launch updates\./);
-  assert.match(home, /fetch\("\/api\/waitlist", \{ method: "POST"/);
-  assert.match(home, /source: "homepage"/);
-  assert.match(home, /type="email" required/);
-  assert.match(home, /You're on the list\. You'll get first access when paid Rallies open, plus launch updates\./);
-  assert.match(home, /You're already on the list\./);
-  assert.match(home, /Something went wrong — try again in a minute\./);
-  assert.doesNotMatch(home, /waitlist-band.*waitlist-band/s);
+  // Creator signup sits beside the free publishing path. Buyer signup stays in the marketplace.
+  const creators = home.match(/<section[^>]+id="creators">.*?<\/section>/s)?.[0];
+  const marketplace = home.match(/<section[^>]+id="more-rallies">.*?<\/section>/s)?.[0];
+  assert.match(creators, /href="\/build".*?<WaitlistForm audience="creator" \/>/s);
+  assert.match(marketplace, /<WaitlistForm audience="buyer" \/>/);
+  assert.equal((home.match(/<WaitlistForm /g) ?? []).length, 2);
+  assert.match(form, /Paid Rallies aren’t on sale yet\./);
+  assert.match(form, /Join the creator waitlist/);
+  assert.match(form, /fetch\("\/api\/waitlist", \{\s*method: "POST"/);
+  assert.match(form, /JSON\.stringify\(\{ email, source: "homepage", audience \}\)/);
+  assert.match(form, /type="email"\s+required/);
+  assert.match(form, /You're on the list\. You'll get first access when paid Rallies open, plus launch updates\./);
+  assert.match(form, /You're already on the list\./);
+  assert.match(form, /Something went wrong — try again in a minute\./);
+  assert.match(route, /const audience = body\.audience \?\? "buyer"/);
+  assert.match(route, /audience !== "buyer" && audience !== "creator"/);
+  assert.match(route, /source,\s*audience,/);
 
   // Styling exists for the band, the success swap, and the inline error.
   assert.match(css, /\.waitlist-band \{/);
@@ -74,12 +78,16 @@ test("ships the homepage waitlist: band, public POST route, D1 storage", async (
 // 409. The route handlers can't run under node --test (they import the
 // cloudflare:workers D1 binding), so this test proves the mechanism against
 // the real migration + real drizzle, and that the route inspects the cause.
-test("a duplicate signup surfaces UNIQUE on error.cause, and the route checks the cause", async () => {
+test("existing buyers can join the creator list once and duplicates surface on error.cause", async () => {
   const migrationFiles = (await readdir(new URL("../drizzle", import.meta.url)))
     .filter((name) => name.startsWith("0014_") && name.endsWith(".sql"));
   const migration = await readFile(new URL(`../drizzle/${migrationFiles[0]}`, import.meta.url), "utf8");
   const sqlite = new DatabaseSync(":memory:");
   sqlite.exec(migration);
+  sqlite.prepare("INSERT INTO waitlist_signups (id, email, created_at) VALUES (?, ?, ?)")
+    .run("existing", "dup@example.com", 0);
+  sqlite.exec(await readFile(new URL("../drizzle/0015_waitlist_audience.sql", import.meta.url), "utf8"));
+  assert.equal(sqlite.prepare("SELECT audience FROM waitlist_signups WHERE id = 'existing'").get().audience, "buyer");
   // Minimal D1-compatible binding over node:sqlite: drizzle's D1 driver
   // only needs prepare() -> { bind, run, all }.
   const d1 = {
@@ -95,14 +103,17 @@ test("a duplicate signup surfaces UNIQUE on error.cause, and the route checks th
   };
   const db = drizzle(d1, { schema: { waitlistSignups } });
   const row = (id) => ({ id, email: "dup@example.com", source: "homepage", createdAt: new Date() });
-  await db.insert(waitlistSignups).values(row("first"));
-  await assert.rejects(db.insert(waitlistSignups).values(row("second")), (error) => {
-    assert.ok(error instanceof DrizzleQueryError);
-    assert.doesNotMatch(error.message, /UNIQUE constraint failed/);
-    assert.ok(error.cause instanceof Error);
-    assert.match(error.cause.message, /UNIQUE constraint failed: waitlist_signups\.email/);
-    return true;
-  });
+  await db.insert(waitlistSignups).values({ ...row("creator"), audience: "creator" });
+  for (const audience of ["buyer", "creator"]) {
+    await assert.rejects(db.insert(waitlistSignups).values({ ...row("repeat"), audience }), (error) => {
+      assert.ok(error instanceof DrizzleQueryError);
+      assert.doesNotMatch(error.message, /UNIQUE constraint failed/);
+      assert.ok(error.cause instanceof Error);
+      assert.match(error.cause.message, /UNIQUE constraint failed: waitlist_signups\.email, waitlist_signups\.audience/);
+      return true;
+    });
+  }
+  sqlite.close();
   const route = await readFile(new URL("../app/api/waitlist/route.ts", import.meta.url), "utf8");
   assert.match(route, /error\.cause instanceof Error/);
   assert.match(route, /causeText\.includes\("UNIQUE constraint failed"\)/);

@@ -20,9 +20,12 @@ export async function POST(request: Request) {
   } catch {
     return Response.json({ error: "Check your email address." }, { status: 400 });
   }
-  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!email || email.length > 254 || !EMAIL_RE.test(email))
     return Response.json({ error: "Enter a valid email address." }, { status: 422 });
+  const audience = body.audience ?? "buyer";
+  if (audience !== "buyer" && audience !== "creator")
+    return Response.json({ error: "Choose a valid waitlist." }, { status: 400 });
   const source = typeof body.source === "string" && body.source.trim()
     ? body.source.trim().slice(0, 50)
     : "homepage";
@@ -37,6 +40,7 @@ export async function POST(request: Request) {
       id: crypto.randomUUID(),
       email,
       source,
+      audience,
       createdAt: new Date(),
     });
   } catch (error) {
